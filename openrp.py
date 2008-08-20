@@ -149,7 +149,6 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     endstops = schedule.GetNearestStops(end_lat, end_lng, 3)
 
     now = int(time.time())
-    print "Time: %s" % time.ctime(now)
     arrival_time = 0
     actions = []
     for s in startstops:
