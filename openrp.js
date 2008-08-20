@@ -57,6 +57,8 @@ function submitCallback(data, responseCode) {
         }
     }
 
+    map.clearOverlays();
+
     var polyline = new GPolyline(routePath, "#ff0000", 3);
     map.addOverlay(polyline);
     document.getElementById("moo").innerHTML = routePlan;
