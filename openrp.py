@@ -81,7 +81,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       mode = 'r'
     else:
       mode = 'rb'
-    return open(filename, mode), mime_type
+    return open(os.path.join(self.server.file_dir, filename), mode), mime_type
 
   def handle_GET_home(self):
     schedule = self.server.schedule
@@ -181,6 +181,13 @@ def StartServerThread(server):
   # python while it is serving a request the browser may get an incomplete
   # reply.
 
+def FindDefaultFileDir():
+  """Return the path of the directory containing the static files. By default
+  the directory is called 'web_content', just off the current working directory."""
+  # For all other distributions 'files' is in the gtfsscheduleviewer
+  # directory. 
+  return os.path.join(os.getcwd(), 'web_content')
+
 def daemonize():
   # all of this gratuitously stolen from http://homepage.hispeed.ch/py430/python/daemon.py
 
@@ -231,16 +238,19 @@ if __name__ == '__main__':
                     help='port on which to listen')
   parser.add_option("-d", action="store_true", dest="daemonize",
                     help="Daemonize process after startup")
+  parser.add_option('--file_dir', dest='file_dir',
+                    help='directory containing static files')
 
 
-  parser.set_defaults(port=8765)
+  parser.set_defaults(port=8765, file_dir=FindDefaultFileDir())
+
   (options, args) = parser.parse_args()
 
   if options.daemonize:
     daemonize()
 
-  if not os.path.isfile('index.html'):
-    print "Can't find index.html"
+  if not os.path.isfile(os.path.join(options.file_dir, 'index.html')):
+    print "Can't find index.html with --file_dir=%s" % options.file_dir
     exit(1)
 
   if options.key and os.path.isfile(options.key):
@@ -266,6 +276,7 @@ if __name__ == '__main__':
   server.key = options.key
   server.schedule = schedule
   server.tpe = tpe
+  server.file_dir = options.file_dir
 
   StartServerThread(server)  # Spawns a thread for server and returns
   print "To view, point your browser at http://%s:%d/" \
