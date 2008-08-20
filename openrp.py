@@ -3,7 +3,7 @@
 import BaseHTTPServer, sys, urlparse
 import mimetypes
 from optparse import OptionParser
-import os.path
+import sys, os
 import re
 import signal
 import simplejson
@@ -181,6 +181,44 @@ def StartServerThread(server):
   # python while it is serving a request the browser may get an incomplete
   # reply.
 
+def daemonize():
+  # all of this gratuitously stolen from http://homepage.hispeed.ch/py430/python/daemon.py
+
+  # do the UNIX double-fork magic, see Stevens' "Advanced
+  # Programming in the UNIX Environment" for details (ISBN 0201563177)
+  try:
+    pid = os.fork()
+    if pid > 0:
+      # exit first parent
+      sys.exit(0)
+  except OSError, e:
+    print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
+    sys.exit(1)
+
+    # decouple from parent environment
+    os.chdir("/")   #don't prevent unmounting....
+    os.setsid()
+    os.umask(0)
+
+    # do second fork
+    try:
+      pid = os.fork()
+      if pid > 0:
+        # exit from second parent, print eventual PID before
+            #print "Daemon PID %d" % pid
+        open(PIDFILE,'w').write("%d"%pid)
+        sys.exit(0)
+    except OSError, e:
+      print >>sys.stderr, "fork #2 failed: %d (%s)" % (e.errno, e.strerror)
+      sys.exit(1)
+    # FIXME: enable this goodness later
+    #change to data directory if needed
+    #os.chdir("/root/data")
+    #redirect outputs to a logfile
+    #sys.stdout = sys.stderr = Log(open(LOGFILE, 'a+'))
+    #ensure the that the daemon runs a normal user
+    #os.setegid(103)     #set group first "pydaemon"
+    #os.seteuid(103)     #set user "pydaemon"
 
 if __name__ == '__main__':
   parser = OptionParser()
@@ -191,9 +229,15 @@ if __name__ == '__main__':
                     'of a text file that contains an API key')
   parser.add_option('--port', dest='port', type='int',
                     help='port on which to listen')
-  parser.set_defaults(port=8765,
-                      manual_entry=True)
+  parser.add_option("-d", action="store_true", dest="daemonize",
+                    help="Daemonize process after startup")
+
+
+  parser.set_defaults(port=8765)
   (options, args) = parser.parse_args()
+
+  if options.daemonize:
+    daemonize()
 
   if not os.path.isfile('index.html'):
     print "Can't find index.html"
