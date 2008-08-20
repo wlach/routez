@@ -96,7 +96,10 @@ function gotDestCallback(latlng) {
 
 function mysubmit() {
     origin = dest = null;
-
-    geocoder.getLatLng(document.getElementById('routePlanStart').value, gotOriginCallback);
-    geocoder.getLatLng(document.getElementById('routePlanEnd').value, gotDestCallback);
+    
+    var extra = ", Halifax, Nova Scotia";
+    var origin_str = document.getElementById('routePlanStart').value + extra;
+    var dest_str = document.getElementById('routePlanEnd').value + extra;
+    geocoder.getLatLng(origin_str, gotOriginCallback);
+    geocoder.getLatLng(dest_str, gotDestCallback);
 }
