@@ -1,0 +1,234 @@
+#!/usr/bin/python2.5
+
+import BaseHTTPServer, sys, urlparse
+import mimetypes
+from optparse import OptionParser
+import os.path
+import re
+import signal
+import simplejson
+import time
+import datetime
+import urllib
+
+from graphserver.core import Graph, Link, State
+from graphserver.ext.gtfs import GTFSLoadable
+from graphserver.engine import TripPlanEngine
+import transitfeed
+
+class ResultEncoder(simplejson.JSONEncoder):
+  def default(self, obj):
+    try:
+      iterable = iter(obj)
+    except TypeError:
+      pass
+    else:
+      return list(iterable)
+    return simplejson.JSONEncoder.default(self, obj)
+
+class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+  def __init__(self, request, client_address, socket_server):
+    BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, socket_server)
+
+  def do_GET(self):
+    scheme, host, path, x, params, fragment = urlparse.urlparse(self.path)
+    parsed_params = {}
+    for k in params.split('&'):
+      k = urllib.unquote(k)
+      if '=' in k:
+        k, v = k.split('=', 1)
+        parsed_params[k] = unicode(v, 'utf8')
+      else:
+        parsed_params[k] = ''
+
+    if path == '/':
+      return self.handle_GET_home()
+
+    m = re.match(r'/json/([a-z]{1,64})', path)
+    if m:
+      handler_name = 'handle_json_GET_%s' % m.group(1)
+      handler = getattr(self, handler_name, None)
+      if callable(handler):
+        return self.handle_json_wrapper_GET(handler, parsed_params)
+
+    # Restrict allowable file names to prevent relative path attacks etc
+    m = re.match(r'\/([a-z0-9_-]{1,64}\.?[a-z0-9_-]{1,64})$', path)
+    if m and m.group(1):
+      try:
+        f, mime_type = self.OpenFile(m.group(1))
+        return self.handle_static_file_GET(f, mime_type)
+      except IOError, e:
+        print "Error: unable to open %s" % m.group(1)
+        # Ignore and treat as 404
+
+    m = re.match(r'/([a-z]{1,64})', path)
+    if m:
+      handler_name = 'handle_GET_%s' % m.group(1)
+      handler = getattr(self, handler_name, None)
+      if callable(handler):
+        return handler(parsed_params)
+
+    return self.handle_GET_default(parsed_params, path)
+
+  def OpenFile(self, filename):
+    """Try to open filename in the static files directory of this server.
+    Return a tuple (file object, string mime_type) or raise an exception."""
+    (mime_type, encoding) = mimetypes.guess_type(filename)
+    assert mime_type
+    # A crude guess of when we should use binary mode. Without it non-unix
+    # platforms may corrupt binary files.
+    if mime_type.startswith('text/'):
+      mode = 'r'
+    else:
+      mode = 'rb'
+    return open(filename, mode), mime_type
+
+  def handle_GET_home(self):
+    schedule = self.server.schedule
+    (min_lat, min_lon, max_lat, max_lon) = schedule.GetStopBoundingBox()
+
+    key = self.server.key
+
+    f, _ = self.OpenFile('index.html')
+    content = f.read()
+
+    # A very simple template system. For a fixed set of values replace [xxx]
+    # with the value of local variable xxx
+    for v in ('min_lat', 'min_lon', 'max_lat', 'max_lon', 'key'):
+      content = content.replace('[%s]' % v, str(locals()[v]))
+
+    self.send_response(200)
+    self.send_header('Content-Type', 'text/html')
+    self.send_header('Content-Length', str(len(content)))
+    self.end_headers()
+    self.wfile.write(content)
+
+  def handle_GET_default(self, parsed_params, path):
+    self.send_error(404)
+
+  def handle_static_file_GET(self, fh, mime_type):
+    content = fh.read()
+    self.send_response(200)
+    self.send_header('Content-Type', mime_type)
+    self.send_header('Content-Length', str(len(content)))
+    self.end_headers()
+    self.wfile.write(content)
+
+  def handle_json_wrapper_GET(self, handler, parsed_params):
+    """Call handler and output the return value in JSON."""
+    result = handler(parsed_params)
+    content = ResultEncoder().encode(result)
+    self.send_response(200)
+    self.send_header('Content-Type', 'text/plain')
+    self.send_header('Content-Length', str(len(content)))
+    self.end_headers()
+    self.wfile.write(content)
+
+  def handle_json_GET_stoplist(self, params):
+    matches = []
+    for s in self.server.schedule.GetStopList():
+      matches.append([ s.stop_id, s.stop_name, s.stop_lat, s.stop_lon ])
+    return matches
+
+  def handle_json_GET_triplist(self, params):
+    matches = []
+    for s in self.server.schedule.GetTripList():
+      route = self.server.schedule.GetRoute(s.route_id)
+      matches.append([ s.trip_id, route.route_short_name, s.trip_headsign ] )
+    return matches
+
+  def handle_json_GET_routeplan(self, params):
+    schedule = self.server.schedule
+
+    start_lat = float(params.get('startlat', None))
+    start_lng = float(params.get('startlng', None))
+    end_lat = float(params.get('endlat', None))
+    end_lng = float(params.get('endlng', None))
+
+    startstops = schedule.GetNearestStops(start_lat, start_lng, 3)
+    endstops = schedule.GetNearestStops(end_lat, end_lng, 3)
+
+    now = int(time.time())
+    print "Time: %s" % time.ctime(now)
+    arrival_time = 0
+    actions = []
+    for s in startstops:
+      for s2 in endstops:
+        spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, now)
+        new_arrival_time = edges[-1].payload.arrive
+        if new_arrival_time < arrival_time or arrival_time == 0:
+          actions = tpe._actions_from_path(vertices,edges,"false")
+          arrival_time = new_arrival_time
+        spt.destroy()
+    
+    return actions
+
+class GTFSGraph(Graph, GTFSLoadable):
+    pass
+
+def StartServerThread(server):
+  """Start server in its own thread because KeyboardInterrupt doesn't
+  interrupt a socket call in Windows."""
+  # Code taken from
+  # http://mail.python.org/pipermail/python-list/2003-July/212751.html
+  # An alternate approach is shown at
+  # http://groups.google.com/group/webpy/msg/9f41fd8430c188dc
+  import threading
+  th = threading.Thread(target=lambda: server.serve_forever())
+  th.setDaemon(1)
+  th.start()
+  # I don't care about shutting down the server thread cleanly. If you kill
+  # python while it is serving a request the browser may get an incomplete
+  # reply.
+
+
+if __name__ == '__main__':
+  parser = OptionParser()
+  parser.add_option('--feed_filename', '--feed', dest='feed_filename',
+                    help='file name of feed to load', default="feed.zip")
+  parser.add_option('--key', dest='key',
+                    help='Google Maps API key or the name '
+                    'of a text file that contains an API key')
+  parser.add_option('--port', dest='port', type='int',
+                    help='port on which to listen')
+  parser.set_defaults(port=8765,
+                      manual_entry=True)
+  (options, args) = parser.parse_args()
+
+  if not os.path.isfile('index.html'):
+    print "Can't find index.html"
+    exit(1)
+
+  if options.key and os.path.isfile(options.key):
+    options.key = open(options.key).read().strip()
+
+  schedule = transitfeed.Schedule(
+    problem_reporter=transitfeed.ProblemReporter())
+  schedule.Load(options.feed_filename)
+
+  gg = GTFSGraph()
+  gg.load_gtfs(schedule)
+
+  # link all stops with same latitude/longitude
+  stops = schedule.GetStopList()
+  for s in stops:
+    for s2 in stops:
+      if s.stop_lat == s2.stop_lat and s.stop_lon == s2.stop_lon and s.stop_id != s2.stop_id:
+        gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
+  tpe = TripPlanEngine(gg)
+
+  server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
+                                     RequestHandlerClass=ScheduleRequestHandler)
+  server.key = options.key
+  server.schedule = schedule
+  server.tpe = tpe
+
+  StartServerThread(server)  # Spawns a thread for server and returns
+  print "To view, point your browser at http://%s:%d/" \
+      % (server.server_name, server.server_port)
+
+  try:
+    while 1:
+      time.sleep(0.5)
+  except KeyboardInterrupt:
+    pass

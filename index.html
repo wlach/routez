@@ -1,0 +1,55 @@
+
+<head>
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=[key]" type="text/javascript"></script>
+  <script src="openrp.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    function load() {
+    if (GBrowserIsCompatible()) {
+        GDownloadUrl("/json/stoplist", loadStopListCallback);
+        GDownloadUrl("/json/triplist", loadTripListCallback);
+
+        //sizeRouteList();
+        var map_dom = document.getElementById("map");
+        map = new GMap2(map_dom);
+        map.addControl(new GLargeMapControl());
+        map.addControl(new GMapTypeControl());
+        map.addControl(new GOverviewMapControl());
+        var bb = new GLatLngBounds(new GLatLng([min_lat], [min_lon]),new GLatLng([max_lat], [max_lon]));
+        map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb));
+        map.enableDoubleClickZoom();
+
+        geocoder = new GClientGeocoder();
+        //initIcons();
+        //GEvent.addListener(map, "moveend", callbackMoveEnd);
+        //GEvent.addListener(map, "zoomend", callbackZoomEnd);
+        //callbackMoveEnd();  // Pretend we just moved to current center
+        //fetchRoutes();
+      }
+    }
+  </script>
+
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style type="text/css">
+    v\:* {
+    behavior:url(#default#VML);
+    }
+  </style>
+
+</head>
+<body class='sidebar-left' onload="load();" onunload="GUnload()">
+  <div id='topbar'>
+    <form id="routePlan" onSubmit="mysubmit(); return false;">
+      <input type="text" id="routePlanStart" value="5553 North Street"/>
+      <input type="text" id="routePlanEnd" value="Barrington and South"/>
+      <input value="Search" type="submit">
+    </form> 
+  </div>
+  <div id='content'>
+    <div id='sidebar-wrapper'><div id='sidebar'>
+	<div id="moo"><p>Moo...</p></div>
+    </div></div>
+    
+    <div id="map-wrapper"> <div id="map"></div> </div>
+  </div>
+
+</body>
