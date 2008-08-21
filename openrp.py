@@ -160,11 +160,12 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     for s in startstops:
       for s2 in endstops:
         spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, now)
-        new_arrival_time = vertices[-1].payload.time
-        if new_arrival_time < arrival_time or arrival_time == 0:
-          actions = tpe._actions_from_path(vertices,edges,"false")
-          arrival_time = new_arrival_time
-        spt.destroy()
+        if spt != None:
+          new_arrival_time = vertices[-1].payload.time
+          if new_arrival_time < arrival_time or arrival_time == 0:
+            actions = tpe._actions_from_path(vertices,edges,"false")
+            arrival_time = new_arrival_time
+          spt.destroy()
     
     return actions
 
@@ -295,6 +296,8 @@ if __name__ == '__main__':
     for s2 in stops:
       if s.stop_lat == s2.stop_lat and s.stop_lon == s2.stop_lon and s.stop_id != s2.stop_id:
         gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
+    
+  # create trip plan engine (probably the wrong abstraction)
   tpe = TripPlanEngine(gg)
 
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
