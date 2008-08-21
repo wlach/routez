@@ -4,6 +4,7 @@ import BaseHTTPServer, sys, urlparse
 import mimetypes
 from optparse import OptionParser
 import sys, os
+import pwd
 import re
 import signal
 import simplejson
@@ -15,6 +16,11 @@ from graphserver.core import Graph, Link, State
 from graphserver.ext.gtfs import GTFSLoadable
 from graphserver.engine import TripPlanEngine
 import transitfeed
+
+
+LOGFILE = '/var/log/openrp.log'
+PIDFILE = '/var/run/openrp.pid'
+
 
 class ResultEncoder(simplejson.JSONEncoder):
   def default(self, obj):
@@ -187,6 +193,16 @@ def FindDefaultFileDir():
   # directory. 
   return os.path.join(os.getcwd(), 'web_content')
 
+class Log:
+    """file like for writes with auto flush after each write
+    to ensure that everything is logged, even during an
+    unexpected exit."""
+    def __init__(self, f):
+        self.f = f
+    def write(self, s):
+        self.f.write(s)
+        self.f.flush()
+
 def daemonize():
   # all of this gratuitously stolen from http://homepage.hispeed.ch/py430/python/daemon.py
 
@@ -202,29 +218,32 @@ def daemonize():
     sys.exit(1)
 
     # decouple from parent environment
-    os.chdir("/")   #don't prevent unmounting....
+    os.chdir("/") # don't prevent unmounting....
     os.setsid()
     os.umask(0)
 
     # do second fork
-    try:
-      pid = os.fork()
-      if pid > 0:
-        # exit from second parent, print eventual PID before
-            #print "Daemon PID %d" % pid
-        open(PIDFILE,'w').write("%d"%pid)
-        sys.exit(0)
-    except OSError, e:
-      print >>sys.stderr, "fork #2 failed: %d (%s)" % (e.errno, e.strerror)
-      sys.exit(1)
-    # FIXME: enable this goodness later
-    #change to data directory if needed
-    #os.chdir("/root/data")
-    #redirect outputs to a logfile
-    #sys.stdout = sys.stderr = Log(open(LOGFILE, 'a+'))
-    #ensure the that the daemon runs a normal user
-    #os.setegid(103)     #set group first "pydaemon"
-    #os.seteuid(103)     #set user "pydaemon"
+  try:
+    pid = os.fork()
+    if pid > 0:
+      # exit from second parent, print eventual PID before
+      #print "Daemon PID %d" % pid
+      open(PIDFILE,'w').write("%d"%pid)
+      sys.exit(0)
+  except OSError, e:
+    print >>sys.stderr, "fork #2 failed: %d (%s)" % (e.errno, e.strerror)
+    sys.exit(1)
+
+  # redirect outputs to a logfile
+  sys.stdout = sys.stderr = Log(open(LOGFILE, 'a+'))
+
+  # ensure the that the daemon runs a normal user
+  pw = pwd.getpwnam("openrp")
+  os.setegid(pw.pw_uid)
+  os.seteuid(pw.pw_gid)
+  # forget handling the exception where openrp doesn't exist, we check for 
+  # that when the program starts. if said user disappears between then
+  # and now, whatevs...
 
 if __name__ == '__main__':
   parser = OptionParser()
@@ -240,13 +259,21 @@ if __name__ == '__main__':
   parser.add_option('--file_dir', dest='file_dir',
                     help='directory containing static files')
 
-
   parser.set_defaults(port=8765, file_dir=FindDefaultFileDir())
 
   (options, args) = parser.parse_args()
 
   if options.daemonize:
-    daemonize()
+    if not os.getuid() == 0:
+      print "uid must be zero for daemonization!"
+      exit(1)
+    else:
+      try:
+        pwd.getpwnam("openrp")
+      except KeyError:
+        print "No openrp user found!"
+        exit(1)
+      daemonize()
 
   if not os.path.isfile(os.path.join(options.file_dir, 'index.html')):
     print "Can't find index.html with --file_dir=%s" % options.file_dir
