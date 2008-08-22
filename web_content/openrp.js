@@ -48,12 +48,14 @@ function submitCallback(data, responseCode) {
         routePath[routePath.length] = new GLatLng(stopList[gtfs_node][1], 
                                                   stopList[gtfs_node][2]);
 
-        if (action == "board" || action == "alight") {
-            routePlan += "<p><b>" + action + "</b> ";
+        if (action == "board") {
             var tripId = actions[i][1].replace(/\sat\sgtfs[0-9]+/, "");
-            routePlan += "on (" + tripList[tripId] + ") ";
-            routePlan += "at (" + stopList[gtfs_node][0] + ") ";
-            routePlan += "at " + actions[i][2] + "</p>";
+            routePlan += "<p><b>Board</b> the " + tripList[tripId];
+            routePlan += " departing from " + stopList[gtfs_node][0];
+            routePlan += " at " + actions[i][2] + " and travel to ";
+        } else if (action == "alight") {
+            var tripId = actions[i][1].replace(/\sat\sgtfs[0-9]+/, "");
+            routePlan += stopList[gtfs_node][0] + ".</p>";
         }
     }
 
