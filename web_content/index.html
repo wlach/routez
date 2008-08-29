@@ -1,9 +1,13 @@
 
 <head>
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=[key]" type="text/javascript"></script>
+
+  <script src="labeled_marker.js" type="text/javascript"></script>
   <script src="openrp.js" type="text/javascript"></script>
   <script type="text/javascript">
     function load() {
+        // hide the route plan when the page is first loaded
+        document.getElementById('route-plan').style.display = 'none';
     if (GBrowserIsCompatible()) {
         GDownloadUrl("/json/stoplist", loadStopListCallback);
         GDownloadUrl("/json/triplist", loadTripListCallback);
@@ -12,14 +16,13 @@
         var map_dom = document.getElementById("map");
         map = new GMap2(map_dom);
         map.addControl(new GLargeMapControl());
-        map.addControl(new GMapTypeControl());
-        map.addControl(new GOverviewMapControl());
         var bb = new GLatLngBounds(new GLatLng([min_lat], [min_lon]),new GLatLng([max_lat], [max_lon]));
         map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb));
         map.enableDoubleClickZoom();
 
         geocoder = new GClientGeocoder();
-        //initIcons();
+        initIcons();
+
         //GEvent.addListener(map, "moveend", callbackMoveEnd);
         //GEvent.addListener(map, "zoomend", callbackZoomEnd);
         //callbackMoveEnd();  // Pretend we just moved to current center
@@ -38,15 +41,43 @@
 </head>
 <body class='sidebar-left' onload="load();" onunload="GUnload()">
   <div id='topbar'>
-    <form id="routePlan" onSubmit="mysubmit(); return false;">
-      <input type="text" id="routePlanStart" value="5553 North Street"/>
-      <input type="text" id="routePlanEnd" value="Barrington and South"/>
-      <input value="Search" type="submit">
-    </form> 
+    <h1 id="logo-text"><a href="/">myhmt.ca</a></h1>
   </div>
   <div id='content'>
     <div id='sidebar-wrapper'><div id='sidebar'>
-	<div id="moo"><p>Moo...</p></div>
+	<div id="intro" class="sidebar-box">
+	  <fieldset>
+	    <legend>About</legend>
+	    <p><b>Welcome to myhmt.ca</b></p>
+	    <p>myhmt.ca is an <b>unofficial</b> site providing trip planning and
+	      other services for users of <a href="http://halifax.ca/metrotransit/">Halifax Metro Transit</a>.</p>
+	  </fieldset>
+	</div>
+	<div id="route-plan" class="sidebar-box">
+	  <fieldset class="fieldset">
+	    <legend>Route Plan</legend>
+	    <div id="route-plan-content">
+	    </div>
+	  </fieldset>
+	</div>
+	<div id="plan-trip" class="sidebar-box">
+	  <fieldset class="fieldset">
+	    <legend>Plan a trip</legend>
+	    <form id="routePlan" onSubmit="mysubmit(); return false;">
+	      <label class="label" for="routePlanStart">From:</label>
+	      <input type="text" id="routePlanStart" class="textfield"/>
+	      <p class="example">Example: North and Agricola</p>
+	      <label class="label" for="routePlanEnd">To:</label><br class="nobr"/>
+	      <input type="text" id="routePlanEnd" class="textfield"/>
+	      <p class="example">Example: 1496 Lower Water</p>
+	      <label class="label" for="time">Time:</label>
+	      <input type="text" id="time" class="textfield"/>
+	      <p class="example">Example: 9:26am</p>
+	      <input value="Plan!" class="button" type="submit">
+	    </form> 
+	  </fieldset>
+	</div>
+
     </div></div>
     
     <div id="map-wrapper"> <div id="map"></div> </div>

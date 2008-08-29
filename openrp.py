@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python
 
 import BaseHTTPServer, sys, urlparse
 import mimetypes
@@ -11,6 +11,8 @@ import simplejson
 import time
 import datetime
 import urllib
+
+import parsedatetime as pdt
 
 from graphserver.core import Graph, Link, State
 from graphserver.ext.gtfs import GTFSLoadable
@@ -150,16 +152,18 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     start_lng = float(params.get('startlng', None))
     end_lat = float(params.get('endlat', None))
     end_lng = float(params.get('endlng', None))
+    time_str = params.get('time', None)
 
     startstops = schedule.GetNearestStops(start_lat, start_lng, 3)
     endstops = schedule.GetNearestStops(end_lat, end_lng, 3)
 
-    now = int(time.time())
+    time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
+
     arrival_time = 0
     actions = []
     for s in startstops:
       for s2 in endstops:
-        spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, now)
+        spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs)
         if spt != None:
           new_arrival_time = vertices[-1].payload.time
           if new_arrival_time < arrival_time or arrival_time == 0:
@@ -240,8 +244,8 @@ def daemonize():
 
   # ensure the that the daemon runs a normal user
   pw = pwd.getpwnam("openrp")
-  os.setegid(pw.pw_uid)
-  os.seteuid(pw.pw_gid)
+  os.setegid(pw.pw_gid)
+  os.seteuid(pw.pw_uid)
   # forget handling the exception where openrp doesn't exist, we check for 
   # that when the program starts. if said user disappears between then
   # and now, whatevs...
@@ -306,6 +310,7 @@ if __name__ == '__main__':
   server.schedule = schedule
   server.tpe = tpe
   server.file_dir = options.file_dir
+  server.calendar = pdt.Calendar()
 
   StartServerThread(server)  # Spawns a thread for server and returns
   print "To view, point your browser at http://%s:%d/" \

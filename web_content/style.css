@@ -1,12 +1,54 @@
 html { overflow: hidden; }
 
-html, body {
-  margin: 0;
-  padding: 0;
+body, select, ol, ul, td {
+  background: #ffffff;
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size:   13px;
+  margin:10px 10px 10px 10px;
+  padding: 0px;
   height: 100%;
 }
 
-body { margin: 5px; }
+b.fieldset {
+    width:320px; 
+}
+
+.fieldset .label {
+    padding:0.2em;
+    float: left;
+    width: 3em;
+    margin-right: 0.5em;
+    height: 25px;
+    text-align: right;
+    margin-top:0.3em; 
+}
+
+.fieldset .nobr {
+	display:none; 
+}  
+
+.fieldset .textfield {
+    margin:3px;
+    width: auto;
+    height:25px;
+}
+
+.fieldset .button {
+    margin:3px;
+    height:25px;
+    float:right;
+}
+
+.fieldset .example {
+      position: relative;
+      left: 60px;
+      top: -5px;
+      width: 150px;
+      font-size: 10px;
+      color: #a0a0a0;
+      margin-top: .5em;
+      margin-bottom: .3em; 
+}
 
 #content {
   position: relative;
@@ -18,23 +60,23 @@ body { margin: 5px; }
   height: 100%;
   width: auto;
   left: 0;
-  top: 0;
+  top: 0.5cm;
   z-index: 100;
 }
    
 #map {
   position: relative;
-  height: 100%;
-  width: auto;
+  left: 50;
+  height: 75%;
+  width: 60%;
   border: 1px solid #aaa;
 }
 
 #sidebar-wrapper {
   position: absolute;
   height: 100%;
-  width: 220px;
+  width: 320px;
   top: 0;
-  border: 1px solid #aaa;
   overflow: auto;
   z-index: 300;
 }
@@ -46,11 +88,28 @@ body { margin: 5px; }
   overflow: hidden;
 }
 
+div.sidebar-box {
+    margin-bottom: 0.25cm;
+}
+
+div.form-sidebar-left {
+    position: relative;
+    width: 25%;
+    padding: 4px;
+}
+
+div.form-sidebar-right {
+    position: relative;
+    width: 25%;
+    padding: 4px;
+}
+
+
 #topbar {
   position: relative;
   padding: 2px;
-  border: 1px solid #aaa;
   margin: 0;
+  height: 30px;
 }
 
 #topbar h1 {
@@ -62,11 +121,10 @@ body { margin: 5px; }
   margin: 0;
 }
 
-
 body.sidebar-right #map-wrapper { margin-right: 229px; }
 body.sidebar-right #sidebar-wrapper { right: 0; }
 
-body.sidebar-left #map { margin-left: 229px; }
+body.sidebar-left #map { margin-left: 320px; }
 body.sidebar-left #sidebar { left: 0; }
 
 body.nosidebar #map { margin: 0; }
@@ -105,13 +163,11 @@ h3 {
   white-space: nowrap;
   padding: 2px;
   color: black;
+  font-weight: bold;
   font-size: 12px;
   background-color: white;
-  border: 1px solid black;
-  cursor: pointer;
   filter:alpha(opacity=60); 
   -moz-opacity: 0.6; 
-  opacity: 0.6; 
 }
 #routeList {
   border: 1px solid black;
@@ -141,4 +197,17 @@ h3 {
   padding-left: 10px;
   font-size: 10pt;
   background-color: lightblue;
+}
+
+#header h1#logo-text a {
+	margin: 0; padding: 0;
+	font: bold;
+        font-size: 30px;
+	letter-spacing: -1px;
+	text-transform: none;
+	text-decoration: none;
+	position: absolute;
+	
+	/* change the values of top and left to adjust the position of the logo*/
+ 	top: 2px; left: 2px;	
 }
