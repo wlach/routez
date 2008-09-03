@@ -11,6 +11,7 @@ import simplejson
 import time
 import datetime
 import urllib
+import math
 
 import parsedatetime as pdt
 
@@ -22,6 +23,17 @@ import transitfeed
 
 LOGFILE = '/var/log/openrp.log'
 PIDFILE = '/var/run/openrp.pid'
+
+
+def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
+  # fixme: use a less ridiculous calculation
+  # this one from: http://www.zipcodeworld.com/samples/distance.cs.html
+  theta = src_lng - dest_lng
+  dist = math.sin(math.radians(src_lat)) * math.sin(math.radians(dest_lat)) + math.cos(math.radians(src_lat)) * math.cos(math.radians(dest_lat)) * math.cos(math.radians(theta))
+  dist = math.acos(dist)
+  dist = math.degrees(dist)
+  dist = dist * 60 * 1.1515 * 1.609344 * 1000
+  return dist
 
 
 class ResultEncoder(simplejson.JSONEncoder):
@@ -154,18 +166,27 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     end_lng = float(params.get('endlng', None))
     time_str = params.get('time', None)
 
-    startstops = schedule.GetNearestStops(start_lat, start_lng, 3)
-    endstops = schedule.GetNearestStops(end_lat, end_lng, 3)
+    startstops = schedule.GetNearestStops(start_lat, start_lng, 10)
+    endstops = schedule.GetNearestStops(end_lat, end_lng, 10)
 
     time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
 
-    arrival_time = 0
+    # base case: just walk between the two points (rough estimate, since it's
+    # a direct path)
+    arrival_time = time_secs + calc_latlng_distance(start_lat, start_lng, end_lat, end_lng) / 1.1
     actions = []
     for s in startstops:
       for s2 in endstops:
         spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs)
         if spt != None:
-          new_arrival_time = vertices[-1].payload.time
+          extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
+          extra_distance_from_dest = calc_latlng_distance(s2.stop_lat, s2.stop_lon, end_lat, end_lng)
+
+          # Add in time to walk to origin and from destination
+          extra_time = (extra_distance_from_dest + extra_distance_from_src) / 1.1 # 1.1m/s a good average walking time?
+
+          new_arrival_time = vertices[-1].payload.time + extra_time
+
           if new_arrival_time < arrival_time or arrival_time == 0:
             actions = tpe._actions_from_path(vertices,edges,"false")
             arrival_time = new_arrival_time
