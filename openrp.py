@@ -174,7 +174,9 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     # base case: just walk between the two points (rough estimate, since it's
     # a direct path)
     arrival_time = time_secs + calc_latlng_distance(start_lat, start_lng, end_lat, end_lng) / 1.1
+    num_transfers = 0
     actions = []
+
     for s in startstops:
       for s2 in endstops:
         spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs)
@@ -186,10 +188,12 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           extra_time = (extra_distance_from_dest + extra_distance_from_src) / 1.1 # 1.1m/s a good average walking time?
 
           new_arrival_time = vertices[-1].payload.time + extra_time
+          new_num_transfers = vertices[-1].payload.num_transfers
 
-          if new_arrival_time < arrival_time or arrival_time == 0:
+          if new_arrival_time < arrival_time or new_arrival_time == arrival_time and new_num_transfers < num_transfers:
             actions = tpe._actions_from_path(vertices,edges,"false")
             arrival_time = new_arrival_time
+            num_transfers = new_num_transfers
           spt.destroy()
     
     return actions
