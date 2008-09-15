@@ -134,6 +134,11 @@ function submitCallback(data, responseCode) {
             } else if (action == "alight") {
                 var tripId = actions[i][1].replace(/\sat\sgtfs[0-9]+/, "");
                 routePlan += stopList[gtfs_node][0] + ".</p>";
+                
+                if (i==(actions.length-1)) {
+                    routePlan += "<p><b>Arrive</b> at " + actions[i][2];
+                    routePlan += ".</p>";
+                }
             }
         }
         addWalkingOverlay(origin, routePath[0]);
