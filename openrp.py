@@ -28,6 +28,9 @@ PIDFILE = '/var/run/openrp.pid'
 def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
   # fixme: use a less ridiculous calculation
   # this one from: http://www.zipcodeworld.com/samples/distance.cs.html
+  if src_lat == dest_lat and src_lng == dest_lng:
+    return 0
+
   theta = src_lng - dest_lng
   dist = math.sin(math.radians(src_lat)) * math.sin(math.radians(dest_lat)) + math.cos(math.radians(src_lat)) * math.cos(math.radians(dest_lat)) * math.cos(math.radians(theta))
   dist = math.acos(dist)
