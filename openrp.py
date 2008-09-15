@@ -317,17 +317,22 @@ if __name__ == '__main__':
 
   schedule = transitfeed.Schedule(
     problem_reporter=transitfeed.ProblemReporter())
+  print "Loading schedule."
   schedule.Load(options.feed_filename)
 
+  print "Creating graph from schedule."
   gg = GTFSGraph()
   gg.load_gtfs(schedule)
 
-  # link all stops with same latitude/longitude
+  # link all stops within 50 meters of each other
+  print "Linking proximate stops."
   stops = schedule.GetStopList()
   for s in stops:
     for s2 in stops:
-      if s.stop_lat == s2.stop_lat and s.stop_lon == s2.stop_lon and s.stop_id != s2.stop_id:
+      if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50:
         gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
+      #      if s.stop_lat == s2.stop_lat and s.stop_lon == s2.stop_lon and s.stop_id != s2.stop_id:
+
     
   # create trip plan engine (probably the wrong abstraction)
   tpe = TripPlanEngine(gg)
