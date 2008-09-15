@@ -182,21 +182,29 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     for s in startstops:
       for s2 in endstops:
-        spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs)
+        extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
+        extra_distance_from_dest = calc_latlng_distance(s2.stop_lat, s2.stop_lon, end_lat, end_lng)
+        # 1.1m/s a good average walking time? it is according to wikipedia...
+        extra_start_time = extra_distance_from_src / 1.1 
+        extra_end_time = extra_distance_from_dest / 1.1
+        spt, vertices, edges = tpe._shortest_path_raw(True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs + extra_start_time)
         if spt != None:
-          extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
-          extra_distance_from_dest = calc_latlng_distance(s2.stop_lat, s2.stop_lon, end_lat, end_lng)
-
           # Add in time to walk to origin and from destination
-          extra_time = (extra_distance_from_dest + extra_distance_from_src) / 1.1 # 1.1m/s a good average walking time?
+          new_arrival_time = vertices[-1].payload.time + extra_end_time
+          new_num_transfers = tpe.count_num_transfers(vertices, edges)
+          num_transfers_delta = new_num_transfers - num_transfers          
 
-          new_arrival_time = vertices[-1].payload.time + extra_time
-          new_num_transfers = vertices[-1].payload.num_transfers
+          # Each extra transfer is worth 5minutes
+          transfer_penalty = num_transfers_delta * 500
 
-          if new_arrival_time < arrival_time or new_arrival_time == arrival_time and new_num_transfers < num_transfers:
+          print "Considering %s %s" % (new_arrival_time, new_num_transfers)
+
+          if (new_arrival_time + transfer_penalty) < arrival_time:
             actions = tpe._actions_from_path(vertices,edges,"false")
             arrival_time = new_arrival_time
             num_transfers = new_num_transfers
+            print "CHOOSING %s %s" % (new_arrival_time, new_num_transfers)
+
           spt.destroy()
     
     return actions
