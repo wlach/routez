@@ -174,12 +174,12 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
 
-    # base case: just walk between the two points (rough estimate, since it's
+    # base case: just walk between the two points (rough estimate, since it's 
     # a direct path)
     arrival_time = time_secs + calc_latlng_distance(start_lat, start_lng, end_lat, end_lng) / 1.1
-    num_transfers = 0
     actions = []
 
+    num_transfers = 0
     for s in startstops:
       for s2 in endstops:
         extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
@@ -187,24 +187,25 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # 1.1m/s a good average walking time? it is according to wikipedia...
         extra_start_time = extra_distance_from_src / 1.1 
         extra_end_time = extra_distance_from_dest / 1.1
+
+        # below is for old graphserver
+        #spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs + extra_start_time)
+        # commented out below is the call for latest graphserver
         spt, vertices, edges = tpe._shortest_path_raw(True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs + extra_start_time)
         if spt != None:
           # Add in time to walk to origin and from destination
-          new_arrival_time = vertices[-1].payload.time + extra_end_time
-          new_num_transfers = tpe.count_num_transfers(vertices, edges)
-          num_transfers_delta = new_num_transfers - num_transfers          
-
-          # Each extra transfer is worth 5minutes
-          transfer_penalty = num_transfers_delta * 500
-
-          print "Considering %s %s" % (new_arrival_time, new_num_transfers)
-
-          if (new_arrival_time + transfer_penalty) < arrival_time:
-            actions = tpe._actions_from_path(vertices,edges,"false")
-            arrival_time = new_arrival_time
-            num_transfers = new_num_transfers
-            print "CHOOSING %s %s" % (new_arrival_time, new_num_transfers)
-
+          to_v = "gtfs%s" % (s2.stop_id)
+          dest = spt.get_vertex(to_v)
+          if dest is not None:
+            new_arrival_time = dest.payload.time + extra_end_time
+            new_num_transfers = tpe.count_num_transfers(vertices, edges)
+            print "Considering (%s -> %s) -> %s (num transfers: %s)" % (s.stop_code, s2.stop_code, new_arrival_time, new_num_transfers)
+            if new_arrival_time < arrival_time or new_arrival_time == arrival_time and new_num_transfers < num_transfers:
+              num_transfers = new_num_transfers
+              actions = tpe._actions_from_path(vertices,edges,"false")
+              arrival_time = new_arrival_time
+              print "CHOOSING (%s -> %s) -> %s" % (s.stop_code, s2.stop_code, new_arrival_time)
+              
           spt.destroy()
     
     return actions
@@ -337,10 +338,8 @@ if __name__ == '__main__':
   stops = schedule.GetStopList()
   for s in stops:
     for s2 in stops:
-      if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50:
+      if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50 and s.stop_id != s2.stop_id:
         gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
-      #      if s.stop_lat == s2.stop_lat and s.stop_lon == s2.stop_lon and s.stop_id != s2.stop_id:
-
     
   # create trip plan engine (probably the wrong abstraction)
   tpe = TripPlanEngine(gg)
