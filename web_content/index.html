@@ -10,7 +10,7 @@
         document.getElementById('route-plan').style.display = 'none';
     if (GBrowserIsCompatible()) {
         GDownloadUrl("/json/stoplist", loadStopListCallback);
-        GDownloadUrl("/json/triplist", loadTripListCallback);
+        GDownloadUrl("/json/routelist", loadRouteListCallback);
 
         //sizeRouteList();
         var map_dom = document.getElementById("map");

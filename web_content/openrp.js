@@ -1,5 +1,5 @@
-var tripListShort;
-var tripListLong;
+var routeListShort;
+var routeListLong;
 var stopList;
 
 var origin = null;
@@ -34,18 +34,19 @@ function initIcons() {
 }
 
 
-function loadTripListCallback(data, responseCode) {
+function loadRouteListCallback(data, responseCode) {
     if (responseCode != 200) {
         return;
     }
 
-    tripListShort = new Array();
-    tripListLong = new Array();
+    routeListShort = new Array();
+    routeListLong = new Array();
 
     var myData = eval(data);
     for (var i=0; i<myData.length; ++i) {
-        tripListShort[myData[i][0]] = myData[i][1];
-        tripListLong[myData[i][0]] = myData[i][1] + " (" + myData[i][2] + ")";
+        route = myData[i];
+        routeListShort[route['id']] = route['shortname'];
+        routeListLong[route['id']] = route['shortname'] + " (" +  route['longname'] + ")";
     }    
 }
 
@@ -59,7 +60,8 @@ function loadStopListCallback(data, responseCode) {
     var myData = eval(data);
 
     for (var i=0; i<myData.length; ++i) {
-        stopList["gtfs" + myData[i][0]] = [ myData[i][1], myData[i][2], myData[i][3] ];
+        var stop = myData[i];
+        stopList[stop['id']] = stop;
     }
 }
 
@@ -108,37 +110,38 @@ function submitCallback(data, responseCode) {
         addWalkingOverlay(origin, dest);
     } else {
         for (var i=0; i<actions.length; ++i) {
-            action = actions[i][0];
-            var gtfs_node = actions[i][1].replace(/.*(gtfs[0-9]+)/, "$1");
-            var latlng = new GLatLng(stopList[gtfs_node][1], 
-                                     stopList[gtfs_node][2])
-            routePath[routePath.length] = latlng;
-            bounds.extend(latlng);
+            var id = actions[i].id;
+            if (i==0 || id != actions[i-1].id) {
+                var latlng = new GLatLng(stopList[id].lat, 
+                                         stopList[id].lng)
+                routePath[routePath.length] = latlng;
+                bounds.extend(latlng);
+            }
+
             if (i==(actions.length - 1)) {
                 map.addOverlay(new GMarker(latlng, walkStopIcon));
             }
 
-            if (action == "board") {
-                var tripId = actions[i][1].replace(/\sat\sgtfs[0-9]+/, "");
+            if (actions[i].type == "board") {
+                var routeId = actions[i].route_id;
 
                 var markerOpts = new Object();
                 markerOpts.icon = busStopIcon;
-                markerOpts.labelText = tripListShort[tripId];
+                markerOpts.labelText = routeListShort[routeId];
                 markerOpts.labelClass = "tooltip";
                 markerOpts.labelOffset = new GSize(24, -44);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
-
-                routePlan += "<p><b>Board</b> the " + tripListLong[tripId];
-                routePlan += " departing from " + stopList[gtfs_node][0];
-                routePlan += " at " + actions[i][2] + " and travel to ";
-            } else if (action == "alight") {
-                var tripId = actions[i][1].replace(/\sat\sgtfs[0-9]+/, "");
-                routePlan += stopList[gtfs_node][0] + ".</p>";
                 
-                if (i==(actions.length-1)) {
-                    routePlan += "<p><b>Arrive</b> at " + actions[i][2];
-                    routePlan += ".</p>";
-                }
+                routePlan += "<p><b>Board</b> the " + routeListLong[routeId];
+                routePlan += " departing from " + stopList[id].name;
+                routePlan += " at " + actions[i].time + " and travel to ";
+            } else if (actions[i].type == "alight") {
+                routePlan += stopList[id].name + ".</p>";
+                
+                 if (i==(actions.length-1)) {
+                     routePlan += "<p><b>Arrive</b> at " + stopList[actions[i].id].name;
+                     routePlan += " at " + actions[i].time +".</p>";
+                 }
             }
         }
         addWalkingOverlay(origin, routePath[0]);

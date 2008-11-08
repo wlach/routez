@@ -14,29 +14,12 @@ import urllib
 import math
 
 import parsedatetime as pdt
-
-from graphserver.core import Graph, Link, State
-from graphserver.ext.gtfs import GTFSLoadable
-from graphserver.engine import TripPlanEngine
 import transitfeed
+from routezgraph import *
 
 
 LOGFILE = '/var/log/openrp.log'
 PIDFILE = '/var/run/openrp.pid'
-
-
-def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
-  # fixme: use a less ridiculous calculation
-  # this one from: http://www.zipcodeworld.com/samples/distance.cs.html
-  if src_lat == dest_lat and src_lng == dest_lng:
-    return 0
-
-  theta = src_lng - dest_lng
-  dist = math.sin(math.radians(src_lat)) * math.sin(math.radians(dest_lat)) + math.cos(math.radians(src_lat)) * math.cos(math.radians(dest_lat)) * math.cos(math.radians(theta))
-  dist = math.acos(dist)
-  dist = math.degrees(dist)
-  dist = dist * 60 * 1.1515 * 1.609344 * 1000
-  return dist
 
 
 class ResultEncoder(simplejson.JSONEncoder):
@@ -150,18 +133,20 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def handle_json_GET_stoplist(self, params):
     matches = []
     for s in self.server.schedule.GetStopList():
-      matches.append([ s.stop_id, s.stop_name, s.stop_lat, s.stop_lon ])
+      matches.append({ 'id':s.stop_id, 'name':s.stop_name, 
+                       'lat':s.stop_lat, 'lng':s.stop_lon })
     return matches
 
-  def handle_json_GET_triplist(self, params):
+  def handle_json_GET_routelist(self, params):
     matches = []
-    for s in self.server.schedule.GetTripList():
-      route = self.server.schedule.GetRoute(s.route_id)
-      matches.append([ s.trip_id, route.route_short_name, s.trip_headsign ] )
+    for r in self.server.schedule.GetRouteList():
+      matches.append({ 'id':r.route_id, 'shortname':r.route_short_name, 
+                       'longname':r.route_long_name } )
     return matches
 
   def handle_json_GET_routeplan(self, params):
     schedule = self.server.schedule
+    graph = self.server.graph
 
     start_lat = float(params.get('startlat', None))
     start_lng = float(params.get('startlng', None))
@@ -169,17 +154,17 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     end_lng = float(params.get('endlng', None))
     time_str = params.get('time', None)
 
-    startstops = schedule.GetNearestStops(start_lat, start_lng, 10)
-    endstops = schedule.GetNearestStops(end_lat, end_lng, 10)
+    startstops = schedule.GetNearestStops(start_lat, start_lng, 5)
+    endstops = schedule.GetNearestStops(end_lat, end_lng, 5)
 
     time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
 
     # base case: just walk between the two points (rough estimate, since it's 
     # a direct path)
     arrival_time = time_secs + calc_latlng_distance(start_lat, start_lng, end_lat, end_lng) / 1.1
-    actions = []
 
-    num_transfers = 0
+    best_trippath = None
+    best_weight = 0
     for s in startstops:
       for s2 in endstops:
         extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
@@ -187,31 +172,38 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # 1.1m/s a good average walking time? it is according to wikipedia...
         extra_start_time = extra_distance_from_src / 1.1 
         extra_end_time = extra_distance_from_dest / 1.1
+        
+        trippath = graph.find_path(time_secs + extra_start_time, s.stop_id, 
+                                   s2.stop_id)
+        if trippath:
+          total_weight = trippath.weight + extra_end_time
+          if not best_trippath or total_weight < best_weight:
+            best_trippath = trippath
+            best_weight = total_weight
 
-        # below is for old graphserver
-        #spt, vertices, edges = tpe._shortest_path_raw(True, True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs + extra_start_time)
-        # commented out below is the call for latest graphserver
-        spt, vertices, edges = tpe._shortest_path_raw(True, "gtfs" + s.stop_id, "gtfs" + s2.stop_id, time_secs + extra_start_time)
-        if spt != None:
-          # Add in time to walk to origin and from destination
-          to_v = "gtfs%s" % (s2.stop_id)
-          dest = spt.get_vertex(to_v)
-          if dest is not None:
-            new_arrival_time = dest.payload.time + extra_end_time
-            new_num_transfers = tpe.count_num_transfers(vertices, edges)
-            print "Considering (%s -> %s) -> %s (num transfers: %s)" % (s.stop_code, s2.stop_code, new_arrival_time, new_num_transfers)
-            if new_arrival_time < arrival_time or new_arrival_time == arrival_time and new_num_transfers < num_transfers:
-              num_transfers = new_num_transfers
-              actions = tpe._actions_from_path(vertices,edges,"false")
-              arrival_time = new_arrival_time
-              print "CHOOSING (%s -> %s) -> %s" % (s.stop_code, s2.stop_code, new_arrival_time)
-              
-          spt.destroy()
-    
-    return actions
+    actions_desc = []
+    if best_trippath:
+      last_action = None
+      for action in best_trippath.actions:
+        # order is always: get off (if applicable), board (if applicable), 
+        # then move
+        if last_action and last_action.route_id != action.route_id:
+          actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
+                                'time':last_action.start_time })
+        if not last_action or last_action.route_id != action.route_id:
+          actions_desc.append({ 'type':'board', 'id':action.src_id, 
+                                'time':action.start_time, 
+                                'route_id':action.route_id })
+        actions_desc.append({ 'type':'pass', 'id':action.src_id, 
+                              'dest_id':action.dest_id })
+        last_action = action
+      # if we had a path at all, append the last getting off action here
+      if last_action:
+        actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
+                              'time':last_action.start_time })
 
-class GTFSGraph(Graph, GTFSLoadable):
-    pass
+
+    return actions_desc
 
 def StartServerThread(server):
   """Start server in its own thread because KeyboardInterrupt doesn't
@@ -324,37 +316,42 @@ if __name__ == '__main__':
   if options.key and os.path.isfile(options.key):
     options.key = open(options.key).read().strip()
 
+  import psyco
+  psyco.full()
+
   schedule = transitfeed.Schedule(
     problem_reporter=transitfeed.ProblemReporter())
   print "Loading schedule."
   schedule.Load(options.feed_filename)
 
   print "Creating graph from schedule."
-  gg = GTFSGraph()
-  gg.load_gtfs(schedule)
+  graph = TripGraph()
+  graph.load_gtfs(schedule)
 
   # link all stops within 50 meters of each other
-  print "Linking proximate stops."
-  stops = schedule.GetStopList()
-  for s in stops:
-    for s2 in stops:
-      if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50 and s.stop_id != s2.stop_id:
-        gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
+  #print "Linking proximate stops."
+  #stops = schedule.GetStopList()
+  #for s in stops:
+  #  for s2 in stops:
+  #    if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50 and s.stop_id != s2.stop_id:
+  #      gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
     
-  # create trip plan engine (probably the wrong abstraction)
-  tpe = TripPlanEngine(gg)
-
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
                                      RequestHandlerClass=ScheduleRequestHandler)
   server.key = options.key
   server.schedule = schedule
-  server.tpe = tpe
+  server.graph = graph
   server.file_dir = options.file_dir
   server.calendar = pdt.Calendar()
+
+  import hotshot
+  prof = hotshot.Profile("hotshot_edi_stats")
 
   StartServerThread(server)  # Spawns a thread for server and returns
   print "To view, point your browser at http://%s:%d/" \
       % (server.server_name, server.server_port)
+
+  prof.close()
 
   try:
     while 1:

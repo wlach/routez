@@ -7,6 +7,8 @@ from datetime import date, timedelta
 import copy
 import transitfeed
 import math
+from heapq import heappush, heappop
+from bisect import bisect
 
 def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
   # fixme: use a less ridiculous calculation
@@ -29,6 +31,13 @@ class TripHop:
         self.dest_id = dest_id
         self.route_id = route_id
 
+    def __lt__(self, other):
+        if type(other) == int:
+            print "%s < %s" % (self.start_time, other)
+            return self.start_time < other
+        
+        return self.start_time < other.start_time
+
 class TripStop:
     def __init__(self, id, lat, lng):
         self.id = id
@@ -42,16 +51,17 @@ class TripStop:
         if not self.triphops[service_id].get(route_id):
                 self.triphops[service_id][route_id] = []
         self.triphops[service_id][route_id].append(TripHop(start_time, end_time, dest_id, route_id))
-        self.triphops[service_id][route_id].sort(
-            lambda x, y: x.start_time - y.end_time)
+        self.triphops[service_id][route_id].sort()
 
     def find_triphop(self, time, route_id, service_id):
         if not self.triphops.get(service_id) or \
         not self.triphops[service_id].get(route_id):
             return None
-        for triphop in self.triphops[service_id][route_id]:
-            if triphop.start_time >= time:
-                return triphop
+        triphops = self.triphops[service_id][route_id]
+        triphop_marker = TripHop(time, time, self.id, self.id)
+        idx = bisect(triphops, triphop_marker)
+        if idx < len(triphops):
+            return triphops[idx]
 
         return None
 
@@ -63,11 +73,11 @@ class TripStop:
 
 class TripAction:
     def __init__(self, src_id, dest_id, route_id, start_time, end_time):
-        self.start_time = start_time
-        self.end_time = end_time
         self.src_id = src_id
         self.dest_id = dest_id
         self.route_id = route_id
+        self.start_time = start_time
+        self.end_time = end_time
 
     def __eq__(self, tripaction):
         return self.start_time == tripaction.start_time and \
@@ -86,6 +96,15 @@ class TripPath:
         self.src_id = src_id
         self.weight = 0
 
+    def __copy__(self):
+        newinst = self.__class__(self.start_time, self.src_id)
+        newinst.actions = copy.copy(self.actions)
+        newinst.weight = self.weight
+        return newinst
+
+    def __lt__(self, trippath):
+        return self.weight < trippath.weight
+
     def add_action(self, action, dest_id, graph):
         self.actions.append(action)
         self.weight = self._get_weight(dest_id, graph)
@@ -102,24 +121,27 @@ class TripPath:
 
     def _get_weight(self, dest_id, graph):
         weight = 0
+        prevtime = self.start_time
 
         if len(self.actions):
             # first, calculate the time already elapsed and add that
             prevaction = None
             for action in self.actions:
                 weight = weight + action.get_weight()
+                weight = weight + (action.start_time - prevtime)
+                # transfer penalty of 5 minutes if we're switching routes
                 if prevaction:
-                    weight = weight + (action.start_time - prevaction.end_time)
-                    # transfer penalty of 5 minutes if we're switching routes
                     if prevaction.route_id != action.route_id:
                         weight = weight + (5 * 60)
                 prevaction = action
+                prevtime = prevaction.end_time
 
             # then, calculate the time remaining based on going directly
             # from the last vertice to the destination at a ridiculous speed
-            # (200km/h). 
+            # (200km/h).                 
             last_stop = graph.tripstops[self.actions[-1].dest_id]
             dest_stop = graph.tripstops[dest_id]
+
             remaining_distance = calc_latlng_distance(last_stop.lat,  
                                                       last_stop.lng, 
                                                       dest_stop.lat, 
@@ -138,7 +160,7 @@ class TripGraph:
     def add_triphop(self, start_time, end_time, src_id, dest_id, route_id, service_id):
         self.tripstops[src_id].add_triphop(start_time, end_time, dest_id, \
                                                route_id, service_id)
-
+        
     def load_gtfs(self, sched):
         stops = sched.GetStopList()
         for stop in stops:
@@ -176,31 +198,28 @@ class TripGraph:
         completed_paths = []
         visited_ids = {}
 
-        while len(completed_paths) == 0 or len(trip_paths) > 0:
-            trip_path = trip_paths.pop(0)           
-            print "Extending path with weight: %s" % trip_path.weight
-            print "No. of completed paths: %s" % len(completed_paths)
-            print "visited ids: %s" % visited_ids
-            new_trip_paths = self.extend_path(dest_id, trip_path, 
+        while len(trip_paths) > 0:
+          trip_path = heappop(trip_paths)
+          print "Extending path with weight: %s" % trip_path.weight
+          print "No. of completed paths: %s" % len(completed_paths)
+          new_trip_paths = self.extend_path(dest_id, trip_path, 
                                               service_period, visited_ids)
-            for new_trip_path in new_trip_paths:
-                if new_trip_path.get_end_id() == dest_id:
-                    print "found completed path"
-                    completed_paths.append(new_trip_path)
-                else:
-                    print "found uncompleted path"
-                    trip_paths.append(new_trip_path)
-                trip_paths.sort(lambda x, y: int(x.weight - y.weight))
-                completed_paths.sort(lambda x, y: int(x.weight - y.weight))
+          for new_trip_path in new_trip_paths:
+            if new_trip_path.get_end_id() == dest_id:
+              heappush(completed_paths, new_trip_path)
+            else:
+              print "--Adding trip path with weight %s" % new_trip_path.weight
+              heappush(trip_paths, new_trip_path)
             if len(completed_paths) > 0 and len(trip_paths) > 0:
-                print "Weight of best completed path: %s, uncompleted: %s" % \
-                    (completed_paths[0].weight, trip_paths[0].weight)
+              print "Weight of best completed path: %s, uncompleted: %s" % \
+                  (completed_paths[0].weight, trip_paths[0].weight)
             
             # if we've still got open paths, but their weight exceeds that
             # of any completed paths, break
             if len(completed_paths) > 0 and len(trip_paths) > 0 and \
-                     completed_paths[0].weight < trip_paths[0].weight:
-                 break;
+                  completed_paths[0].weight < trip_paths[0].weight:
+              print "Breaking with %s uncompleted paths." % len(trip_paths)
+              break;
 
         if len(completed_paths) > 0:
             return completed_paths.pop()
@@ -219,7 +238,8 @@ class TripGraph:
         # them. ignore paths which extend to nodes we've already visited.
         for route_id in self.tripstops[src_id].get_routes(service_period):
             print "Processing %s" % route_id
-            triphop = self.tripstops[src_id].find_triphop(time, route_id, service_period)
+            triphop = self.tripstops[src_id].find_triphop(time, route_id, 
+                                                          service_period)
             if triphop:
                 # if we're extending the path from this source id, then that 
                 # must by definition mean we've found the shortest path to 
@@ -234,10 +254,9 @@ class TripGraph:
                                                 triphop.route_id, \
                                                 triphop.start_time, \
                                                 triphop.end_time)
-                    trip_path2 = copy.deepcopy(trip_path)
+                    trip_path2 = copy.copy(trip_path)
                     trip_path2.add_action(tripaction, dest_id, self)
-                    print "--- trip actions length: %s" % \
-                        len(trip_path2.actions)
+                    #print "--- trip actions length: %s" % len(trip_path2.actions)
                     trip_paths.append(trip_path2)
                     visited_ids[src_id][route_id] = 1
 
