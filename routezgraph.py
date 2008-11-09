@@ -31,12 +31,11 @@ class TripHop:
         self.dest_id = dest_id
         self.route_id = route_id
 
-    def __lt__(self, other):
+    def __cmp__(self, other):
         if type(other) == int:
-            print "%s < %s" % (self.start_time, other)
-            return self.start_time < other
+            return self.start_time - other
         
-        return self.start_time < other.start_time
+        return self.start_time - other.start_time
 
 class TripStop:
     def __init__(self, id, lat, lng):
@@ -102,8 +101,8 @@ class TripPath:
         newinst.weight = self.weight
         return newinst
 
-    def __lt__(self, trippath):
-        return self.weight < trippath.weight
+    def __cmp__(self, trippath):
+        return self.weight - trippath.weight
 
     def add_action(self, action, dest_id, graph):
         self.actions.append(action)
@@ -219,10 +218,7 @@ class TripGraph:
             if len(completed_paths) > 0 and len(trip_paths) > 0 and \
                   completed_paths[0].weight < trip_paths[0].weight:
               print "Breaking with %s uncompleted paths." % len(trip_paths)
-              break;
-
-        if len(completed_paths) > 0:
-            return completed_paths.pop()
+              return completed_paths.pop()
 
         return None
 
