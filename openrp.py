@@ -154,8 +154,8 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     end_lng = float(params.get('endlng', None))
     time_str = params.get('time', None)
 
-    startstops = schedule.GetNearestStops(start_lat, start_lng, 5)
-    endstops = schedule.GetNearestStops(end_lat, end_lng, 5)
+    startstops = schedule.GetNearestStops(start_lat, start_lng, 10)
+    endstops = schedule.GetNearestStops(end_lat, end_lng, 10)
 
     time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
 
@@ -200,7 +200,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       # if we had a path at all, append the last getting off action here
       if last_action:
         actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
-                              'time':last_action.start_time })
+                              'time':last_action.end_time })
 
 
     return actions_desc

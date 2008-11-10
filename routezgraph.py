@@ -8,7 +8,6 @@ import copy
 import transitfeed
 import math
 from heapq import heappush, heappop
-from bisect import bisect
 
 def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
   # fixme: use a less ridiculous calculation
@@ -57,10 +56,9 @@ class TripStop:
         not self.triphops[service_id].get(route_id):
             return None
         triphops = self.triphops[service_id][route_id]
-        triphop_marker = TripHop(time, time, self.id, self.id)
-        idx = bisect(triphops, triphop_marker)
-        if idx < len(triphops):
-            return triphops[idx]
+        for triphop in triphops:
+          if triphop.start_time >= time:
+            return triphop
 
         return None
 
@@ -93,6 +91,7 @@ class TripPath:
         self.actions = []
         self.start_time = time
         self.src_id = src_id
+        self.raw_weight = 0
         self.weight = 0
 
     def __copy__(self):
@@ -118,6 +117,19 @@ class TripPath:
             return self.actions[-1].dest_id
         return self.src_id
 
+    def get_len(self):
+        return len(self.actions)
+
+    def get_last_src_id(self):
+      if len(self.actions):
+        return self.actions[-1].src_id
+      return -1
+
+    def get_last_route_id(self):
+      if len(self.actions):
+        return self.actions[-1].route_id
+      return -1
+    
     def _get_weight(self, dest_id, graph):
         weight = 0
         prevtime = self.start_time
@@ -129,15 +141,14 @@ class TripPath:
                 weight = weight + action.get_weight()
                 weight = weight + (action.start_time - prevtime)
                 # transfer penalty of 5 minutes if we're switching routes
-                if prevaction:
-                    if prevaction.route_id != action.route_id:
+                if prevaction and prevaction.route_id != action.route_id:
                         weight = weight + (5 * 60)
                 prevaction = action
                 prevtime = prevaction.end_time
 
             # then, calculate the time remaining based on going directly
             # from the last vertice to the destination at a ridiculous speed
-            # (200km/h).                 
+            # (200km/h).
             last_stop = graph.tripstops[self.actions[-1].dest_id]
             dest_stop = graph.tripstops[dest_id]
 
@@ -219,33 +230,48 @@ class TripGraph:
                   completed_paths[0].weight < trip_paths[0].weight:
               print "Breaking with %s uncompleted paths." % len(trip_paths)
               return completed_paths.pop()
-
-        return None
+        
+        if len(completed_paths):
+          return completed_paths.pop()
+        else:
+          return None
 
     def extend_path(self, dest_id, trip_path, service_period, visited_ids):
         trip_paths = []
         
         time = trip_path.get_end_time()
         src_id = trip_path.get_end_id()
+        
+        last_route_id = trip_path.get_last_route_id()
+        last_routes = []
+        if trip_path.get_len() > 0:
+          last_src_id = trip_path.get_last_src_id()
+          last_routes = self.tripstops[last_src_id].get_routes(service_period)
+          if not visited_ids.get(last_src_id):       
+            visited_ids[last_src_id] = {}
+          visited_ids[last_src_id][last_route_id] = 1
 
-        print "Extending path at vertice %s" % src_id
+        print "Extending path at vertice %s (on %s)" % (src_id, last_route_id)
 
         # find outgoing nodes from the source and get a list of paths to
-        # them. ignore paths which extend to nodes we've already visited.
+        # them. 
         for route_id in self.tripstops[src_id].get_routes(service_period):
             print "Processing %s" % route_id
             triphop = self.tripstops[src_id].find_triphop(time, route_id, 
                                                           service_period)
             if triphop:
-                # if we're extending the path from this source id, then that 
-                # must by definition mean we've found the shortest path to 
-                # it (at least via that route id). don't extend from this
-                # node via the same route again
-                if not visited_ids.get(src_id):           
-                    visited_ids[src_id] = {}
-
-                if not visited_ids[src_id].get(route_id):
-                    print "-- Extending path to %s" % triphop.dest_id
+              # don't extend from this node via this route if we've already
+              # extended the path this way: if we have before, that indicates
+              # that we've found a more optimal path
+              if visited_ids.get(src_id) and \
+                      visited_ids[src_id].get(route_id):
+                  print "-- NOT Extending path to %s (via %s), been there, done that" % (triphop.dest_id, route_id)                  
+                # if we could have transferred at the previous node, don't
+                # transfer now
+                elif route_id != last_route_id and last_routes.count(route_id) > 0:
+                  print "-- NOT Extending path to %s (via %s), pointless transfer" % (triphop.dest_id, route_id)
+                else:
+                    print "-- Extending path to %s (via %s)" % (triphop.dest_id, route_id)
                     tripaction = TripAction(src_id, triphop.dest_id, \
                                                 triphop.route_id, \
                                                 triphop.start_time, \
@@ -254,6 +280,6 @@ class TripGraph:
                     trip_path2.add_action(tripaction, dest_id, self)
                     #print "--- trip actions length: %s" % len(trip_path2.actions)
                     trip_paths.append(trip_path2)
-                    visited_ids[src_id][route_id] = 1
 
         return trip_paths
+
