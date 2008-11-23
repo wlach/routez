@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 import BaseHTTPServer, sys, urlparse
+from django.conf import settings as DjangoSettings
 import mimetypes
 from optparse import OptionParser
-import sys, os
+import os
 import pwd
 import re
 import signal
@@ -15,6 +16,7 @@ import math
 
 import parsedatetime as pdt
 import transitfeed
+import routezsettings
 from routezgraph import *
 
 
@@ -95,19 +97,16 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     key = self.server.key
 
-    f, _ = self.OpenFile('index.html')
-    content = f.read()
-
-    # A very simple template system. For a fixed set of values replace [xxx]
-    # with the value of local variable xxx
-    for v in ('min_lat', 'min_lon', 'max_lat', 'max_lon', 'key'):
-      content = content.replace('[%s]' % v, str(locals()[v]))
+    # use django's templating system to send a response
+    t = get_template('index.html')
+    c = t.render(Context({'min_lat': min_lat, 'min_lon': min_lon, 
+                          'max_lat': max_lat, 'max_lon': max_lon, 'key': key}))
 
     self.send_response(200)
     self.send_header('Content-Type', 'text/html')
-    self.send_header('Content-Length', str(len(content)))
+    self.send_header('Content-Length', str(len(c)))
     self.end_headers()
-    self.wfile.write(content)
+    self.wfile.write(c)
 
   def handle_GET_default(self, parsed_params, path):
     self.send_error(404)
@@ -344,14 +343,13 @@ if __name__ == '__main__':
   server.file_dir = options.file_dir
   server.calendar = pdt.Calendar()
 
-  import hotshot
-  prof = hotshot.Profile("hotshot_edi_stats")
+  DjangoSettings.configure(TEMPLATE_DIRS=routezsettings.TEMPLATE_DIRS)
+  from django.template.loader import get_template
+  from django.template import Context
 
   StartServerThread(server)  # Spawns a thread for server and returns
   print "To view, point your browser at http://%s:%d/" \
       % (server.server_name, server.server_port)
-
-  prof.close()
 
   try:
     while 1:
