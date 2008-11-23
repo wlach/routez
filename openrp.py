@@ -156,51 +156,39 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     startstops = schedule.GetNearestStops(start_lat, start_lng, 10)
     endstops = schedule.GetNearestStops(end_lat, end_lng, 10)
 
-    time_secs = time.mktime(self.server.calendar.parse(time_str)[0])
+    start_time = self.server.calendar.parse(time_str)[0]
+    daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
+                                  0, 0, 0, 0, 0, 0))
+    def human_time(secs, daysecs):
+      dt = datetime.datetime.fromtimestamp(secs+daysecs)
+      dtstr = dt.strftime("%I:%M%p")
+      return dtstr
 
-    # base case: just walk between the two points (rough estimate, since it's 
-    # a direct path)
-    arrival_time = time_secs + calc_latlng_distance(start_lat, start_lng, end_lat, end_lng) / 1.1
-
-    best_trippath = None
-    best_weight = 0
-    for s in startstops:
-      for s2 in endstops:
-        extra_distance_from_src = calc_latlng_distance(s.stop_lat, s.stop_lon, start_lat, start_lng)
-        extra_distance_from_dest = calc_latlng_distance(s2.stop_lat, s2.stop_lon, end_lat, end_lng)
-        # 1.1m/s a good average walking time? it is according to wikipedia...
-        extra_start_time = extra_distance_from_src / 1.1 
-        extra_end_time = extra_distance_from_dest / 1.1
-        
-        trippath = graph.find_path(time_secs + extra_start_time, s.stop_id, 
-                                   s2.stop_id)
-        if trippath:
-          total_weight = trippath.weight + extra_end_time
-          if not best_trippath or total_weight < best_weight:
-            best_trippath = trippath
-            best_weight = total_weight
+    trippath = graph.find_path(time.mktime(start_time), start_lat, start_lng, end_lat, 
+                               end_lng)
 
     actions_desc = []
-    if best_trippath:
-      last_action = None
-      for action in best_trippath.actions:
-        # order is always: get off (if applicable), board (if applicable), 
-        # then move
-        if last_action and last_action.route_id != action.route_id:
-          actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
-                                'time':last_action.start_time })
-        if not last_action or last_action.route_id != action.route_id:
-          actions_desc.append({ 'type':'board', 'id':action.src_id, 
-                                'time':action.start_time, 
-                                'route_id':action.route_id })
-        actions_desc.append({ 'type':'pass', 'id':action.src_id, 
-                              'dest_id':action.dest_id })
-        last_action = action
-      # if we had a path at all, append the last getting off action here
-      if last_action:
+    last_action = None
+    for action in trippath.actions:
+      # order is always: get off (if applicable), board (if applicable), 
+      # then move
+      if last_action and last_action.route_id != action.route_id:
         actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
-                              'time':last_action.end_time })
+                              'time':human_time(daysecs, 
+                                                last_action.start_time) })
+      if not last_action or last_action.route_id != action.route_id:
+        actions_desc.append({ 'type':'board', 'id':action.src_id, 
+                              'time':human_time(daysecs, action.start_time), 
+                              'route_id':action.route_id })
+      actions_desc.append({ 'type':'pass', 'id':action.src_id, 
+                            'dest_id':action.dest_id })
+      last_action = action
 
+    # if we had a path at all, append the last getting off action here
+    if last_action:
+        actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
+                              'time':human_time(daysecs, 
+                                                last_action.end_time) })
 
     return actions_desc
 
