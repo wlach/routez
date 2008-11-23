@@ -303,9 +303,6 @@ if __name__ == '__main__':
   if options.key and os.path.isfile(options.key):
     options.key = open(options.key).read().strip()
 
-  import psyco
-  psyco.full()
-
   schedule = transitfeed.Schedule(
     problem_reporter=transitfeed.ProblemReporter())
   print "Loading schedule."
