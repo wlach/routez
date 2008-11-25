@@ -132,7 +132,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def handle_json_GET_stoplist(self, params):
     matches = []
     for s in self.server.schedule.GetStopList():
-      matches.append({ 'id':s.stop_id, 'name':s.stop_name, 
+      matches.append({ 'id':"gtfs"+s.stop_id, 'name':s.stop_name, 
                        'lat':s.stop_lat, 'lng':s.stop_lon })
     return matches
 

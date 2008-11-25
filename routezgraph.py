@@ -189,21 +189,27 @@ class TripGraph:
   walkstops = {}
 
   def add_tripstop(self, id, lat, lng):
-    self.tripstops[id] = TripStop(id, lat, lng)
+    myid = "gtfs" + id
+    self.tripstops[myid] = TripStop(myid, lat, lng)
 
   def add_triphop(self, start_time, end_time, src_id, dest_id, route_id, 
                   service_id):
-    self.tripstops[src_id].add_triphop(start_time, end_time, dest_id, 
+    my_src_id = "gtfs" + src_id
+    my_dest_id = "gtfs" + dest_id    
+    self.tripstops[my_src_id].add_triphop(start_time, end_time, my_dest_id, 
                                        route_id, service_id)
 
   def add_walkstop(self, id, lat, lng):
-    self.walkstops[id] = WalkStop(id, lat, lng)
+    myid = "osm" + id
+    self.walkstops[myid] = WalkStop(myid, lat, lng)
 
   def add_walkhop(self, src_id, dest_id):
-    w1 = self.walkstops[src_id]
-    w2 = self.walkstops[dest_id]
+    my_src_id = "osm" + src_id
+    my_dest_id = "osm" + dest_id
+    w1 = self.walkstops[my_src_id]
+    w2 = self.walkstops[my_dest_id]
     time = calc_latlng_distance(w1.lat, w1.lng, w2.lat, w2.lng) / 1.1
-    self.walkstops[src_id].add_walkhop(dest_id, time)
+    self.walkstops[my_src_id].add_walkhop(my_dest_id, time)
 
   def get_nearest_tripstops(self, lat, lng, n=1):
     """Return the n nearest stops to lat,lon"""
@@ -276,10 +282,7 @@ class TripGraph:
 
     # Find path
     visited_ids = {}
-    
-    # FIXME: calculate and use a base case where we just walk between
-    # the two points
-    
+        
     # first, find the 20 closest start nodes and create paths based on that
     trip_paths = [ ]
     best_path = None
