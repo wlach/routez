@@ -269,7 +269,9 @@ def daemonize():
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option('--feed_filename', '--feed', dest='feed_filename',
-                    help='file name of feed to load', default="feed.zip")
+                    help='file name of feed to load', default="")
+  parser.add_option('--osm_filename', '--osm', dest='osm_filename',
+                    help='file name of OSM to load', default="")
   parser.add_option('--key', dest='key',
                     help='Google Maps API key or the name '
                     'of a text file that contains an API key')
@@ -284,6 +286,18 @@ if __name__ == '__main__':
 
   (options, args) = parser.parse_args()
 
+  if not os.path.isfile(os.path.join(options.file_dir, 'index.html')):
+    print "Can't find index.html with --file_dir=%s" % options.file_dir
+    exit(1)
+  
+  if not os.path.isfile(options.feed_filename):
+    print "Can't find feed file '%s'" % options.feed_filename
+    exit(1)
+
+  if not os.path.isfile(options.osm_filename):
+    print "Can't find OSM file '%s'" % options.osm_filename
+    exit(1)
+
   if options.daemonize:
     if not os.getuid() == 0:
       print "uid must be zero for daemonization!"
@@ -296,10 +310,6 @@ if __name__ == '__main__':
         exit(1)
       daemonize()
 
-  if not os.path.isfile(os.path.join(options.file_dir, 'index.html')):
-    print "Can't find index.html with --file_dir=%s" % options.file_dir
-    exit(1)
-
   if options.key and os.path.isfile(options.key):
     options.key = open(options.key).read().strip()
 
@@ -308,9 +318,14 @@ if __name__ == '__main__':
   print "Loading schedule."
   schedule.Load(options.feed_filename)
 
+  print "Loading OSM."
+  map = osm.OSM(options.osm_filename)
+
   print "Creating graph from schedule."
   graph = TripGraph()
   graph.load_gtfs(schedule)
+  graph.load_osm(map)
+  #graph.link_osm_gtfs()
 
   # link all stops within 50 meters of each other
   #print "Linking proximate stops."
