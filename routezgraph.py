@@ -39,28 +39,22 @@ class TripHop:
             return self.start_time - other
         
         return self.start_time - other.start_time
-
-class WalkStop:
-  walkhops = {}
-  triplinks = []
-
-  def __init__(self, id, lat, lng):
-    self.id = id
-    self.lat = lat
-    self.lng = lng
-  
-  def add_walkhop(self, dest_id, time):
-    self.walkhops[dest_id] = time
-
-  def add_triplink(self, tripstop):
-    self.triplinks.append(tripstop)
-
+ 
 class TripStop:
-    def __init__(self, id, lat, lng):
+    def __init__(self, id, lat, lng, type):
         self.id = id
-        self.triphops = {}
         self.lat = lat
         self.lng = lng
+        self.type = type
+        self.walkhops = {}
+        self.triphops = {}
+        self.triplinks = {}
+
+    def add_walkhop(self, dest_id, time):
+        self.walkhops[dest_id] = time
+
+    def add_triplink(self, dest_id, time):
+      self.triplinks[dest_id] = time
 
     def add_triphop(self, start_time, end_time, dest_id, route_id, service_id):
         if not self.triphops.get(service_id):
@@ -184,37 +178,34 @@ class TripPath:
 
         return (weight, full_weight)
 
-class TripGraph:
-  tripstops = {}        
-  walkstops = {}
+class TripGraph(object):
 
-  def add_tripstop(self, id, lat, lng):
-    myid = "gtfs" + id
-    self.tripstops[myid] = TripStop(myid, lat, lng)
+  def __init__(self):
+      self.tripstops = {}        
+      self.osmstops = {}
+      pass
+
+  def add_tripstop(self, id, lat, lng, type):
+    tripstop = TripStop(id, lat, lng, type)
+    self.tripstops[id] = tripstop
+    if type == "osm":
+      self.osmstops[id] = tripstop
 
   def add_triphop(self, start_time, end_time, src_id, dest_id, route_id, 
                   service_id):
-    my_src_id = "gtfs" + src_id
-    my_dest_id = "gtfs" + dest_id    
-    self.tripstops[my_src_id].add_triphop(start_time, end_time, my_dest_id, 
+    self.tripstops[src_id].add_triphop(start_time, end_time, dest_id, 
                                        route_id, service_id)
 
-  def add_walkstop(self, id, lat, lng):
-    myid = "osm" + id
-    self.walkstops[myid] = WalkStop(myid, lat, lng)
-
   def add_walkhop(self, src_id, dest_id):
-    my_src_id = "osm" + src_id
-    my_dest_id = "osm" + dest_id
-    w1 = self.walkstops[my_src_id]
-    w2 = self.walkstops[my_dest_id]
+    w1 = self.tripstops[src_id]
+    w2 = self.tripstops[dest_id]
     time = calc_latlng_distance(w1.lat, w1.lng, w2.lat, w2.lng) / 1.1
-    self.walkstops[my_src_id].add_walkhop(my_dest_id, time)
+    self.tripstops[src_id].add_walkhop(dest_id, time)
 
-  def get_nearest_tripstops(self, lat, lng, n=1):
+  def get_nearest_osmstops(self, lat, lng, n=1):
     """Return the n nearest stops to lat,lon"""
     dist_stop_list = []
-    for s in self.tripstops.values():
+    for s in self.osmstops.values():
       dist = (s.lat - lat)**2 + (s.lng - lng)**2
       if len(dist_stop_list) < n:
         bisect.insort(dist_stop_list, (dist, s))
@@ -226,8 +217,8 @@ class TripGraph:
   def load_gtfs(self, sched):
     stops = sched.GetStopList()
     for stop in stops:
-      self.add_tripstop(stop.stop_id, stop.stop_lat, 
-                        stop.stop_lon)
+      self.add_tripstop("gtfs" + stop.stop_id, stop.stop_lat, 
+                        stop.stop_lon, "gtfs")
       
     trips = sched.GetTripList()
     for trip in trips:
@@ -238,36 +229,39 @@ class TripGraph:
       for (secs, stoptime, is_timepoint) in interpolated_stops:
         stop = stoptime.stop
         if prevstop:                    
-          self.add_triphop(prev_secs, secs, prevstop.stop_id, 
-                           stop.stop_id, trip.route_id, 
+          self.add_triphop(prev_secs, secs, "gtfs"+prevstop.stop_id, 
+                           "gtfs"+stop.stop_id, trip.route_id, 
                            trip.service_id)                
         prevstop = stop
         prev_secs = secs        
 
   def load_osm(self, osm):
     for node in osm.nodes.values():
-      self.add_walkstop(node.id, node.lat, node.lon)
+      self.add_tripstop("osm"+node.id, node.lat, node.lon, "osm")
 
     for way in osm.ways.values():
       prev_id = None
       for id in way.nds:
         if prev_id:
-          self.add_walkhop(prev_id, id)
+          self.add_walkhop("osm"+prev_id, "osm"+id)
         prev_id = id
 
   def link_osm_gtfs(self):
-    print "Linking OSM with gtfs (this step is slow)"
-    for stop in self.tripstops.values():
-      print "Linking stop with id %s" % stop.id
-      nearest_walkstop = None
-      mindist = 0
-      for walkstop in self.walkstops.values():
-        dist = (stop.lat - walkstop.lat)**2 + \
-            (stop.lng - walkstop.lng)**2
-        if not nearest_walkstop or dist < mindist:
-          mindist = dist
-          nearest_walkstop = walkstop
-      nearest_walkstop.add_triplink(stop.id)
+    mylen = len(self.tripstops.values())
+    for s1 in self.tripstops.values():
+      if s1.type == "gtfs":
+        nearest_osm = None
+        min_dist = 0
+        for s2 in self.tripstops.values():
+          if s2.type == "osm":
+            dist = calc_latlng_distance(s1.lat, s1.lng, s2.lat, s2.lng)
+            if not nearest_osm or dist < min_dist:
+              nearest_osm = s2
+              min_dist = dist
+        time = calc_latlng_distance(nearest_osm.lat, nearest_osm.lng, s1.lat, s1.lng) / 1.1
+        s1.add_triplink(nearest_osm.id, time)
+        print "Adding triplink %s->%s" %(nearest_osm.id, s1.id)
+        nearest_osm.add_triplink(s1.id, time)
 
   def find_path(self, time, src_lat, src_lng, dest_lat, dest_lng):
     # translate the time to an offset from the beginning of the day
@@ -283,10 +277,10 @@ class TripGraph:
     # Find path
     visited_ids = {}
         
-    # first, find the 20 closest start nodes and create paths based on that
+    # first, find the 5 closest start nodes and create paths based on that
     trip_paths = [ ]
     best_path = None
-    for s in self.get_nearest_tripstops(src_lat, src_lng, 20):
+    for s in self.get_nearest_osmstops(src_lat, src_lng, 5):
       p = TripPath(today_secs, src_lat, src_lng, dest_lat, dest_lng, s)
       heappush(trip_paths, p)
       print "full weight %s for s %s" % (p.full_weight, s.id)
@@ -330,13 +324,40 @@ class TripGraph:
     if trip_path.get_len() > 0:
       last_src_id = trip_path.get_last_src_id()
       last_routes = self.tripstops[last_src_id].get_routes(service_period)
-      if not visited_ids.get(last_src_id):       
-        visited_ids[last_src_id] = {}
       visited_ids[last_src_id][last_route_id] = 1
 
     print "Extending path at vertice %s (on %s)" % (src_id, last_route_id)
 
-    # find outgoing nodes from the source and get a list of paths to
+    # if we haven't visited this node before, find outgoing walkhops.
+    if not visited_ids.get(src_id):
+      for dest_id in self.tripstops[src_id].walkhops.keys():
+        walktime = self.tripstops[src_id].walkhops[dest_id]
+        tripaction = TripAction(src_id, dest_id, -1, time, 
+                                time + walktime)
+        trip_path2 = copy.copy(trip_path)
+        trip_path2.add_action(tripaction, self.tripstops)
+        trip_paths.append(trip_path2)
+
+    # forbid further visits to this node using walking immediately: if
+    # we're visiting it now, that means that all optimal routes to it
+    # have already been found (unlike with buses, where you might want
+    # to explore slightly less optimal routes to this node to reduce
+    # the need for transfers)
+    if not visited_ids.get(src_id):       
+      visited_ids[src_id] = {}
+
+    # explore any unvisited nodes via links
+    for triplink_id in self.tripstops[src_id].triplinks.keys():
+      if not visited_ids.get(triplink_id):
+        print "Adding link path (%s->%s)" % (src_id, triplink_id)
+        # 5 seconds to make the link (probably a dumb assumption)
+        tripaction = TripAction(src_id, triplink_id, -1, time, 
+                                time + self.tripstops[src_id].triplinks[triplink_id])
+        trip_path2 = copy.copy(trip_path)
+        trip_path2.add_action(tripaction, self.tripstops)
+        trip_paths.append(trip_path2)
+    
+    # find outgoing triphops from the source and get a list of paths to
     # them. 
     for route_id in self.tripstops[src_id].get_routes(service_period):
       print "Processing %s" % route_id
@@ -348,13 +369,13 @@ class TripGraph:
         # that we've found a more optimal path
         if visited_ids.get(src_id) and \
               visited_ids[src_id].get(route_id):
-          print "-- NOT Extending path to %s (via %s), been there, done that" % (triphop.dest_id, route_id)                  
+          pass
         # if we could have transferred at the previous node, don't
         # transfer now
         elif route_id != last_route_id and last_routes.count(route_id) > 0:
-          print "-- NOT Extending path to %s (via %s), pointless transfer" % (triphop.dest_id, route_id)
+          pass
         else:
-          print "-- Extending path to %s (via %s)" % (triphop.dest_id, route_id)
+          
           tripaction = TripAction(src_id, triphop.dest_id, \
                                     triphop.route_id, \
                                     triphop.start_time, \

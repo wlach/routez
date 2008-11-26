@@ -13,6 +13,7 @@ import time
 import datetime
 import urllib
 import math
+import cPickle
 
 import parsedatetime as pdt
 import transitfeed
@@ -173,20 +174,27 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       # order is always: get off (if applicable), board (if applicable), 
       # then move
       if last_action and last_action.route_id != action.route_id:
-        actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
+        actions_desc.append({ 'type':'alight', 
+                              'lat': graph.tripstops[last_action.dest_id].lat, 
+                              'lng': graph.tripstops[last_action.dest_id].lng, 
                               'time':human_time(daysecs, 
                                                 last_action.start_time) })
       if not last_action or last_action.route_id != action.route_id:
-        actions_desc.append({ 'type':'board', 'id':action.src_id, 
-                              'time':human_time(daysecs, action.start_time), 
-                              'route_id':action.route_id })
+        if action.route_id >= 0:
+          actions_desc.append({ 'type':'board', 'id':action.src_id, 
+                                'time':human_time(daysecs, action.start_time), 
+                                'route_id':action.route_id })
       actions_desc.append({ 'type':'pass', 'id':action.src_id, 
+                            'lat': graph.tripstops[action.src_id].lat, 
+                            'lng': graph.tripstops[action.src_id].lng,
                             'dest_id':action.dest_id })
       last_action = action
 
     # if we had a path at all, append the last getting off action here
     if last_action:
         actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
+                              'lat': graph.tripstops[last_action.dest_id].lat, 
+                              'lng': graph.tripstops[last_action.dest_id].lng,
                               'time':human_time(daysecs, 
                                                 last_action.end_time) })
 
@@ -270,8 +278,8 @@ if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option('--feed_filename', '--feed', dest='feed_filename',
                     help='file name of feed to load', default="")
-  parser.add_option('--osm_filename', '--osm', dest='osm_filename',
-                    help='file name of OSM to load', default="")
+  parser.add_option('--graph_filename', '--graph', dest='graph_filename',
+                    help='file name of graph to load', default="")
   parser.add_option('--key', dest='key',
                     help='Google Maps API key or the name '
                     'of a text file that contains an API key')
@@ -294,8 +302,8 @@ if __name__ == '__main__':
     print "Can't find feed file '%s'" % options.feed_filename
     exit(1)
 
-  if not os.path.isfile(options.osm_filename):
-    print "Can't find OSM file '%s'" % options.osm_filename
+  if not os.path.isfile(options.graph_filename):
+    print "Can't find graph file '%s'" % options.graph_filename
     exit(1)
 
   if options.daemonize:
@@ -318,22 +326,10 @@ if __name__ == '__main__':
   print "Loading schedule."
   schedule.Load(options.feed_filename)
 
-  print "Loading OSM."
-  map = osm.OSM(options.osm_filename)
-
-  print "Creating graph from schedule."
-  graph = TripGraph()
-  graph.load_gtfs(schedule)
-  graph.load_osm(map)
-  #graph.link_osm_gtfs()
-
-  # link all stops within 50 meters of each other
-  #print "Linking proximate stops."
-  #stops = schedule.GetStopList()
-  #for s in stops:
-  #  for s2 in stops:
-  #    if calc_latlng_distance(s.stop_lat, s.stop_lon, s2.stop_lat, s2.stop_lon) < 50 and s.stop_id != s2.stop_id:
-  #      gg.add_edge("gtfs" + s.stop_id, "gtfs" + s2.stop_id, Link())
+  print "Loading graph."
+  FILE = open(options.graph_filename, 'r')
+  graph = cPickle.load(FILE)
+  FILE.close()
     
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
                                      RequestHandlerClass=ScheduleRequestHandler)

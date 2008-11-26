@@ -110,10 +110,9 @@ function submitCallback(data, responseCode) {
         addWalkingOverlay(origin, dest);
     } else {
         for (var i=0; i<actions.length; ++i) {
-            var id = actions[i].id;
-            if (i==0 || id != actions[i-1].id) {
-                var latlng = new GLatLng(stopList[id].lat, 
-                                         stopList[id].lng)
+            if (actions[i].type == "alight" || actions[i].type == "pass") {
+                var latlng = new GLatLng(actions[i].lat, 
+                                         actions[i].lng)
                 routePath[routePath.length] = latlng;
                 bounds.extend(latlng);
             }
@@ -123,6 +122,7 @@ function submitCallback(data, responseCode) {
             }
 
             if (actions[i].type == "board") {
+                var id = actions[i].id;
                 var routeId = actions[i].route_id;
 
                 var markerOpts = new Object();
@@ -136,11 +136,11 @@ function submitCallback(data, responseCode) {
                 routePlan += " departing from " + stopList[id].name;
                 routePlan += " at " + actions[i].time + " and travel to ";
             } else if (actions[i].type == "alight") {
-                routePlan += stopList[id].name + ".</p>";
+                // routePlan += stopList[id].name + ".</p>";
                 
                  if (i==(actions.length-1)) {
-                     routePlan += "<p><b>Arrive</b> at " + stopList[actions[i].id].name;
-                     routePlan += " at " + actions[i].time +".</p>";
+                     // routePlan += "<p><b>Arrive</b> at " + stopList[actions[i].id].name;
+                     // routePlan += " at " + actions[i].time +".</p>";
                  }
             }
         }
