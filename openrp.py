@@ -330,6 +330,9 @@ if __name__ == '__main__':
   FILE = open(options.graph_filename, 'r')
   graph = cPickle.load(FILE)
   FILE.close()
+
+  import psyco
+  psyco.full()
     
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
                                      RequestHandlerClass=ScheduleRequestHandler)
