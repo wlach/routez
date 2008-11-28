@@ -103,11 +103,10 @@ class TripPath:
         self.src_stop = src_stop
         self.dest_stop = dest_stop
         self.last_stop = last_stop
-        self.weight = self._get_weight()
         self.walking_time = 0
+        self.traversed_route_ids = 0
+        self.weight = self._get_weight()
         self.route_ids = {}
-        self.visited_ids = {}
-        self.visited_ids[src_stop] = 1
 
     def __copy__(self):
         newinst = self.__class__(self.start_time, self.fastest_speed, self.src_lat, self.src_lng,
@@ -117,21 +116,23 @@ class TripPath:
         newinst.weight = self.weight
         newinst.walking_time = self.walking_time
         newinst.route_ids = copy.copy(self.route_ids)        
-        newinst.visited_ids = {}
         return newinst
 
     def __cmp__(self, trippath):
         return self.weight - trippath.weight
 
     def add_action(self, action, tripstops):
+        if action.route_id == -1:
+          self.walking_time = self.walking_time + (action.end_time - action.start_time)
+        elif len(self.actions) > 0 and action.route_id != self.actions[-1].route_id:
+          self.traversed_route_ids = self.traversed_route_ids + 1
+        for route_id in action.route_ids:
+          self.route_ids[route_id] = 1
+
         self.actions.append(action)
         self.last_stop = tripstops[action.dest_id]
         self.weight = self._get_weight()
-        if action.route_id == -1:
-          self.walking_time = self.walking_time + (action.end_time - action.start_time)
-        for route_id in action.route_ids:
-          self.route_ids[route_id] = 1
-        self.visited_ids[action.dest_id] = 1
+
 
     def get_end_time(self):
         if len(self.actions):
@@ -165,6 +166,7 @@ class TripPath:
 
         last_lat = self.src_stop.lat
         last_lng = self.src_stop.lng
+        last_route_id = -1
 
         if len(self.actions):
             # first, calculate the time already elapsed and add that
@@ -173,23 +175,33 @@ class TripPath:
             for action in self.actions:
                 weight = weight + (action.end_time - action.start_time)
                 weight = weight + (action.start_time - prevtime)
-                if action.route_id != -1 and \
-                      action.route_id != prevaction.route_id:
-                  traversed_route_ids = traversed_route_ids + 1
                 prevaction = action
                 prevtime = prevaction.end_time
                 
             last_lat = self.last_stop.lat
             last_lng = self.last_stop.lng
-            weight = weight + (traversed_route_ids * 5 * 60)
-
+            weight = weight + ((self.traversed_route_ids**2) * 5 * 60)            
 
         # then, calculate the time remaining based on going directly
         # from the last vertice to the destination vertice at the fastest
         # possible speed in the graph
         remaining_distance = calc_latlng_distance(last_lat, last_lng, 
                                                   self.dest_stop.lat, self.dest_stop.lng)
-        weight = weight + (remaining_distance / self.fastest_speed) 
+        weight = weight + (remaining_distance / self.fastest_speed)
+
+        # double the cost of walking after 5 mins, then exponentially make 
+        # walking time more expensive as it exceeds 10mins
+        if self.walking_time > (5*60):
+          if self.walking_time > (10*60):            
+            weight = weight + 2 * (5*60) + (self.walking_time - (10*60))**2
+          else:            
+            weight = weight + self.walking_time*2
+          
+        # add 5 mins to our weight if we were walking and remaining distance
+        # >500m, to account for the fact that we're probably going to
+        # want to wait for another bus
+        if last_route_id == -1 and remaining_distance > 1000:
+          weight = weight + (5*60)
 
         return weight
 
@@ -310,14 +322,15 @@ class TripGraph(object):
     completed_paths = [ ]
     best_path = None
     start_node = self.get_nearest_osmstop(src_lat, src_lng)
-    end_node = self.get_nearest_osmstop(dest_lat, dest_lng)    
+    end_node = self.get_nearest_osmstop(dest_lat, dest_lng)
     print "Start: %s End: %s" % (start_node.id, end_node.id)
 
     # stupid case: start is equal to end
     if start_node == end_node:
       return None
 
-    heappush(uncompleted_paths, TripPath(today_secs, self.fastest_speed, src_lat, 
+    heappush(uncompleted_paths, TripPath(today_secs, self.fastest_speed, 
+                                         src_lat, 
                                          src_lng, dest_lat, dest_lng, 
                                          start_node, end_node))
     
@@ -366,6 +379,8 @@ class TripGraph(object):
     if trip_path.get_len() > 0:
       last_src_id = trip_path.get_last_src_id()
       last_routes = self.tripstops[last_src_id].get_routes(service_period)
+      if last_route_id != -1 and visited_ids[last_src_id].get(last_route_id):
+        return trip_paths
       visited_ids[last_src_id][last_route_id] = 1
 
     print "Extending path at vertice %s (on %s), walk time: %s" % (src_id, last_route_id, trip_path.walking_time)      
@@ -375,44 +390,41 @@ class TripGraph(object):
     outgoing_route_ids = self.tripstops[src_id].get_routes(service_period)
 
     # if we haven't visited this node before, find outgoing walkhops (to nodes
-    # that we haven't visited before). also, don't walk if doing so would
-    # exceed a maximal walking time of 20mins
+    # that we haven't visited before). 
     # if we've already visited this node via walking, don't visit it again
     if not visited_ids[src_id].get(-1):
       for dest_id in self.tripstops[src_id].walkhops.keys():
         walktime = self.tripstops[src_id].walkhops[dest_id]
-        if 1: #trip_path.walking_time + walktime < (10 * 60):
-          tripaction = TripAction(src_id, dest_id, -1, 
-                                  outgoing_route_ids, time, 
-                                  time + walktime)
-          trip_path2 = copy.copy(trip_path)
-          trip_path2.add_action(tripaction, self.tripstops)
-          trip_paths.append(trip_path2)
+        tripaction = TripAction(src_id, dest_id, -1, 
+                                outgoing_route_ids, time, 
+                                time + walktime)
+        trip_path2 = copy.copy(trip_path)
+        trip_path2.add_action(tripaction, self.tripstops)
+        trip_paths.append(trip_path2)
 
       # explore any unvisited nodes via links
       for triplink_id in self.tripstops[src_id].triplinks.keys():
         walktime = self.tripstops[src_id].triplinks[triplink_id]
-        if 1: #trip_path.walking_time + walktime < (10 * 60):
-          tripaction = TripAction(src_id, triplink_id, -1, outgoing_route_ids, 
-                                  time, time + walktime)
-          trip_path2 = copy.copy(trip_path)
-          trip_path2.add_action(tripaction, self.tripstops)
-          trip_paths.append(trip_path2)
+        tripaction = TripAction(src_id, triplink_id, -1, outgoing_route_ids, 
+                                time, time + walktime)
+        trip_path2 = copy.copy(trip_path)
+        trip_path2.add_action(tripaction, self.tripstops)
+        trip_paths.append(trip_path2)
 
     # find outgoing triphops from the source and get a list of paths to
     # them. 
     for route_id in outgoing_route_ids:
-      print "Processing %s" % route_id
+      # print "Processing %s" % route_id
       triphop = self.tripstops[src_id].find_triphop(time, route_id, 
                                                     service_period)
       if triphop:
         # don't extend from this node via this route if we've already
         # extended the path this way: if we have before, that indicates
         # that we've found a more optimal path
-        if visited_ids.get(src_id) and \
-              visited_ids[src_id].get(route_id):
+        if visited_ids[src_id].get(route_id):
           pass
-        # if we've been on the route before (or could have been), don't get on again
+        # if we've been on the route before (or could have been), don't get on 
+        # again
         elif route_id != last_route_id and trip_path.route_ids.get(route_id):
           pass
         else:          

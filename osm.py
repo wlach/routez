@@ -126,11 +126,18 @@ class OSM:
         #count times each node is used
         node_histogram = dict.fromkeys( self.nodes.keys(), 0 )
         for way in self.ways.values():
-            if len(way.nds) < 2:       #if a way has only one node, delete it out of the osm collection
+            #if a way has only one node, delete it out of the osm collection
+            #similarly if it's not a road
+            if len(way.nds) < 2 or not way.tags.get('highway'):  
                 del self.ways[way.id]
             else:
                 for node in way.nds:
                     node_histogram[node] += 1
+
+        for node in self.nodes.values():
+            if node_histogram[node.id] == 0:
+                print "Node %s is not connected, deleting." % node.id
+                del self.nodes[node.id]
 
         #use that histogram to split all ways, replacing the member set of ways
         new_ways = {}
