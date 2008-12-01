@@ -180,8 +180,8 @@ class TripPath:
 
       # now, add 5 minutes per each transfer, multiplied to the power of 2
       # (to make transfers exponentially more painful)
-      if self.traversed_route_ids > 0:
-        heuristic_weight = heuristic_weight + ((2**(self.traversed_route_ids-1)) * 5 * 60)
+      if self.traversed_route_ids > 1:
+        heuristic_weight = heuristic_weight + ((2**(self.traversed_route_ids-2)) * 5 * 60)
 
       # double the cost of walking after 5 mins, quadruple after 10 mins, octuple after
       # 15, etc.
