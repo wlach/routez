@@ -47,13 +47,9 @@ class TripStop:
         self.type = type
         self.walkhops = {}
         self.triphops = {}
-        self.triplinks = {}
 
     def add_walkhop(self, dest_id, time):
       self.walkhops[dest_id] = time
-
-    def add_triplink(self, dest_id, time):
-      self.triplinks[dest_id] = time
 
     def add_triphop(self, start_time, end_time, dest_id, route_id, service_id):
         if not self.triphops.get(service_id):
@@ -301,11 +297,11 @@ class TripGraph(object):
               nearest_osm = s2
               min_dist = dist
         time = calc_latlng_distance(nearest_osm.lat, nearest_osm.lng, s1.lat, s1.lng) / 1.1
-        s1.add_triplink(nearest_osm.id, time)
         print "Adding triplink %s->%s" %(nearest_osm.id, s1.id)
-        nearest_osm.add_triplink(s1.id, time)
+        self.add_walkhop(nearest_osm.id, s1.id)
+        self.add_walkhop(s1.id, nearest_osm.id)
 
-  def find_path(self, time, src_lat, src_lng, dest_lat, dest_lng):
+  def find_path(self, time, src_lat, src_lng, dest_lat, dest_lng, cb=None):
     # translate the time to an offset from the beginning of the day
     # and determine service period
     now = datetime.datetime.fromtimestamp(time)
@@ -341,7 +337,7 @@ class TripGraph(object):
     while len(uncompleted_paths) > 0:
       trip_path = heappop(uncompleted_paths)
       print "Extending path with weight: %s" % (trip_path.heuristic_weight)
-      new_trip_paths = self.extend_path(trip_path, service_period, visited_ids)
+      new_trip_paths = self.extend_path(trip_path, service_period, visited_ids, cb)
       num_paths_considered = num_paths_considered + len(new_trip_paths)
       for p in new_trip_paths:
         if p.get_end_id() == end_node.id:
@@ -365,7 +361,7 @@ class TripGraph(object):
     else:
       return None      
 
-  def extend_path(self, trip_path, service_period, visited_ids):
+  def extend_path(self, trip_path, service_period, visited_ids, cb):
     trip_paths = []
       
     time = trip_path.get_end_time()
@@ -379,6 +375,8 @@ class TripGraph(object):
 
     if trip_path.get_len() > 0:
       last_src_id = trip_path.get_last_src_id()
+      if cb:
+        cb(last_src_id, src_id, last_route_id)
       last_routes = self.tripstops[last_src_id].get_routes(service_period)
       if last_route_id != -1 and visited_ids[last_src_id].get(last_route_id):
         return trip_paths
@@ -399,15 +397,6 @@ class TripGraph(object):
         tripaction = TripAction(src_id, dest_id, -1, 
                                 outgoing_route_ids, time, 
                                 time + walktime)
-        trip_path2 = copy.copy(trip_path)
-        trip_path2.add_action(tripaction, self.tripstops)
-        trip_paths.append(trip_path2)
-
-      # explore any unvisited nodes via links
-      for triplink_id in self.tripstops[src_id].triplinks.keys():
-        walktime = self.tripstops[src_id].triplinks[triplink_id]
-        tripaction = TripAction(src_id, triplink_id, -1, outgoing_route_ids, 
-                                time, time + walktime)
         trip_path2 = copy.copy(trip_path)
         trip_path2.add_action(tripaction, self.tripstops)
         trip_paths.append(trip_path2)
