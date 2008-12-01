@@ -134,9 +134,9 @@ class OSM:
                 for node in way.nds:
                     node_histogram[node] += 1
 
+        # delete nodes that don't appear in ways
         for node in self.nodes.values():
             if node_histogram[node.id] == 0:
-                print "Node %s is not connected, deleting." % node.id
                 del self.nodes[node.id]
 
         #use that histogram to split all ways, replacing the member set of ways
