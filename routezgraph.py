@@ -433,7 +433,7 @@ class TripGraph(object):
           pass
         else:          
           tripaction = TripAction(src_id, triphop.dest_id, \
-                                    triphop.route_id, \
+                                    route_id, \
                                     outgoing_route_ids, \
                                     triphop.start_time, \
                                     triphop.end_time)
