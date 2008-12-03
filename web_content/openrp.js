@@ -117,10 +117,6 @@ function submitCallback(data, responseCode) {
                 bounds.extend(latlng);
             }
 
-            if (i==(actions.length - 1)) {
-                map.addOverlay(new GMarker(latlng, walkStopIcon));
-            }
-
             if (actions[i].type == "board") {
                 var id = actions[i].id;
                 var routeId = actions[i].route_id;
@@ -136,16 +132,20 @@ function submitCallback(data, responseCode) {
                 routePlan += " departing from " + stopList[id].name;
                 routePlan += " at " + actions[i].time + " and travel to ";
             } else if (actions[i].type == "alight") {
-                // routePlan += stopList[id].name + ".</p>";
-                
-                 if (i==(actions.length-1)) {
-                     // routePlan += "<p><b>Arrive</b> at " + stopList[actions[i].id].name;
-                     // routePlan += " at " + actions[i].time +".</p>";
-                 }
+                var previd = actions[i-1].dest_id;
+                routePlan += stopList[previd].name + ".</p>";
+            } 
+            
+            // if we have to get off and walk, show a nice icon
+            if (i>0 && actions[i-1].type == "alight" && 
+                actions[i].type != "board") {
+                map.addOverlay(new GMarker(latlng, walkStopIcon));
+            }
+
+            if (i==(actions.length-1)) {
+                routePlan += "<p><b>Arrive</b> at " + actions[i].time +".</p>";
             }
         }
-        addWalkingOverlay(origin, routePath[0]);
-        addWalkingOverlay(routePath[routePath.length-1], dest);
     }
     map.setCenter(bounds.getCenter());
     var zoom = map.getBoundsZoomLevel(bounds);

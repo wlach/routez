@@ -135,6 +135,14 @@ class TripPath:
 
         return new_trippath
 
+    def get_actions(self):
+      actions = []
+      tmp_action = self.last_action
+      while tmp_action:        
+        actions.insert(0, tmp_action)
+        tmp_action = tmp_action.parent
+      return actions
+
     def _get_heuristic_weight(self):
       # start off with heuristic weight being equivalent to its real weight
       self.heuristic_weight = self.weight

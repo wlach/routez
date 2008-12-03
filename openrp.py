@@ -165,16 +165,17 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       dtstr = dt.strftime("%I:%M%p")
       return dtstr
 
-    trippath = graph.find_path(time.mktime(start_time), start_lat, start_lng, end_lat, 
-                               end_lng)
+    trippath = graph.find_path(time.mktime(start_time), start_lat, start_lng, 
+                               end_lat, end_lng)
 
     actions_desc = []
     last_action = None
-    for action in trippath.actions:
+    for action in trippath.get_actions():
       # order is always: get off (if applicable), board (if applicable), 
       # then move
       if last_action and last_action.route_id != action.route_id:
-        actions_desc.append({ 'type':'alight', 
+        if last_action.route_id != -1:
+          actions_desc.append({ 'type':'alight', 
                               'lat': graph.tripstops[last_action.dest_id].lat, 
                               'lng': graph.tripstops[last_action.dest_id].lng, 
                               'time':human_time(daysecs, 
@@ -192,9 +193,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     # if we had a path at all, append the last getting off action here
     if last_action:
-        actions_desc.append({ 'type':'alight', 'id':last_action.dest_id, 
-                              'lat': graph.tripstops[last_action.dest_id].lat, 
-                              'lng': graph.tripstops[last_action.dest_id].lng,
+        actions_desc.append({ 'type':'arrive', 
                               'time':human_time(daysecs, 
                                                 last_action.end_time) })
 
