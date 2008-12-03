@@ -7,21 +7,8 @@ import copy
 import transitfeed
 import osm
 import math
+import latlng_ext
 from heapq import heappush, heappop
-import bisect
-
-def calc_latlng_distance(src_lat, src_lng, dest_lat, dest_lng):
-  # fixme: use a less ridiculous calculation
-  # this one from: http://www.zipcodeworld.com/samples/distance.cs.html
-  # note: this function returns distance in meters
-  if src_lat == dest_lat and src_lng == dest_lng:
-    return 0
-
-  theta = src_lng - dest_lng
-  src_lat_radians = math.radians(src_lat)
-  dest_lat_radians = math.radians(dest_lat)
-  tmp = math.sin(src_lat_radians) * math.sin(dest_lat_radians) + math.cos(src_lat_radians) * math.cos(dest_lat_radians) * math.cos(math.radians(theta))
-  return math.degrees(math.acos(tmp)) * 60 * 1.1515 * 1.609344 * 1000
 
 class TripHop:
     def __init__(self, start_time, end_time, dest_id, route_id):
@@ -150,9 +137,11 @@ class TripPath:
       # then, calculate the time remaining based on going directly
       # from the last vertice to the destination vertice at the fastest
       # possible speed in the graph
-      remaining_distance = calc_latlng_distance(self.last_stop.lat, self.last_stop.lng, 
-                                                self.dest_stop.lat, self.dest_stop.lng)
-      self.heuristic_weight += remaining_distance / self.fastest_speed
+      remaining_distance = latlng_ext.distance(self.last_stop.lat, 
+                                               self.last_stop.lng, 
+                                               self.dest_stop.lat, 
+                                               self.dest_stop.lng)
+      self.heuristic_weight += remaining_distance / (self.fastest_speed / 3)
 
       # now, add 5 minutes per each transfer, multiplied to the power of 2
       # (to make transfers exponentially more painful)
@@ -197,7 +186,7 @@ class TripGraph(object):
                   service_id):
     s1 = self.tripstops[src_id]
     s2 = self.tripstops[dest_id]
-    dist = calc_latlng_distance(s1.lat, s1.lng, s2.lat, s2.lng)
+    dist = latlng_ext.distance(s1.lat, s1.lng, s2.lat, s2.lng)
     total_time = end_time - start_time
     speed = float(dist) / float(total_time)
     if total_time > 30 and dist > 0 and speed > self.fastest_speed:
@@ -208,7 +197,7 @@ class TripGraph(object):
   def add_walkhop(self, src_id, dest_id):
     w1 = self.tripstops[src_id]
     w2 = self.tripstops[dest_id]
-    time = calc_latlng_distance(w1.lat, w1.lng, w2.lat, w2.lng) / 1.1
+    time = latlng_ext.distance(w1.lat, w1.lng, w2.lat, w2.lng) / 1.1
     self.tripstops[src_id].add_walkhop(dest_id, time)
 
   def get_nearest_osmstop(self, lat, lng):
@@ -267,11 +256,11 @@ class TripGraph(object):
         min_dist = 0
         for s2 in self.tripstops.values():
           if s2.type == "osm":
-            dist = calc_latlng_distance(s1.lat, s1.lng, s2.lat, s2.lng)
+            dist = latlng_ext.distance(s1.lat, s1.lng, s2.lat, s2.lng)
             if not nearest_osm or dist < min_dist:
               nearest_osm = s2
               min_dist = dist
-        time = calc_latlng_distance(nearest_osm.lat, nearest_osm.lng, s1.lat, s1.lng) / 1.1
+        time = latlng_ext.distance(nearest_osm.lat, nearest_osm.lng, s1.lat, s1.lng) / 1.1
         print "Adding triplink %s->%s" %(nearest_osm.id, s1.id)
         self.add_walkhop(nearest_osm.id, s1.id)
         self.add_walkhop(s1.id, nearest_osm.id)
@@ -301,7 +290,7 @@ class TripGraph(object):
     if start_node == end_node:
       return None
 
-    dist_from_start = calc_latlng_distance(src_lat, src_lng, start_node.lat, start_node.lng)
+    dist_from_start = latlng_ext.distance(src_lat, src_lng, start_node.lat, start_node.lng)
     today_secs += dist_from_start / 1.1
 
     heappush(uncompleted_paths, TripPath(today_secs, self.fastest_speed, 
