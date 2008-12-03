@@ -82,6 +82,7 @@ class TripPath:
         self.traversed_route_ids = 0
         self.possible_route_ids = set()
         self.last_route_id = -1
+        self.route_time = 0
         self._get_heuristic_weight()
 
     def __copy__(self):
@@ -93,7 +94,8 @@ class TripPath:
         newinst.traversed_route_ids = self.traversed_route_ids
         newinst.possible_route_ids = self.possible_route_ids.copy()
         newinst.last_route_id = self.last_route_id
-        newinst.heuristic_weight = self.heuristic_weight        
+        newinst.route_time = self.route_time
+        newinst.heuristic_weight = self.heuristic_weight
         return newinst
 
     def __cmp__(self, trippath):
@@ -104,10 +106,13 @@ class TripPath:
 
         if action.route_id == -1:
           new_trippath.walking_time += (action.end_time - action.start_time)
+          new_trippath.route_time = 0
         elif new_trippath.last_action and action.route_id != new_trippath.last_action.route_id:
           new_trippath.traversed_route_ids += 1
+          new_trippath.route_time = 0
         new_trippath.possible_route_ids.update(action.route_ids)
 
+        new_trippath.route_time += (action.end_time - action.start_time)
         new_trippath.weight += (action.end_time - action.start_time)
         new_trippath.weight += (action.start_time - new_trippath.time)
 
@@ -340,7 +345,7 @@ class TripGraph(object):
         cb(last_src_id, src_id, last_route_id)
       if last_route_id != -1 and visited_ids[last_src_id].get(last_route_id):
         return []
-      visited_ids[last_src_id][last_route_id] = trip_path.heuristic_weight
+      visited_ids[last_src_id][last_route_id] = trip_path
 
     #print "Extending path at vertice %s (on %s), walk time: %s" % (src_id, last_route_id, trip_path.walking_time)      
 
@@ -354,13 +359,19 @@ class TripGraph(object):
     # if we haven't visited this node before, find outgoing walkhops (to nodes
     # that we haven't visited before). 
     # if we've already visited this node via walking, don't visit it again
+    # also, if we're on a bus, don't allow a transfer if we've been on for
+    # less than 10 minutes
     if not visited_ids[src_id].get(-1):
-      for dest_id in self.tripstops[src_id].walkhops.keys():
-        walktime = self.tripstops[src_id].walkhops[dest_id]
-        tripaction = TripAction(src_id, dest_id, -1, 
-                                outgoing_route_ids, trip_path.time, 
-                                trip_path.time + walktime)
-        trip_paths.append(trip_path.add_action(tripaction, self.tripstops))
+        if last_route_id != -1 and trip_path.route_time < (10 * 60):
+            pass
+        else:
+            for dest_id in self.tripstops[src_id].walkhops.keys():
+                walktime = self.tripstops[src_id].walkhops[dest_id]
+                tripaction = TripAction(src_id, dest_id, -1, 
+                                        outgoing_route_ids, trip_path.time, 
+                                        trip_path.time + walktime)
+                trip_path2 = trip_path.add_action(tripaction, self.tripstops)
+                trip_paths.append(trip_path2)
 
     # find outgoing triphops from the source and get a list of paths to
     # them. 
@@ -375,18 +386,27 @@ class TripGraph(object):
         # FIXME: this isn't actually true, sometimes we find a more optimal
         # path later-- in these cases we need to be able to measure the putative
         # new path against the one that exists
-        if visited_ids[src_id].get(route_id):
-          pass
+        #if visited_ids[src_id].get(route_id):
+        #  pass
         # if we've been on the route before (or could have been), don't get on 
         # again
-        elif route_id != last_route_id and route_id in trip_path.possible_route_ids:
+        if route_id != last_route_id and route_id in trip_path.possible_route_ids:
           pass
-        else:          
+        # disallow more than three transfers
+        elif route_id != last_route_id and trip_path.traversed_route_ids > 3:
+            pass        
+        else:
           tripaction = TripAction(src_id, triphop.dest_id, \
                                     route_id, \
                                     outgoing_route_ids, \
                                     triphop.start_time, \
                                     triphop.end_time)
-          trip_paths.append(trip_path.add_action(tripaction, self.tripstops))
+          trip_path2 = trip_path.add_action(tripaction, self.tripstops)
+          existing_path = visited_ids[src_id].get(route_id)
+          if not existing_path or \
+                existing_path.heuristic_weight > trip_path2.heuristic_weight or \
+                (existing_path.heuristic_weight == trip_path2.heuristic_weight and \
+                     existing_path.walking_time > trip_path2.walking_time):
+            trip_paths.append(trip_path2)
 
     return trip_paths
