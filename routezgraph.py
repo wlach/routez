@@ -64,7 +64,6 @@ class TripAction:
     self.src_id = src_id
     self.dest_id = dest_id
     self.route_id = route_id
-    self.route_ids = route_ids
     self.start_time = start_time
     self.end_time = end_time
     self.parent = parent_action
@@ -101,7 +100,7 @@ class TripPath:
     def __cmp__(self, trippath):
         return self.heuristic_weight - trippath.heuristic_weight
 
-    def add_action(self, action, tripstops):
+    def add_action(self, action, possible_route_ids, tripstops):
         new_trippath = copy.copy(self)
 
         if action.route_id == -1:
@@ -110,7 +109,7 @@ class TripPath:
         elif new_trippath.last_action and action.route_id != new_trippath.last_action.route_id:
           new_trippath.traversed_route_ids += 1
           new_trippath.route_time = 0
-        new_trippath.possible_route_ids.update(action.route_ids)
+        new_trippath.possible_route_ids.update(possible_route_ids)
 
         new_trippath.route_time += (action.end_time - action.start_time)
         new_trippath.weight += (action.end_time - action.start_time)
@@ -368,9 +367,12 @@ class TripGraph(object):
             for dest_id in self.tripstops[src_id].walkhops.keys():
                 walktime = self.tripstops[src_id].walkhops[dest_id]
                 tripaction = TripAction(src_id, dest_id, -1, 
-                                        outgoing_route_ids, trip_path.time, 
+                                        outgoing_route_ids,
+                                        trip_path.time, 
                                         trip_path.time + walktime)
-                trip_path2 = trip_path.add_action(tripaction, self.tripstops)
+                trip_path2 = trip_path.add_action(tripaction, 
+                                                  outgoing_route_ids, 
+                                                  self.tripstops)
                 trip_paths.append(trip_path2)
 
     # find outgoing triphops from the source and get a list of paths to
@@ -401,7 +403,8 @@ class TripGraph(object):
                                     outgoing_route_ids, \
                                     triphop.start_time, \
                                     triphop.end_time)
-          trip_path2 = trip_path.add_action(tripaction, self.tripstops)
+          trip_path2 = trip_path.add_action(tripaction, outgoing_route_ids, 
+                                            self.tripstops)
           existing_path = visited_ids[src_id].get(route_id)
           if not existing_path or \
                 existing_path.heuristic_weight > trip_path2.heuristic_weight or \
