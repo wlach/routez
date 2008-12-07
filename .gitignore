@@ -1,0 +1,7 @@
+aclocal.m4
+*.o
+tripgraph.so
+configure
+config.status
+config.mk
+config.log

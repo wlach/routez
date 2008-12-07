@@ -18,7 +18,7 @@ import cPickle
 import parsedatetime as pdt
 import transitfeed
 import routezsettings
-from routezgraph import *
+from tripgraph import *
 
 
 LOGFILE = '/var/log/openrp.log'
@@ -165,8 +165,17 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       dtstr = dt.strftime("%I:%M%p")
       return dtstr
 
-    trippath = graph.find_path(time.mktime(start_time), start_lat, start_lng, 
-                               end_lat, end_lng)
+    now = datetime.datetime.fromtimestamp(time.mktime(start_time))
+    today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
+    print "weekday: %s" % now.weekday()
+    service_period = 'weekday'
+    if now.weekday() == 5:
+      service_period = 'saturday'
+    elif now.weekday() == 6:
+      service_period = 'sunday'
+
+    trippath = graph.find_path(today_secs, service_period, start_lat, start_lng, 
+                               end_lat, end_lng, None)
 
     actions_desc = []
     last_action = None
@@ -175,9 +184,10 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       # then move
       if last_action and last_action.route_id != action.route_id:
         if last_action.route_id != -1:
+          ts = graph.get_tripstop(last_action.dest_id)
           actions_desc.append({ 'type':'alight', 
-                              'lat': graph.tripstops[last_action.dest_id].lat, 
-                              'lng': graph.tripstops[last_action.dest_id].lng, 
+                              'lat': ts.lat, 
+                              'lng': ts.lng, 
                               'time':human_time(daysecs, 
                                                 last_action.start_time) })
       if not last_action or last_action.route_id != action.route_id:
@@ -185,9 +195,10 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           actions_desc.append({ 'type':'board', 'id':action.src_id, 
                                 'time':human_time(daysecs, action.start_time), 
                                 'route_id':action.route_id })
+      ts = graph.get_tripstop(action.src_id)
       actions_desc.append({ 'type':'pass', 'id':action.src_id, 
-                            'lat': graph.tripstops[action.src_id].lat, 
-                            'lng': graph.tripstops[action.src_id].lng,
+                            'lat': ts.lat, 
+                            'lng': ts.lng,
                             'dest_id':action.dest_id })
       last_action = action
 
@@ -326,9 +337,8 @@ if __name__ == '__main__':
   schedule.Load(options.feed_filename)
 
   print "Loading graph."
-  FILE = open(options.graph_filename, 'r')
-  graph = cPickle.load(FILE)
-  FILE.close()
+  graph = TripGraph()
+  graph.load(options.graph_filename)
 
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
                                      RequestHandlerClass=ScheduleRequestHandler)

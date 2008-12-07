@@ -128,7 +128,8 @@ class OSM:
         for way in self.ways.values():
             #if a way has only one node, delete it out of the osm collection
             #similarly if it's not a road
-            if len(way.nds) < 2 or not way.tags.get('highway'):  
+            if len(way.nds) < 2 or not way.tags.get('highway') or \
+                    way.tags['highway'] == 'footway':  
                 del self.ways[way.id]
             else:
                 for node in way.nds:

@@ -1,0 +1,14 @@
+== Near term ==
+
+- Pick low-hanging fruit to optimize libroutez.
+- Improve web interface.
+
+== Medium term ==
+
+- Add better heuristics to make libroutez consider less options
+- Clean up libroutez, make into a proper library.
+- De-entangle application from Halifax (not much work required).
+
+== Blue sky ==
+
+- Make maps visualization use OpenStreetMap instead of Google Maps.
