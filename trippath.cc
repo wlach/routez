@@ -1,6 +1,7 @@
 #include "trippath.h"
 
 using namespace std;
+using namespace tr1;
 using namespace boost;
 
 
@@ -32,7 +33,7 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
 }
 
 
-TripAction::TripAction(string _src_id, string _dest_id, int _route_id, 
+TripAction::TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
                        double _start_time, double _end_time)
 {
     src_id = _src_id;
@@ -145,7 +146,7 @@ python::list TripPath::get_actions()
     return l;
 }
 
-shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, set<int> &_possible_route_ids,
+shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, unordered_set<int> &_possible_route_ids,
                               shared_ptr<TripStop> &_last_stop)
 {
     shared_ptr<TripPath> new_trippath(new TripPath(*this));
@@ -162,7 +163,7 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, set<in
         new_trippath->route_time = 0;
     }
 
-    for (set<int>::iterator i = _possible_route_ids.begin(); 
+    for (unordered_set<int>::iterator i = _possible_route_ids.begin(); 
          i != _possible_route_ids.end(); i++)
     {
         new_trippath->possible_route_ids.insert(*i);

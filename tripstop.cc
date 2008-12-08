@@ -2,6 +2,7 @@
 
 using namespace boost;
 using namespace std;
+using namespace tr1;
 
 
 static bool operator<(const TripHop& x, const TripHop& y)
@@ -146,9 +147,9 @@ shared_ptr<TripHop> TripStop::find_triphop(int time, int route_id,
 }
 
 
-set<int> TripStop::get_routes(std::string service_id)
+unordered_set<int> TripStop::get_routes(std::string service_id)
 {
-    set<int> routes;
+    unordered_set<int> routes;
 
     for (TripHopDict::iterator i = tdict[service_id].begin();
          i != tdict[service_id].end(); i++)

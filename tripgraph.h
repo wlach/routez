@@ -2,7 +2,8 @@
 #define __TRIPGRAPH_H
 #include <string>
 #include <stdint.h>
-#include <map>
+#include <tr1/unordered_map>
+
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "trippath.h"
@@ -28,8 +29,8 @@ public:
     boost::shared_ptr<TripStop> get_nearest_osmstop(double lat, double lng);
 
     typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
-    typedef std::map<std::string, std::map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
-    typedef std::map<std::string, std::map<std::string, boost::shared_ptr<TripPath> > > VisitedWalkMap;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, boost::shared_ptr<TripPath> > > VisitedWalkMap;
 
     TripPath find_path(int secs, std::string service_period, 
                        double src_lat, double src_lng, 
@@ -41,7 +42,7 @@ public:
                              VisitedWalkMap &visited_walks, 
                              PyObject *cb);
 
-    typedef std::map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
+    typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
     TripStopDict tripstops;
     TripStopDict osmstops;
         

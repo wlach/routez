@@ -4,8 +4,8 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <stdint.h>
-#include <map>
-#include <set>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #include <vector>
 
 #define MAX_ID_LEN 16
@@ -40,7 +40,7 @@ struct TripStop
     void add_triphop(int32_t start_time, int32_t end_time, std::string dest_id, 
                      int route_id, std::string service_id);
     void add_walkhop(std::string dest_id, float walktime);
-    std::set<int> get_routes(std::string service_id);
+    std::tr1::unordered_set<int> get_routes(std::string service_id);
     boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
                                             std::string service_period);
 
@@ -49,9 +49,9 @@ struct TripStop
     float lat;
     float lng;
     typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
-    typedef std::map<int, TripHopList> TripHopDict;
-    typedef std::map<std::string, TripHopDict> ServiceDict;
-    typedef std::map<std::string, float> WalkHopDict;
+    typedef std::tr1::unordered_map<int, TripHopList> TripHopDict;
+    typedef std::tr1::unordered_map<std::string, TripHopDict> ServiceDict;
+    typedef std::tr1::unordered_map<std::string, float> WalkHopDict;
     ServiceDict tdict;
     WalkHopDict wdict;
 };

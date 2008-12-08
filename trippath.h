@@ -1,6 +1,6 @@
 #ifndef __TRIPPATH_H
 #define __TRIPPATH_H
-#include <set>
+#include <tr1/unordered_set>
 #include <vector>
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
@@ -16,7 +16,7 @@ struct TripAction
     float end_time;
     boost::shared_ptr<TripAction> parent;
 
-    TripAction(std::string _src_id, std::string _dest_id, int _route_id, 
+    TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
                double _start_time, double _end_time);
 
 };
@@ -33,7 +33,7 @@ struct TripPath
     double walking_time;
     double route_time;
     int traversed_route_ids;
-    std::set<int> possible_route_ids;
+    std::tr1::unordered_set<int> possible_route_ids;
     int last_route_id;
     double weight;
     double heuristic_weight;
@@ -47,7 +47,7 @@ struct TripPath
 
     boost::shared_ptr<TripPath> add_action(
         boost::shared_ptr<TripAction> &action, 
-        std::set<int> &_possible_route_ids,
+        std::tr1::unordered_set<int> &_possible_route_ids,
         boost::shared_ptr<TripStop> &_last_stop);
 
     void _get_heuristic_weight();
