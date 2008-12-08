@@ -1,6 +1,6 @@
 include config.mk
 
-default: latlng_ext.so trippath.so
+default: tripgraph.so testgraph
 
 config.mk:
 	@echo "Please run ./configure. Stop."
@@ -18,4 +18,4 @@ testgraph: testgraph.cc tripgraph.so
 	g++ testgraph.cc -o testgraph tripgraph.so -fPIC $(BOOST_PYTHON_LDFLAGS) $(BOOST_PYTHON_CFLAGS) -g
 
 clean:
-	rm -f latlng_ext.so trippath.so *.o loadgraph
+	rm -f tripgraph.so *.o testgraph *~
