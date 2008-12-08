@@ -1,5 +1,6 @@
 #ifndef __TRIPGRAPH_H
 #define __TRIPGRAPH_H
+#include <queue>
 #include <string>
 #include <stdint.h>
 #include <tr1/unordered_map>
@@ -36,10 +37,25 @@ public:
                        double src_lat, double src_lng, 
                        double dest_lat, double dest_lng, PyObject *cb);
 
-    TripPathList extend_path(boost::shared_ptr<TripPath> &path, 
-                             std::string service_period, 
+    struct PathCompare
+    {
+        inline bool operator() (const boost::shared_ptr<TripPath> &x, 
+                                const boost::shared_ptr<TripPath> &y)
+        {
+            return x->heuristic_weight > y->heuristic_weight;
+        }
+    };
+
+    typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
+
+    void extend_path(boost::shared_ptr<TripPath> &path, 
+                             std::string &service_period, 
+                             const char *end_id,
+                             int &num_paths_considered,
                              VisitedRouteMap &visited_routes, 
                              VisitedWalkMap &visited_walks, 
+                             PathQueue &uncompleted_paths,
+                             PathQueue &completed_paths,
                              PyObject *cb);
 
     typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
