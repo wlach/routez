@@ -43,7 +43,7 @@ struct TripPath
              boost::shared_ptr<TripStop> &_last_stop);
     TripPath(); 
 
-    double cmp(const TripPath &t);
+    //double cmp(const TripPath &t);
 
     boost::shared_ptr<TripPath> add_action(
         boost::shared_ptr<TripAction> &action, 

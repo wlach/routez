@@ -1,6 +1,5 @@
 #include "tripgraph.h"
 #include <assert.h>
-#include <queue>
 #include <boost/python.hpp>
 #include <tr1/unordered_map>
 
@@ -35,12 +34,6 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
     return dist;
 }
 
-
-static bool operator>(const shared_ptr<TripPath> &x, 
-                      const shared_ptr<TripPath> &y)
-{
-    return x->heuristic_weight > y->heuristic_weight;
-}
 
 TripGraph::TripGraph()
 {
@@ -176,7 +169,6 @@ TripPath TripGraph::find_path(int secs, string service_period,
                               double src_lat, double src_lng, 
                               double dest_lat, double dest_lng, PyObject *cb)
 {
-    typedef priority_queue<shared_ptr<TripPath>, vector<shared_ptr<TripPath> >, greater<shared_ptr<TripPath> > > PathQueue;
     PathQueue uncompleted_paths;
     PathQueue completed_paths;
         
@@ -207,18 +199,9 @@ TripPath TripGraph::find_path(int secs, string service_period,
     {
         shared_ptr<TripPath> path = uncompleted_paths.top();
         uncompleted_paths.pop();
-        TripPathList new_paths = extend_path(path, service_period, 
-                                             visited_routes, visited_walks, cb);
-        num_paths_considered += new_paths.size();
-        for (TripPathList::iterator i = new_paths.begin(); 
-             i != new_paths.end(); i++)
-        {
-            shared_ptr<TripPath> t = (*i);
-            if (t->last_stop->id == end_node->id)
-                completed_paths.push(t);
-            else
-                uncompleted_paths.push(t);
-        }
+        extend_path(path, service_period, end_node->id, num_paths_considered,
+                    visited_routes, visited_walks, 
+                    uncompleted_paths, completed_paths, cb);        
 
         //# if we've still got open paths, but their weight exceeds that
         // of the weight of a completed path, break
@@ -250,11 +233,15 @@ TripStop TripGraph::get_tripstop(string id)
 }
 
 
-TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path, 
-                                               string service_period, 
-                                               VisitedRouteMap &visited_routes,
-                                               VisitedWalkMap &visited_walks, 
-                                               PyObject *cb)
+void TripGraph::extend_path(shared_ptr<TripPath> &path, 
+                            string &service_period, 
+                            const char *goal_id,
+                            int &num_paths_considered,
+                            VisitedRouteMap &visited_routes,
+                            VisitedWalkMap &visited_walks, 
+                            PathQueue &uncompleted_paths,
+                            PathQueue &completed_paths,
+                            PyObject *cb)
 {
     TripPathList newpaths;
     const char * src_id = path->last_stop->id;
@@ -273,8 +260,8 @@ TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path,
 #endif
     }
     
-    // printf("Extending path at vertice %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id.c_str(), 
-    //        last_route_id, path->time, path->walking_time, path->route_time);
+    // printf("Extending path at vertice %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
+    //         last_route_id, path->time, path->walking_time, path->route_time);
 
     shared_ptr<TripStop> src_stop(tripstops[src_id]);
 
@@ -285,13 +272,22 @@ TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path,
     // explore walkhops that are better than the ones we've already visited
     // if we're on a bus, don't allow a transfer if we've been on for
     // less than 5 minutes (FIXME: probably better to measure distance travelled?)
-    if (last_route_id == -1 || path->route_time > (10 * 60))
+    if (last_route_id == -1 || path->route_time > (2 * 60))
     {
         for (TripStop::WalkHopDict::iterator i = src_stop->wdict.begin();
              i != src_stop->wdict.end(); i++)
         {
             const char *dest_id = i->first.c_str();
             double walktime = i->second;
+
+            // do a quick test to make sure that the potential basis for a 
+            // new path isn't worse than what we have already, before
+            // incurring the cost of creating a new path and evaluating it.
+            unordered_map<const char*, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
+            unordered_map<const char*, shared_ptr<TripPath> >::iterator v1 = vsrc.find(dest_id);
+            if (v1 != vsrc.end() && path->heuristic_weight > v1->second->heuristic_weight)
+                continue;
+                
             shared_ptr<TripAction> action(
                 new TripAction(src_id, dest_id, -1, 
                                path->time, (path->time + walktime)));
@@ -299,8 +295,6 @@ TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path,
                 action, outgoing_route_ids, tripstops[dest_id]);
 
             //printf("- Considering walkpath to %s\n", dest_id.c_str());
-            unordered_map<const char*, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
-            unordered_map<const char*, shared_ptr<TripPath> >::iterator v1 = vsrc.find(dest_id);
 
             if (v1 == vsrc.end() || 
                 v1->second->heuristic_weight > path2->heuristic_weight ||
@@ -308,7 +302,12 @@ TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path,
                  v1->second->walking_time > path2->walking_time))
             {
                 //printf("-- Adding walkpath to %s\n", dest_id.c_str());
-                newpaths.push_back(path2);
+                if (strcmp(dest_id, goal_id) == 0)
+                    completed_paths.push(path2);
+                else
+                    uncompleted_paths.push(path2);
+
+                num_paths_considered++;
                 visited_walks[src_id][dest_id] = path2;
             }
         }
@@ -338,27 +337,36 @@ TripGraph::TripPathList TripGraph::extend_path(shared_ptr<TripPath> &path,
             }
             else
             {
+                // do a quick test to make sure that the potential basis for a 
+                // new path isn't worse than what we have already, before
+                // incurring the cost of creating a new path and evaluating it.
+                unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*i);
+                if (v != visited_routes[src_id].end() && path->heuristic_weight > v->second->heuristic_weight)
+                    continue;
+
                 shared_ptr<TripAction> action = shared_ptr<TripAction>(
                     new TripAction(src_id, t->dest_id, (*i), t->start_time,
                                    t->end_time));
                 shared_ptr<TripPath> path2 = path->add_action(
                     action, outgoing_route_ids, tripstops[t->dest_id]);
                 
-                unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*i);
 
                 if (v == visited_routes[src_id].end() || 
                     v->second->heuristic_weight > path2->heuristic_weight ||
                     ((v->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                      v->second->walking_time > path2->walking_time))
                 {
-                    newpaths.push_back(path2);
+                    if (strcmp(t->dest_id, goal_id) == 0)
+                        completed_paths.push(path2);
+                    else
+                        uncompleted_paths.push(path2);
+
+                    num_paths_considered++;
                     visited_routes[src_id][(*i)] = path2;
                 }
             }
         }
     }
-        
-    return newpaths;
 }    
 
 

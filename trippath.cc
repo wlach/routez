@@ -70,12 +70,6 @@ TripPath::TripPath(double _time, double _fastest_speed,
 }
 
 
-double TripPath::cmp(const TripPath &t)
-{
-    return this->heuristic_weight - t.heuristic_weight;
-}
-
-
 python::object TripPath::get_last_action()
 {
     if (last_action)
