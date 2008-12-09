@@ -286,7 +286,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             unordered_map<const char*, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
             unordered_map<const char*, shared_ptr<TripPath> >::iterator v1 = vsrc.find(dest_id);
             if (v1 != vsrc.end() && path->heuristic_weight > v1->second->heuristic_weight)
-                break;
+                continue;
                 
             shared_ptr<TripAction> action(
                 new TripAction(src_id, dest_id, -1, 
@@ -342,7 +342,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 // incurring the cost of creating a new path and evaluating it.
                 unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*i);
                 if (v != visited_routes[src_id].end() && path->heuristic_weight > v->second->heuristic_weight)
-                    break;
+                    continue;
 
                 shared_ptr<TripAction> action = shared_ptr<TripAction>(
                     new TripAction(src_id, t->dest_id, (*i), t->start_time,
