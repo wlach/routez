@@ -2,16 +2,16 @@ body, select, ol, ul, td {
   background: #ffffff;
   font-family: verdana, arial, helvetica, sans-serif;
   font-size:   13px;
-  margin:10px 10px 10px 10px;
   padding: 0px;
+  margin: 0px;
+  height: 100%;
 }
 
 #content {
-  margin-top: 5px;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  margin:15px 20px 20px 20px;
+  margin-top: 30px;
   position: relative;
+  padding-bottom: 48px;
 }
 
 #sidebar-wrapper {
@@ -25,10 +25,12 @@ body, select, ol, ul, td {
 }
 
 .plan-trip {
+    position: relative;
     margin-bottom: 1cm;
 }
 
 .input-box .title {
+    position: relative;
     padding: 0.25em;
     background: #eef;
     border-top: 1px solid #ccf;
@@ -38,6 +40,7 @@ body, select, ol, ul, td {
 }
 
 .input-box .fieldset {
+    position: relative;
     padding-left: 1em;
     padding-right: 1em;
     padding-bottom: 3em;
@@ -50,16 +53,12 @@ body, select, ol, ul, td {
 .input-box .fieldset .label {
     padding:0.2em;
     float: left;
-    width: 5em;
+    width: 3em;
     margin-right: 0.5em;
     height: 25px;
     text-align: right;
     margin-top:0.3em; 
 }
-
-.input-box .fieldset .nobr {
-	display:none; 
-}  
 
 .input-box .fieldset .button {
     margin:3px;
@@ -69,16 +68,16 @@ body, select, ol, ul, td {
 
 
 .input-box .fieldset .textfield {
-    margin:3px;
+    margin: 3px;
     height:25px;
 }
 
 
 .input-box .fieldset .example {
       position: relative;
-      left: 80px;
+      left: 55px;
       top: -5px;
-      width: 150px;
+      width: 200px;
       font-size: 10px;
       color: #a0a0a0;
       margin-top: .5em;
@@ -96,23 +95,22 @@ body, select, ol, ul, td {
 }
    
 #map {
-  margin-left: 320px;
+  margin-left: 340px;
   width: 600px;
   left: 1em;
   height: 400px;
   border: 1px solid #aaa;
 }
 
-#bottombar {
-  position: relative;
-  margin-top: 60px;
-  border: 1px solid #aaa;
-  height: 60px;
+.push {
+  height: 50px;
 }
 
-body {
-  font-family:helvetica,arial,sans, sans-serif;
+#footer {
+    text-position: center;
+    padding: 10px;
 }
+
 h1 {
   margin-top: 0.5em;
   margin-bottom: 0.5em;

@@ -40,43 +40,51 @@
 
 </head>
 <body class='sidebar-left' onload="load();" onunload="GUnload()">
-  <div id='content'>
-    <div id='sidebar-wrapper'><div id='sidebar'>
-	<div id="logo" class="sidebar-box">
-	  <h1 id="logo-text"><a href="/">Routez</a></h1>
-	</div>
-	<div id="intro" class="sidebar-box">
-	  <p>Routez.ca is an <b>unofficial</b> service providing trip planning 
-	    and other services for users of 
-	    <a href="http://www.halifax.ca/metrotransit/">Metro 
-	      Transit</a> in the greater area of Halifax, Nova Scotia. Try it 
-	    and see! </p> 
-	</div>
- 	<div id="route-plan" class="sidebar-box">
+  <div id='container'>
+    <div id='content'>
+      <div id='sidebar-wrapper'>
+	<div id='sidebar'>
+	  <div id="logo" class="sidebar-box">
+	    <h1 id="logo-text"><a href="/">Routez</a></h1>
+	  </div>
+	  <div id="intro" class="sidebar-box">
+	    <p>Routez.ca is an <b>unofficial</b> service providing trip planning 
+	      and other services for users of 
+	      <a href="http://www.halifax.ca/metrotransit/">Metro 
+		Transit</a> in the greater area of Halifax, Nova Scotia. Try it 
+	      and see! </p> 
+	  </div>
+ 	  <div id="route-plan" class="sidebar-box">
 	    <b>Travel from X to Y...</b>
 	    <div id="route-plan-content">
 	    </div>
-	</div>
-	<div id="plan-trip" class="input-box">
-	  <div class="title">Plan a trip</div>
-	  <div class="fieldset">
-	    <form id="routePlan" onSubmit="mysubmit(); return false;">
-	      <label class="label" for="routePlanStart">From:</label>
-	      <input type="text" id="routePlanStart" class="textfield"/>
-	      <p class="example">Example: North and Agricola</p>
-	      <label class="label" for="routePlanEnd">To:</label>
-	      <input type="text" id="routePlanEnd" class="textfield"/>
-	      <p class="example">Example: 1496 Lower Water</p>
-	      <label class="label" for="time">Time:</label>
-	      <input type="text" id="time" class="textfield"/>
-	      <p class="example">Example: 9:26am</p>
-	      <input value="Plan!" class="button" type="submit">
-	    </form> 
+	    <p>Did that sound sensible? Was it what you expected? 
+	      <a href="mailto:wrlach@gmail.com">Let me know.</a></p>
 	  </div>
-	</div>
-    </div></div>
-    
-    <div id="map-wrapper"> <div id="map"></div></div>
+	  <div id="plan-trip" class="input-box">
+	    <div class="title">Plan a trip</div>
+	    <div class="fieldset">
+	      <form id="routePlan" onSubmit="mysubmit(); return false;">
+		<label class="label" for="routePlanStart">From:</label>
+		<input type="text" id="routePlanStart" class="textfield"/>
+		<p class="example">Example: North and Agricola</p>
+		<label class="label" for="routePlanEnd">To:</label>
+		<input type="text" id="routePlanEnd" class="textfield"/>
+		<p class="example">Example: 1496 Lower Water</p>
+		<label class="label" for="time">Time:</label>
+		<input type="text" id="time" class="textfield"/>
+		<p class="example">Example: 9:26am</p>
+		<input value="Plan!" class="button" type="submit">
+	      </form> 
+	    </div>
+	  </div>
+	</div>    
+      </div>
+      <div id="map-wrapper"> <div id="map"></div></div> 
+    </div>
+    <div class="push"></div>
+    <div id="footer">
+      Routez is copyright 2008 William Lachance. <a href="about">More about routez...</a>
+    </div>
   </div>
-
 </body>
