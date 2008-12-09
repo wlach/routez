@@ -1,47 +1,65 @@
-html { overflow: hidden; }
-
 body, select, ol, ul, td {
   background: #ffffff;
   font-family: verdana, arial, helvetica, sans-serif;
   font-size:   13px;
   margin:10px 10px 10px 10px;
   padding: 0px;
-  height: 100%;
 }
 
-b.fieldset {
-    width:320px; 
+.plan-trip {
+    margin-bottom: 1cm;
+    height: 300px;
 }
 
-.fieldset .label {
+.input-box .title {
+    padding: 0.25em;
+    background: #eef;
+    border-top: 1px solid #ccf;
+    border-left: 1px solid #ccf;
+    border-right: 1px solid #aaf;
+    border-bottom: 1px solid #bbf;
+}
+
+.input-box .fieldset {
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 3em;
+    padding-top: 1em;
+    border-left: 1px solid #ccf;
+    border-right: 1px solid #aaf;
+    border-bottom: 1px solid #aaf;
+}
+
+.input-box .fieldset .label {
     padding:0.2em;
     float: left;
-    width: 3em;
+    width: 5em;
     margin-right: 0.5em;
     height: 25px;
     text-align: right;
     margin-top:0.3em; 
 }
 
-.fieldset .nobr {
+.input-box .fieldset .nobr {
 	display:none; 
 }  
 
-.fieldset .textfield {
-    margin:3px;
-    width: auto;
-    height:25px;
-}
-
-.fieldset .button {
+.input-box .fieldset .button {
     margin:3px;
     height:25px;
     float:right;
 }
 
-.fieldset .example {
+
+.input-box .fieldset .textfield {
+    margin:3px;
+    height:25px;
+}
+
+
+.input-box .fieldset .example {
       position: relative;
-      left: 60px;
+      left: 80px;
       top: -5px;
       width: 150px;
       font-size: 10px;
@@ -53,39 +71,39 @@ b.fieldset {
 #content {
   position: relative;
   margin-top: 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
 #map-wrapper {
   position: relative;
-  height: 100%;
   width: auto;
+  height: auto;
   left: 0;
   top: 0.5cm;
+  margin-right: 25px;
   z-index: 100;
 }
    
 #map {
+  margin-left: 320px;
   position: relative;
-  left: 50;
-  height: 75%;
-  width: 60%;
+  left: 1em;
+  height: 400px;
   border: 1px solid #aaa;
 }
 
 #sidebar-wrapper {
   position: absolute;
-  height: 100%;
   width: 320px;
   top: 0;
-  overflow: auto;
   z-index: 300;
 }
 
 #sidebar {
   position: relative;
   width: auto;
-  padding: 4px;
-  overflow: hidden;
 }
 
 div.sidebar-box {
@@ -104,31 +122,7 @@ div.form-sidebar-right {
     padding: 4px;
 }
 
-
-#topbar {
-  position: relative;
-  padding: 2px;
-  margin: 0;
-  height: 30px;
-}
-
-#topbar h1 {
-  white-space: nowrap;
-  overflow: hidden;
-  font-size: 14pt;
-  font-weight: bold;
-  font-face:
-  margin: 0;
-}
-
-body.sidebar-right #map-wrapper { margin-right: 229px; }
-body.sidebar-right #sidebar-wrapper { right: 0; }
-
-body.sidebar-left #map { margin-left: 320px; }
 body.sidebar-left #sidebar { left: 0; }
-
-body.nosidebar #map { margin: 0; }
-body.nosidebar #sidebar { display: none; }
 
 #bottombar {
   position: relative;
@@ -137,12 +131,6 @@ body.nosidebar #sidebar { display: none; }
   margin-top: 5px;
   display: none;
 }
-
-/* holly hack for IE to get position:bottom right
-   see: http://www.positioniseverything.net/abs_relbugs.html
- \*/
-* html #topbar { height: 1px; }
-/* */
 
 body {
   font-family:helvetica,arial,sans, sans-serif;
@@ -169,45 +157,7 @@ h3 {
   filter:alpha(opacity=60); 
   -moz-opacity: 0.6; 
 }
-#routeList {
-  border: 1px solid black;
-  overflow: auto;
-}
 .shortName {
   font-size: bigger;
   font-weight: bold;
-}
-.routeChoice,.tripChoice,.routeChoiceSelected,.tripChoiceSelected {
-  white-space: nowrap;
-  cursor: pointer;
-  padding: 0px 2px;
-  color: black;
-  line-height: 1.4em;
-  font-size: smaller;
-  overflow: hidden;
-}
-.tripChoice {
-  color: blue;
-}
-.routeChoiceSelected,.tripChoiceSelected {
-  background-color: blue;
-  color: white;
-}
-.tripSection {
-  padding-left: 10px;
-  font-size: 10pt;
-  background-color: lightblue;
-}
-
-#header h1#logo-text a {
-	margin: 0; padding: 0;
-	font: bold;
-        font-size: 30px;
-	letter-spacing: -1px;
-	text-transform: none;
-	text-decoration: none;
-	position: absolute;
-	
-	/* change the values of top and left to adjust the position of the logo*/
- 	top: 2px; left: 2px;	
 }

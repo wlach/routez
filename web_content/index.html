@@ -40,34 +40,31 @@
 
 </head>
 <body class='sidebar-left' onload="load();" onunload="GUnload()">
-  <div id='topbar'>
-    <h1 id="logo-text"><a href="/">myhmt.ca</a></h1>
-  </div>
   <div id='content'>
     <div id='sidebar-wrapper'><div id='sidebar'>
-	<div id="intro" class="sidebar-box">
-	  <fieldset>
-	    <legend>About</legend>
-	    <p><b>Welcome to myhmt.ca</b></p>
-	    <p>myhmt.ca is an <b>unofficial</b> site providing trip planning and
-	      other services for users of <a href="http://halifax.ca/metrotransit/">Halifax Metro Transit</a>.</p>
-	  </fieldset>
+	<div id="logo" class="sidebar-box">
+	  <h1 id="logo-text"><a href="/">Routez</a></h1>
 	</div>
-	<div id="route-plan" class="sidebar-box">
-	  <fieldset class="fieldset">
-	    <legend>Route Plan</legend>
+	<div id="intro" class="sidebar-box">
+	  <p>Routez.ca is an <b>unofficial</b> service providing trip planning 
+	    and other services for users of 
+	    <a href="http://www.halifax.ca/metrotransit/">Metro 
+	      Transit</a> in the greater area of Halifax, Nova Scotia. Try it 
+	    and see! </p> 
+	</div>
+ 	<div id="route-plan" class="sidebar-box">
+	    <b>Travel from X to Y...</b>
 	    <div id="route-plan-content">
 	    </div>
-	  </fieldset>
 	</div>
-	<div id="plan-trip" class="sidebar-box">
-	  <fieldset class="fieldset">
-	    <legend>Plan a trip</legend>
+	<div id="plan-trip" class="input-box">
+	  <div class="title">Plan a trip</div>
+	  <div class="fieldset">
 	    <form id="routePlan" onSubmit="mysubmit(); return false;">
 	      <label class="label" for="routePlanStart">From:</label>
 	      <input type="text" id="routePlanStart" class="textfield"/>
 	      <p class="example">Example: North and Agricola</p>
-	      <label class="label" for="routePlanEnd">To:</label><br class="nobr"/>
+	      <label class="label" for="routePlanEnd">To:</label>
 	      <input type="text" id="routePlanEnd" class="textfield"/>
 	      <p class="example">Example: 1496 Lower Water</p>
 	      <label class="label" for="time">Time:</label>
@@ -75,12 +72,11 @@
 	      <p class="example">Example: 9:26am</p>
 	      <input value="Plan!" class="button" type="submit">
 	    </form> 
-	  </fieldset>
+	  </div>
 	</div>
-
     </div></div>
     
-    <div id="map-wrapper"> <div id="map"></div> </div>
+    <div id="map-wrapper"> <div id="map"></div></div>
   </div>
 
 </body>
