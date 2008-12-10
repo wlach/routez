@@ -21,15 +21,15 @@ body, select, ol, ul, td {
 }
 
 #sidebar {
-  width: auto;
+    position: relative;
+    width: auto;
 }
 
-.plan-trip {
-    position: relative;
+.sidebar-box {
     margin-bottom: 1cm;
 }
 
-.input-box .title {
+.sidebar-box .title {
     position: relative;
     padding: 0.25em;
     background: #eef;
@@ -39,7 +39,7 @@ body, select, ol, ul, td {
     border-bottom: 1px solid #bbf;
 }
 
-.input-box .fieldset {
+.sidebar-box .contents {
     position: relative;
     padding-left: 1em;
     padding-right: 1em;
@@ -50,7 +50,7 @@ body, select, ol, ul, td {
     border-bottom: 1px solid #aaf;
 }
 
-.input-box .fieldset .label {
+.sidebar-box .contents .label {
     padding:0.2em;
     float: left;
     width: 3em;
@@ -60,20 +60,19 @@ body, select, ol, ul, td {
     margin-top:0.3em; 
 }
 
-.input-box .fieldset .button {
+.sidebar-box .contents .button {
     margin:3px;
     height:25px;
     float:right;
 }
 
-
-.input-box .fieldset .textfield {
+.sidebar-box .contents .textfield {
     margin: 3px;
     height:25px;
 }
 
 
-.input-box .fieldset .example {
+.sidebar-box .contents .example {
       position: relative;
       left: 55px;
       top: -5px;

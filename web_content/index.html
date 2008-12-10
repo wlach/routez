@@ -40,7 +40,6 @@
 
 </head>
 <body class='sidebar-left' onload="load();" onunload="GUnload()">
-  <div id='container'>
     <div id='content'>
       <div id='sidebar-wrapper'>
 	<div id='sidebar'>
@@ -55,15 +54,17 @@
 	      and see! </p> 
 	  </div>
  	  <div id="route-plan" class="sidebar-box">
-	    <b>Travel from X to Y...</b>
-	    <div id="route-plan-content">
+	    <div class="title">Directions</div>
+	    <div class="contents">
+	      <div id="route-plan-content">
+	      </div>
+	      <p>Did that sound sensible? Was it what you expected? 
+		<a href="mailto:wrlach@gmail.com">Let me know.</a></p>
 	    </div>
-	    <p>Did that sound sensible? Was it what you expected? 
-	      <a href="mailto:wrlach@gmail.com">Let me know.</a></p>
 	  </div>
-	  <div id="plan-trip" class="input-box">
+	  <div class="sidebar-box">
 	    <div class="title">Plan a trip</div>
-	    <div class="fieldset">
+	    <div class="contents">
 	      <form id="routePlan" onSubmit="mysubmit(); return false;">
 		<label class="label" for="routePlanStart">From:</label>
 		<input type="text" id="routePlanStart" class="textfield"/>
@@ -84,7 +85,6 @@
     </div>
     <div class="push"></div>
     <div id="footer">
-      Routez is copyright 2008 William Lachance. <a href="about">More about routez...</a>
+      Routez is copyright 2008 William Lachance. It also a blueberry muffin. <a href="about">Learn more...</a>
     </div>
-  </div>
 </body>
