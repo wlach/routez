@@ -7,14 +7,6 @@ body, select, ol, ul, td {
   height: 100%;
 }
 
-#content {
-  margin:0 auto;  
-  margin-top: 10px;
-  position: relative;
-  padding-bottom: 48px;
-  width: 1000px;
-}
-
 #header {
     margin: 0;
     padding: 0;
@@ -28,8 +20,16 @@ body, select, ol, ul, td {
     position: absolute;
 }
 
+#content {
+  margin:0 auto;  
+  margin-top: 10px;
+  padding-bottom: 48px;
+  width: 1000px;
+}
+
 #map-wrapper {
     padding: 25px;
+    float: left;
 }
    
 #map {
@@ -106,12 +106,8 @@ body, select, ol, ul, td {
       margin-bottom: .3em; 
 }
 
-.push {
-  height: 50px;
-}
-
 #footer {
-    text-position: center;
+    clear: both;
     padding: 10px;
 }
 
