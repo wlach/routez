@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <head>
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
@@ -39,13 +40,15 @@
   </style>
 
 </head>
-<body class='sidebar-left' onload="load();" onunload="GUnload()">
-    <div id='content'>
+<body onload="load();" onunload="GUnload()">
+  <div id='header'>
+    <div id='header-logo'>
+      <img src="routez-logo.png"/>
+    </div>
+  </div>
+  <div id='content'>
       <div id='sidebar-wrapper'>
 	<div id='sidebar'>
-	  <div id="logo" class="sidebar-box">
-	    <h1 id="logo-text"><a href="/">Routez</a></h1>
-	  </div>
 	  <div id="intro" class="sidebar-box">
 	    <p>Routez.ca is an <b>unofficial</b> service providing trip planning 
 	      and other services for users of 
@@ -81,10 +84,11 @@
 	  </div>
 	</div>    
       </div>
-      <div id="map-wrapper"> <div id="map"></div></div> 
-    </div>
-    <div class="push"></div>
-    <div id="footer">
-      Routez is copyright 2008 William Lachance. It also a blueberry muffin. <a href="about">Learn more...</a>
-    </div>
+      <div id="map-wrapper"> <div id="map"></div></div>       
+
+  </div>
+  <div class="push"/>
+  <div id="footer">
+    Routez is copyright 2008 William Lachance. It also a blueberry muffin. <a href="about">Learn more...</a>
+  </div>
 </body>
