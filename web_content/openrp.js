@@ -172,8 +172,13 @@ function checkPlanRoute() {
 function gotOriginCallback(latlng) {
     if (latlng) {
         origin = latlng;
+        document.getElementById('error-from').style.display = 'none';
+        document.getElementById('routePlanStart').style.border = 
+        '1px solid #aaf';
     } else {
-        alert("Google didn't understand origin!");
+        document.getElementById('error-from').style.display = 'block';
+        document.getElementById('routePlanStart').style.border = 
+        '2px solid #f00';
     }
 
     checkPlanRoute();
@@ -182,8 +187,13 @@ function gotOriginCallback(latlng) {
 function gotDestCallback(latlng) {
     if (latlng) {
         dest = latlng;
+        document.getElementById('error-to').style.display = 'none';
+        document.getElementById('routePlanEnd').style.border = 
+        '1px solid #aaf';
     } else {
-        alert("Google didn't understand destination!");
+        document.getElementById('error-to').style.display = 'block';
+        document.getElementById('routePlanEnd').style.border = 
+        '2px solid #f00';
     }
 
     checkPlanRoute();

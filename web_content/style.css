@@ -83,6 +83,10 @@ body, select, ol, ul, td {
     margin-top:0.3em; 
 }
 
+.sidebar-box .contents .textfield {
+    border: 1px solid #aaf;
+}
+
 .sidebar-box .contents .button {
     margin:3px;
     height:25px;
@@ -104,6 +108,15 @@ body, select, ol, ul, td {
       color: #a0a0a0;
       margin-top: .5em;
       margin-bottom: .3em; 
+}
+
+.sidebar-box .contents .error {
+    float:left;
+    font-size: 10px;
+    color: #f00;
+    margin-top: 0em;
+    margin-bottom: 0em; 
+    display: none;
 }
 
 #footer {
