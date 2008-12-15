@@ -77,6 +77,10 @@ function addWalkingOverlay(origin, dest) {
 }
 
 function submitCallback(data, responseCode) {
+    planButton = document.getElementById('plan-button');
+    planButton.value = 'Plan!';
+    planButton.style.color = "#000";
+
     if (responseCode != 200) {
         return;
     }
@@ -158,7 +162,7 @@ function submitCallback(data, responseCode) {
 
 function checkPlanRoute() {
  
-    if (origin && dest) {
+    if (origin && dest) {        
         time = document.getElementById('time').value;
 
         url = "/json/routeplan" + 
@@ -166,6 +170,10 @@ function checkPlanRoute() {
         "&endlat=" + dest.lat() + "&endlng=" + dest.lng() + 
         "&time=" + time;
         GDownloadUrl(url, submitCallback);
+
+        planButton = document.getElementById('plan-button');
+        planButton.value = 'Working...';    
+        planButton.style.color = "#aaa";
     }
 }
 
