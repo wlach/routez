@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import BaseHTTPServer, sys, urlparse
-from django.conf import settings as DjangoSettings
 import mimetypes
 from optparse import OptionParser
 import os
@@ -16,8 +15,9 @@ import math
 import cPickle
 
 import parsedatetime as pdt
-import transitfeed
-import routezsettings
+import settings
+from django.conf import settings as DjangoSettings
+from travel.models import Route, Stop, Map
 from tripgraph import *
 
 
@@ -93,15 +93,14 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     return open(os.path.join(self.server.file_dir, filename), mode), mime_type
 
   def handle_GET_home(self):
-    schedule = self.server.schedule
-    (min_lat, min_lon, max_lat, max_lon) = schedule.GetStopBoundingBox()
 
     key = self.server.key
 
     # use django's templating system to send a response
+    m = Map.objects.get(id=1)
     t = get_template('index.html')
-    c = t.render(Context({'min_lat': min_lat, 'min_lon': min_lon, 
-                          'max_lat': max_lat, 'max_lon': max_lon, 'key': key}))
+    c = t.render(Context({'min_lat': m.min_lat, 'min_lon': m.min_lng, 
+                          'max_lat': m.max_lat, 'max_lon': m.max_lng, 'key': key}))
 
     self.send_response(200)
     self.send_header('Content-Type', 'text/html')
@@ -132,20 +131,19 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def handle_json_GET_stoplist(self, params):
     matches = []
-    for s in self.server.schedule.GetStopList():
-      matches.append({ 'id':"gtfs"+s.stop_id, 'name':s.stop_name, 
-                       'lat':s.stop_lat, 'lng':s.stop_lon })
+    for s in Stop.objects.all():
+      matches.append({ 'id':"gtfs"+s.stop_id, 'name':s.name, 
+                       'lat':s.lat, 'lng':s.lng })
     return matches
 
   def handle_json_GET_routelist(self, params):
     matches = []
-    for r in self.server.schedule.GetRouteList():
-      matches.append({ 'id':r.route_id, 'shortname':r.route_short_name, 
-                       'longname':r.route_long_name } )
+    for r in Route.objects.all():
+      matches.append({ 'id':r.route_id, 'shortname':r.short_name, 
+                       'longname':r.long_name } )
     return matches
 
   def handle_json_GET_routeplan(self, params):
-    schedule = self.server.schedule
     graph = self.server.graph
 
     start_lat = float(params.get('startlat', None))
@@ -153,9 +151,6 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     end_lat = float(params.get('endlat', None))
     end_lng = float(params.get('endlng', None))
     time_str = params.get('time', None)
-
-    startstops = schedule.GetNearestStops(start_lat, start_lng, 10)
-    endstops = schedule.GetNearestStops(end_lat, end_lng, 10)
 
     start_time = self.server.calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
@@ -286,8 +281,6 @@ def daemonize():
 
 if __name__ == '__main__':
   parser = OptionParser()
-  parser.add_option('--feed_filename', '--feed', dest='feed_filename',
-                    help='file name of feed to load', default="")
   parser.add_option('--graph_filename', '--graph', dest='graph_filename',
                     help='file name of graph to load', default="")
   parser.add_option('--key', dest='key',
@@ -308,10 +301,6 @@ if __name__ == '__main__':
     print "Can't find index.html with --file_dir=%s" % options.file_dir
     exit(1)
   
-  if not os.path.isfile(options.feed_filename):
-    print "Can't find feed file '%s'" % options.feed_filename
-    exit(1)
-
   if not os.path.isfile(options.graph_filename):
     print "Can't find graph file '%s'" % options.graph_filename
     exit(1)
@@ -331,11 +320,6 @@ if __name__ == '__main__':
   if options.key and os.path.isfile(options.key):
     options.key = open(options.key).read().strip()
 
-  schedule = transitfeed.Schedule(
-    problem_reporter=transitfeed.ProblemReporter())
-  print "Loading schedule."
-  schedule.Load(options.feed_filename)
-
   print "Loading graph."
   graph = TripGraph()
   graph.load(options.graph_filename)
@@ -343,12 +327,10 @@ if __name__ == '__main__':
   server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
                                      RequestHandlerClass=ScheduleRequestHandler)
   server.key = options.key
-  server.schedule = schedule
   server.graph = graph
   server.file_dir = options.file_dir
   server.calendar = pdt.Calendar()
 
-  DjangoSettings.configure(TEMPLATE_DIRS=routezsettings.TEMPLATE_DIRS)
   from django.template.loader import get_template
   from django.template import Context
 
