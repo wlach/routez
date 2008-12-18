@@ -17,20 +17,14 @@ var endIcon;
  */
 function initIcons() {
     busStopIcon = new GIcon();
-    busStopIcon.image = "small_bus_marker.png";
+    busStopIcon.image = "lib/small_bus_marker.png";
     busStopIcon.iconSize = new GSize(64, 52);
     busStopIcon.iconAnchor = new GPoint(5, 47);
-    //  icon.infoWindowAnchor = new GPoint(5, 5);
 
     walkStopIcon = new GIcon();
-    walkStopIcon.image = "small_walk_marker.png";
+    walkStopIcon.image = "lib/small_walk_marker.png";
     walkStopIcon.iconSize = new GSize(30, 50);
-    walkStopIcon.iconAnchor = new GPoint(5, 45);
-    
-    // stopIcon.shadow = "/file/mm_20_shadow.png";
-    // iconBackground = makeStopIcon();
-    // iconBackground.image = "/file/mm_20_blue_trans.png";
-    // iconBackground.shadow = "/file/mm_20_shadow_trans.png";
+    walkStopIcon.iconAnchor = new GPoint(5, 45);    
 }
 
 

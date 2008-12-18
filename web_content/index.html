@@ -3,8 +3,8 @@
 <head>
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
 
-  <script src="labeled_marker.js" type="text/javascript"></script>
-  <script src="openrp.js" type="text/javascript"></script>
+  <script src="lib/labeled_marker.js" type="text/javascript"></script>
+  <script src="lib/openrp.js" type="text/javascript"></script>
   <script type="text/javascript">
     function load() {
         // hide the route plan when the page is first loaded
@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="lib/style.css" rel="stylesheet" type="text/css" />
   <style type="text/css">
     v\:* {
     behavior:url(#default#VML);
@@ -43,7 +43,7 @@
 <body onload="load();" onunload="GUnload()">
   <div id='header'>
     <div id='header-logo'>
-      <img src="routez-logo.png"/>
+      <img src="lib/routez-logo.png"/>
     </div>
   </div>
   <div id='content'>

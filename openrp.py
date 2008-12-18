@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import BaseHTTPServer, sys, urlparse
-import mimetypes
 from optparse import OptionParser
-import os
 import pwd
 import re
 import signal
@@ -12,7 +9,9 @@ import time
 import datetime
 import urllib
 import math
-import cPickle
+
+import os, time, threading
+from railways import *
 
 import parsedatetime as pdt
 import settings
@@ -24,135 +23,57 @@ from tripgraph import *
 LOGFILE = '/var/log/openrp.log'
 PIDFILE = '/var/run/openrp.pid'
 
+__doc__ = """\
+This example shows how to do implement a Comet service  with Railways. 
+"""
 
-class ResultEncoder(simplejson.JSONEncoder):
-  def default(self, obj):
-    try:
-      iterable = iter(obj)
-    except TypeError:
-      pass
-    else:
-      return list(iterable)
-    return simplejson.JSONEncoder.default(self, obj)
+class Main(Component):
+  def __init__(self):
+    Component.__init__(self)
 
-class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-  def __init__(self, request, client_address, socket_server):
-    BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, socket_server)
+  @on(GET="lib/{path:any}")
+  def lib(self, request, path):
+    """Serves the files located in the `Library` grand parent directory."""
+    # This is really only useful when running standalone, as with normal
+    # setups, this data should be served by a more poweful web server, with
+    # caching and load balancing.
+    return request.respondFile(self.file_dir + "/" + path)
 
-  def do_GET(self):
-    scheme, host, path, x, params, fragment = urlparse.urlparse(self.path)
-    parsed_params = {}
-    for k in params.split('&'):
-      k = urllib.unquote(k)
-      if '=' in k:
-        k, v = k.split('=', 1)
-        parsed_params[k] = unicode(v, 'utf8')
-      else:
-        parsed_params[k] = ''
-
-    if path == '/':
-      return self.handle_GET_home()
-
-    m = re.match(r'/json/([a-z]{1,64})', path)
-    if m:
-      handler_name = 'handle_json_GET_%s' % m.group(1)
-      handler = getattr(self, handler_name, None)
-      if callable(handler):
-        return self.handle_json_wrapper_GET(handler, parsed_params)
-
-    # Restrict allowable file names to prevent relative path attacks etc
-    m = re.match(r'\/([a-z0-9_-]{1,64}\.?[a-z0-9_-]{1,64})$', path)
-    if m and m.group(1):
-      try:
-        f, mime_type = self.OpenFile(m.group(1))
-        return self.handle_static_file_GET(f, mime_type)
-      except IOError, e:
-        print "Error: unable to open %s" % m.group(1)
-        # Ignore and treat as 404
-
-    m = re.match(r'/([a-z]{1,64})', path)
-    if m:
-      handler_name = 'handle_GET_%s' % m.group(1)
-      handler = getattr(self, handler_name, None)
-      if callable(handler):
-        return handler(parsed_params)
-
-    return self.handle_GET_default(parsed_params, path)
-
-  def OpenFile(self, filename):
-    """Try to open filename in the static files directory of this server.
-    Return a tuple (file object, string mime_type) or raise an exception."""
-    (mime_type, encoding) = mimetypes.guess_type(filename)
-    assert mime_type
-    # A crude guess of when we should use binary mode. Without it non-unix
-    # platforms may corrupt binary files.
-    if mime_type.startswith('text/'):
-      mode = 'r'
-    else:
-      mode = 'rb'
-    return open(os.path.join(self.server.file_dir, filename), mode), mime_type
-
-  def handle_GET_home(self):
-
-    key = self.server.key
-
+  @on(GET="/")
+  def main(self, request):
     # use django's templating system to send a response
     m = Map.objects.get(id=1)
     t = get_template('index.html')
     c = t.render(Context({'min_lat': m.min_lat, 'min_lon': m.min_lng, 
-                          'max_lat': m.max_lat, 'max_lon': m.max_lng, 'key': key}))
+                          'max_lat': m.max_lat, 'max_lon': m.max_lng, 'key': self.key}))
 
-    self.send_response(200)
-    self.send_header('Content-Type', 'text/html')
-    self.send_header('Content-Length', str(len(c)))
-    self.end_headers()
-    self.wfile.write(c)
-
-  def handle_GET_default(self, parsed_params, path):
-    self.send_error(404)
-
-  def handle_static_file_GET(self, fh, mime_type):
-    content = fh.read()
-    self.send_response(200)
-    self.send_header('Content-Type', mime_type)
-    self.send_header('Content-Length', str(len(content)))
-    self.end_headers()
-    self.wfile.write(content)
-
-  def handle_json_wrapper_GET(self, handler, parsed_params):
-    """Call handler and output the return value in JSON."""
-    result = handler(parsed_params)
-    content = ResultEncoder().encode(result)
-    self.send_response(200)
-    self.send_header('Content-Type', 'text/plain')
-    self.send_header('Content-Length', str(len(content)))
-    self.end_headers()
-    self.wfile.write(content)
-
-  def handle_json_GET_stoplist(self, params):
+    return request.respond(c, contentType="text/html")
+  
+  @on(GET="/json/stoplist")
+  def get_stoplist(self, request):
     matches = []
     for s in Stop.objects.all():
       matches.append({ 'id':"gtfs"+s.stop_id, 'name':s.name, 
                        'lat':s.lat, 'lng':s.lng })
-    return matches
+    return request.respond(asJSON(matches))
 
-  def handle_json_GET_routelist(self, params):
+  @on(GET="/json/routelist")
+  def get_routelist(self, request):
     matches = []
     for r in Route.objects.all():
       matches.append({ 'id':r.route_id, 'shortname':r.short_name, 
                        'longname':r.long_name } )
-    return matches
+    return request.respond(asJSON(matches))
 
-  def handle_json_GET_routeplan(self, params):
-    graph = self.server.graph
+  @on(GET="/json/routeplan")
+  def get_routeplan(self, request):
+    start_lat = float(request.get('startlat'))
+    start_lng = float(request.get('startlng'))
+    end_lat = float(request.get('endlat'))
+    end_lng = float(request.get('endlng'))
+    time_str = request.get('time')
 
-    start_lat = float(params.get('startlat', None))
-    start_lng = float(params.get('startlng', None))
-    end_lat = float(params.get('endlat', None))
-    end_lng = float(params.get('endlng', None))
-    time_str = params.get('time', None)
-
-    start_time = self.server.calendar.parse(time_str)[0]
+    start_time = self.calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
                                   0, 0, 0, 0, 0, 0))
     def human_time(secs, daysecs):
@@ -169,7 +90,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     elif now.weekday() == 6:
       service_period = 'sunday'
 
-    trippath = graph.find_path(today_secs, service_period, start_lat, start_lng, 
+    trippath = self.graph.find_path(today_secs, service_period, start_lat, start_lng, 
                                end_lat, end_lng, None)
 
     actions_desc = []
@@ -179,7 +100,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       # then move
       if last_action and last_action.route_id != action.route_id:
         if last_action.route_id != -1:
-          ts = graph.get_tripstop(last_action.dest_id)
+          ts = self.graph.get_tripstop(last_action.dest_id)
           actions_desc.append({ 'type':'alight', 
                               'lat': ts.lat, 
                               'lng': ts.lng, 
@@ -190,7 +111,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           actions_desc.append({ 'type':'board', 'id':action.src_id, 
                                 'time':human_time(daysecs, action.start_time), 
                                 'route_id':action.route_id })
-      ts = graph.get_tripstop(action.src_id)
+      ts = self.graph.get_tripstop(action.src_id)
       actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                             'lat': ts.lat, 
                             'lng': ts.lng,
@@ -203,22 +124,7 @@ class ScheduleRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                               'time':human_time(daysecs, 
                                                 last_action.end_time) })
 
-    return actions_desc
-
-def StartServerThread(server):
-  """Start server in its own thread because KeyboardInterrupt doesn't
-  interrupt a socket call in Windows."""
-  # Code taken from
-  # http://mail.python.org/pipermail/python-list/2003-July/212751.html
-  # An alternate approach is shown at
-  # http://groups.google.com/group/webpy/msg/9f41fd8430c188dc
-  import threading
-  th = threading.Thread(target=lambda: server.serve_forever())
-  th.setDaemon(1)
-  th.start()
-  # I don't care about shutting down the server thread cleanly. If you kill
-  # python while it is serving a request the browser may get an incomplete
-  # reply.
+    return request.respond(asJSON(actions_desc))
 
 def FindDefaultFileDir():
   """Return the path of the directory containing the static files. By default
@@ -324,22 +230,16 @@ if __name__ == '__main__':
   graph = TripGraph()
   graph.load(options.graph_filename)
 
-  server = BaseHTTPServer.HTTPServer(server_address=('', options.port),
-                                     RequestHandlerClass=ScheduleRequestHandler)
-  server.key = options.key
-  server.graph = graph
-  server.file_dir = options.file_dir
-  server.calendar = pdt.Calendar()
+  main = Main()
+  main.key = options.key
+  main.graph = graph
+  main.file_dir = options.file_dir
+  main.calendar = pdt.Calendar()
 
   from django.template.loader import get_template
   from django.template import Context
 
-  StartServerThread(server)  # Spawns a thread for server and returns
-  print "To view, point your browser at http://%s:%d/" \
-      % (server.server_name, server.server_port)
-
-  try:
-    while 1:
-      time.sleep(0.5)
-  except KeyboardInterrupt:
-    pass
+  app = Application(main)
+  name = os.path.splitext(os.path.basename(__file__))[0]
+  run(app=app, name=name, method=STANDALONE, port=options.port, withReactor=True)
+  REACTOR.debugMode = True
