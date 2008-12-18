@@ -13,9 +13,12 @@ import math
 import os, time, threading
 from railways import *
 
-import parsedatetime as pdt
-import settings
+import parsedatetime.parsedatetime as pdt
+
 from django.conf import settings as DjangoSettings
+import settings
+os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
+
 from travel.models import Route, Stop, Map
 from tripgraph import *
 
