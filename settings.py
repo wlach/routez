@@ -66,8 +66,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'routez.urls'
-
 TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), 'web_content'),
 )

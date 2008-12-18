@@ -4,7 +4,6 @@ import transitfeed
 import osm
 import sys
 from tripgraph import *
-#from routezgraph import *
 
 def load_gtfs(tripgraph, sched):
     stops = sched.GetStopList()

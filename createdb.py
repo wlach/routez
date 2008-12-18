@@ -4,8 +4,11 @@
 
 import transitfeed
 import sys
-import settings
+import os
 from django.conf import settings as DjangoSettings
+import settings
+os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
+
 from travel.models import Route, Stop, Map
 
 if __name__ == '__main__':
