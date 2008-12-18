@@ -49,7 +49,7 @@ body, select, ol, ul, td {
 }
 
 .sidebar-box {
-    margin-bottom: 1cm;
+    margin-bottom: 2em;
 }
 
 .sidebar-box .title {
@@ -66,7 +66,7 @@ body, select, ol, ul, td {
     position: relative;
     padding-left: 1em;
     padding-right: 1em;
-    padding-bottom: 3em;
+    padding-bottom: 1em;
     padding-top: 1em;
     border-left: 1px solid #ccf;
     border-right: 1px solid #aaf;
@@ -87,10 +87,14 @@ body, select, ol, ul, td {
     border: 1px solid #aaf;
 }
 
+.sidebar-box .contents .buttons {
+    text-align: right;
+    width: 250px;
+    margin-left: 20px;
+}
+
 .sidebar-box .contents .button {
-    margin:3px;
     height:25px;
-    float:right;
 }
 
 .sidebar-box .contents .textfield {
