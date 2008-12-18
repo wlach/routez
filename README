@@ -1,0 +1,60 @@
+=== About ===
+
+Routez is a trip planning web service written in Python and Javascript as 
+well as a pathfinding library written in C++. The latter part will probably
+eventually be abstracted out and released as a seperate library.
+
+=== Initial Setup ===
+
+1. Download and install the following packages:
+ - Google Transit Data Feed (http://code.google.com/p/googletransitdatafeed/)
+   - As of this writing you need what's in SVN, as it has a fix that I made
+   to actually handle interpolated stops correctly. The next version after
+   1.1.9 should have my fix.
+ - Python ParseDateTime (http://code-bear.com/code/parsedatetime/)
+   - I used version 0.8.6.
+ - Railways (http://github.com/sebastien/railways/)
+   - Use the latest git
+ - boost::python
+   - Just getting it from Debian or Ubuntu probably easiest.
+
+To install a python package in a local prefix, do:
+ 
+  "python setup.py install --home=$HOME"
+
+You may need to set PYTHONPATH to $HOME/lib/python first.
+
+2. Download the Halifax Transit Feed Distribution:
+
+http://github.com/wlach/halifax-transit-feed
+
+Instructions on building the feed are contained within the README. It's mostly
+just a matter of typing 'make', once everything's set up.
+
+3. Download OpenStreetMap data for Halifax.
+
+I put up a semi-recent set at:
+
+   http://wlach.masalalabs.ca/most-of-halifax-plus-brentwood.osm
+
+3. Build the C++ graph module.
+
+The usual...
+
+ - ./autogen.sh && ./configure && make
+
+4. Build a graph corresponding to the OSM and GTFS data
+
+Something like:
+
+ - ./creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez
+
+5. Build a database of stop and route information from the GTFS feed
+
+ - ./manage.py syncdb
+ - ./creategraph.py /path/to/hfxfeed.zip
+
+6. Run it!
+
+ - ./routez.py --graph=mygraph.routez
+
