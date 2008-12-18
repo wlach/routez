@@ -2,7 +2,7 @@
 
 Routez is a trip planning web service written in Python and Javascript as 
 well as a pathfinding library written in C++. The latter part will probably
-eventually be abstracted out and released as a seperate library.
+eventually be abstracted out and released seperately.
 
 === Initial Setup ===
 
