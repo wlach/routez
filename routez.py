@@ -74,7 +74,7 @@ class Main(Component):
     start_lng = float(request.get('startlng'))
     end_lat = float(request.get('endlat'))
     end_lng = float(request.get('endlng'))
-    time_str = request.get('time')
+    time_str = request.get('time') or ""
 
     start_time = self.calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
