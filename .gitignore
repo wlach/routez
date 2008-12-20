@@ -1,8 +1,13 @@
 aclocal.m4
+autom4te.cache
 config.log
 config.mk
 config.status
 configure
 *.o
+*.pyc
+*.routez
+routez.db
+.*.swp
 testgraph
 tripgraph.so
