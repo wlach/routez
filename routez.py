@@ -47,8 +47,14 @@ class Main(Component):
     # use django's templating system to send a response
     m = Map.objects.get(id=1)
     t = get_template('index.html')
+    now_str = time.strftime("%I:%M %p").lower()
+    # Remove leading zero. %_I would do almost the same thing on Linux, but is
+    # non-standard and only works because Python happens to use glibc.
+    if now_str[0] == '0':
+        now_str = now_str[1:]
     c = t.render(Context({'min_lat': m.min_lat, 'min_lon': m.min_lng, 
-                          'max_lat': m.max_lat, 'max_lon': m.max_lng, 'key': self.key}))
+                          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
+                          'key': self.key, 'now': " " + now_str}))
 
     return request.respond(c, contentType="text/html")
   

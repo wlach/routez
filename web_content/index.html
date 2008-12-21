@@ -72,12 +72,16 @@
 		<label class="label" for="routePlanStart">From:</label>
 		<input type="text" id="routePlanStart" class="textfield"/>
 		<p class="example">Example: North and Agricola</p>
+
 		<label class="label" for="routePlanEnd">To:</label>
 		<input type="text" id="routePlanEnd" class="textfield"/>
 		<p class="example">Example: 1496 Lower Water</p>
+
 		<label class="label" for="time">Time:</label>
-		<input type="text" id="time" class="textfield"/>
+		<input type="text" id="time" class="textfield" value="{{now}}"
+                    onFocus="select();"/>
 		<p class="example">Example: 9:26am</p>
+
 		<div class="buttons">
 		  <input value="Plan!" class="button" type="submit" id="plan-button">
 		  </div>
