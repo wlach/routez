@@ -70,6 +70,16 @@ function addWalkingOverlay(origin, dest) {
             map.addOverlay(directions.getPolyline())}); 
 }
 
+// Capitalizes a string, first letter in upper case and the rest in lower case.
+// Created: 2005.11.20  - Modified 2005.11.21
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/string/capitalize [rev. #1]
+String.prototype.capitalize = function(){
+    return this.replace(/\w+/g, function(a){
+        return a.charAt(0).toUpperCase() + a.slice(1).toLowerCase();
+    });
+};
+
 function submitCallback(data, responseCode) {
     planButton = document.getElementById('plan-button');
     planButton.value = 'Plan!';
@@ -107,6 +117,8 @@ function submitCallback(data, responseCode) {
         routePlan += "This probably means it's faster to walk.";
         addWalkingOverlay(origin, dest);
     } else {
+        var dest_str = document.getElementById('routePlanEnd').value.capitalize();
+
         for (var i=0; i<actions.length; ++i) {
             if (actions[i].type == "alight" || actions[i].type == "pass") {
                 var latlng = new GLatLng(actions[i].lat, 
@@ -126,12 +138,19 @@ function submitCallback(data, responseCode) {
                 markerOpts.labelOffset = new GSize(24, -44);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
                 
-                routePlan += "<p><b>Board</b> the " + routeListLong[routeId];
-                routePlan += " departing from " + stopList[id].name;
-                routePlan += " at " + actions[i].time + " and travel to ";
+                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "Board the " + routeListLong[routeId];
+                routePlan += " departing from " + stopList[id].name + ".</p>";
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
-                routePlan += stopList[previd].name + ".</p>";
+                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "Descend at " + stopList[previd].name;
+
+                if (actions.length > i+1 && actions[i].type == "alight" && 
+                    actions[i+1].type != "board") {
+                    routePlan += " and walk to " + dest_str;
+                }
+                routePlan += ".</p>";
             } 
             
             // if we have to get off and walk, show a nice icon
@@ -141,7 +160,8 @@ function submitCallback(data, responseCode) {
             }
 
             if (i==(actions.length-1)) {
-                routePlan += "<p><b>Arrive</b> at " + actions[i].time +".</p>";
+                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "Arrive at " + dest_str + ".</p>";
             }
         }
     }
