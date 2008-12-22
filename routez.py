@@ -42,16 +42,29 @@ class Main(Component):
     # caching and load balancing.
     return request.respondFile(self.file_dir + "/" + path)
 
+  # Returns the hours and minutes of the given Unix timestamp, formatted
+  # nicely.  If the timestamp is not given, defaults to the current time.
+  @staticmethod
+  def human_time(secs = None):
+    format_str = "%I:%M %p"
+    dtstr = ""
+    if secs is None:
+      dtstr = time.strftime(format_str).lower()
+    else:
+      dt = datetime.datetime.fromtimestamp(secs)
+      dtstr = dt.strftime(format_str).lower()
+    # Remove leading zero. %_I would do almost the same thing on Linux, but is
+    # non-standard and only works because Python happens to use glibc's impl.
+    if dtstr[0] == '0':
+        dtstr = dtstr[1:]
+    return dtstr
+
   @on(GET="/")
   def main(self, request):
     # use django's templating system to send a response
     m = Map.objects.get(id=1)
     t = get_template('index.html')
-    now_str = time.strftime("%I:%M %p").lower()
-    # Remove leading zero. %_I would do almost the same thing on Linux, but is
-    # non-standard and only works because Python happens to use glibc.
-    if now_str[0] == '0':
-        now_str = now_str[1:]
+    now_str = Main.human_time()
     c = t.render(Context({'min_lat': m.min_lat, 'min_lon': m.min_lng, 
                           'max_lat': m.max_lat, 'max_lon': m.max_lng, 
                           'key': self.key, 'now': " " + now_str}))
@@ -85,11 +98,6 @@ class Main(Component):
     start_time = self.calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
                                   0, 0, 0, 0, 0, 0))
-    def human_time(secs, daysecs):
-      dt = datetime.datetime.fromtimestamp(secs+daysecs)
-      dtstr = dt.strftime("%I:%M%p")
-      return dtstr
-
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
     print "weekday: %s" % now.weekday()
@@ -110,15 +118,16 @@ class Main(Component):
       if last_action and last_action.route_id != action.route_id:
         if last_action.route_id != -1:
           ts = self.graph.get_tripstop(last_action.dest_id)
+          action_time = Main.human_time(daysecs + last_action.start_time)
           actions_desc.append({ 'type':'alight', 
                               'lat': ts.lat, 
                               'lng': ts.lng, 
-                              'time':human_time(daysecs, 
-                                                last_action.start_time) })
+                              'time': action_time })
       if not last_action or last_action.route_id != action.route_id:
         if action.route_id >= 0:
+          action_time = Main.human_time(daysecs + action.start_time)
           actions_desc.append({ 'type':'board', 'id':action.src_id, 
-                                'time':human_time(daysecs, action.start_time), 
+                                'time': action_time,
                                 'route_id':action.route_id })
       ts = self.graph.get_tripstop(action.src_id)
       actions_desc.append({ 'type':'pass', 'id':action.src_id, 
@@ -129,9 +138,9 @@ class Main(Component):
 
     # if we had a path at all, append the last getting off action here
     if last_action:
-        actions_desc.append({ 'type':'arrive', 
-                              'time':human_time(daysecs, 
-                                                last_action.end_time) })
+        action_time = Main.human_time(daysecs + last_action.end_time)
+        actions_desc.append({ 'type': 'arrive', 
+                              'time': action_time })
 
     return request.respond(asJSON(actions_desc))
 
