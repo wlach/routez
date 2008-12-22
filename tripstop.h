@@ -2,6 +2,7 @@
 #define __TRIPSTOP_H
 #include <assert.h>
 #include <boost/shared_ptr.hpp>
+#include <string.h>
 #include <string>
 #include <stdint.h>
 #include <tr1/unordered_map>
