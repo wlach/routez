@@ -16,7 +16,8 @@ eventually be abstracted out and released seperately.
  - Railways (http://github.com/sebastien/railways/)
    - Use the latest git
  - boost::python
-   - Just getting it from Debian or Ubuntu probably easiest.
+ - Python YAML
+   - Just getting these from Debian or Ubuntu is probably easiest.
 
 To install a python package in a local prefix, do:
  
@@ -52,7 +53,7 @@ Something like:
 5. Build a database of stop and route information from the GTFS feed
 
  - ./manage.py syncdb
- - ./creategraph.py /path/to/hfxfeed.zip
+ - ./createdb.py /path/to/hfxfeed.zip
 
 6. Run it!
 
