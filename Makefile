@@ -7,7 +7,7 @@ config.mk:
 	@exit 1
 
 %.o: %.cc %.h
-	g++ $< -c -o $@ $(BOOST_PYTHON_CFLAGS) -g
+	g++ $< -c -o $@ $(CXXFLAGS) $(BOOST_PYTHON_CFLAGS) -g
 
 TRIPGRAPH_OBJECTS=tripgraph.o trippath.o tripstop.o
 
