@@ -15,6 +15,8 @@ eventually be abstracted out and released seperately.
    - I used version 0.8.6.
  - Railways (http://github.com/sebastien/railways/)
    - Use the latest git
+ - Django (http://www.djangoproject.com/)
+   - I used 1.0.
  - boost::python
    - Just getting it from Debian or Ubuntu probably easiest.
 
@@ -52,7 +54,6 @@ Something like:
 5. Build a database of stop and route information from the GTFS feed
 
  - ./manage.py syncdb
- - ./creategraph.py /path/to/hfxfeed.zip
 
 6. Run it!
 
