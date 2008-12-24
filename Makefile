@@ -1,5 +1,9 @@
 include config.mk
 
+# Always always compile with fPIC
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+
 default: tripgraph.so testgraph
 
 config.mk:
