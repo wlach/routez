@@ -138,12 +138,12 @@ function submitCallback(data, responseCode) {
                 markerOpts.labelOffset = new GSize(24, -44);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
                 
-                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
                 routePlan += "Board the " + routeListLong[routeId];
                 routePlan += " departing from " + stopList[id].name + ".</p>";
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
-                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
                 routePlan += "Descend at " + stopList[previd].name;
 
                 if (actions.length > i+1 && actions[i].type == "alight" && 
@@ -160,7 +160,7 @@ function submitCallback(data, responseCode) {
             }
 
             if (i==(actions.length-1)) {
-                routePlan += "<p><b>" + actions[i].time + "</b> ";
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
                 routePlan += "Arrive at " + dest_str + ".</p>";
             }
         }
