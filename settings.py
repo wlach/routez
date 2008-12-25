@@ -53,6 +53,8 @@ ADMIN_MEDIA_PREFIX = '/media/'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'b8bfmc)clb8bt015n=5=bx%s*_!e!3=q3#cjh6rlw0ytp^@29j'
 
+ROOT_URLCONF = 'routez.urls'
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -75,5 +77,5 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'travel'
+    'routez.travel',
 )
