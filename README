@@ -13,8 +13,6 @@ eventually be abstracted out and released seperately.
    1.1.9 should have my fix.
  - Python ParseDateTime (http://code-bear.com/code/parsedatetime/)
    - I used version 0.8.6.
- - Railways (http://github.com/sebastien/railways/)
-   - Use the latest git
  - boost::python
  - Python YAML
    - Just getting these from Debian or Ubuntu is probably easiest.
@@ -55,6 +53,11 @@ Something like:
  - ./manage.py syncdb
  - ./createdb.py /path/to/hfxfeed.zip
 
-6. Run it!
+6. Configure it.
 
- - ./routez.py --graph=mygraph.routez
+ - In settings.py, set GRAPH_FILE to the location of the graph file.
+ - Put your Google Maps API key in the file gmap_api_key
+
+7. Run it!
+
+ - python manage.py runserver
