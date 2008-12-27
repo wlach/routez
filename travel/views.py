@@ -70,11 +70,9 @@ def routeplan(request):
     elif now.weekday() == 6:
         service_period = 'sunday'
 
-    # FIXME: We should find a way to load this only once, instead of for each 
-    # request.
-    from tripgraph import TripGraph
-    graph = TripGraph()
-    graph.load(settings.GRAPH_FILE)
+    # Use the TripGraph loaded in __init__.py, so we don't load it per request
+    import routez
+    graph = routez.travel.graph
     trippath = graph.find_path(today_secs, service_period, 
                     start_lat, start_lng, end_lat, end_lng, None)
 
