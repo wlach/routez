@@ -45,14 +45,14 @@ void TripGraph::load(string fname)
     FILE *fp = fopen(fname.c_str(), "r");
     if (!fp)
     {
-        printf("ERROR: Couldn't open graph.");
+        printf("Error: Couldn't open graph.\n");
         return;
     }
         
     uint32_t num_tripstops = 0;
     if (fread(&num_tripstops, sizeof(uint32_t), 1, fp) != 1)
     {
-        printf("Error reading num tripstops.");
+        printf("Error: Couldn't read the number of tripstops.\n");
         return;
     }
         
@@ -73,7 +73,7 @@ void TripGraph::save(string fname)
     FILE *fp = fopen(fname.c_str(), "w");
     if (!fp)
     {
-        printf("ERROR: Couldn't open graph %s for writing.", fname.c_str());
+        printf("Error: Couldn't open graph %s for writing.\n", fname.c_str());
         return;
     }
 
