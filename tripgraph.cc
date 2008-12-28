@@ -7,6 +7,9 @@ using namespace boost;
 using namespace std;
 using namespace tr1;
 
+// Estimated walking speed in m/s
+static const float est_walk_speed = 1.1f;
+
 static inline double radians(double degrees)
 {
     return degrees/180.0f*M_PI;
@@ -111,7 +114,7 @@ void TripGraph::add_walkhop(string src_id, string dest_id)
                            tripstops[dest_id]->lat, 
                            tripstops[dest_id]->lng);
 
-    tripstops[src_id]->add_walkhop(dest_id, dist/1.1);
+    tripstops[src_id]->add_walkhop(dest_id, dist / est_walk_speed);
 }
 
 
@@ -183,11 +186,11 @@ TripPath TripGraph::find_path(int secs, string service_period,
     // beginning, add that to our start time
     double dist_from_start = distance(src_lat, src_lng, 
                                       start_node->lat, start_node->lng);
-    secs += (int)(dist_from_start / 1.1);
+    secs += (int)(dist_from_start / est_walk_speed);
     
     printf("Start time - %d\n", secs);
-    shared_ptr<TripPath> start_path(new TripPath(secs, 1.1f, end_node, 
-                                                 start_node));
+    shared_ptr<TripPath> start_path(new TripPath(secs, est_walk_speed, 
+                                                 end_node, start_node));
     if (start_node == end_node)
         return TripPath(*start_path);
 
