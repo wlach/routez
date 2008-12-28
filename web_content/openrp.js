@@ -80,6 +80,13 @@ String.prototype.capitalize = function(){
     });
 };
 
+function addLine(map, routePath, colour) {
+    if (routePath.length > 0) {
+        var polyline = new GPolyline(routePath, colour, 5);
+        map.addOverlay(polyline);
+    }
+}
+
 function submitCallback(data, responseCode) {
     planButton = document.getElementById('plan-button');
     planButton.value = 'Plan!';
@@ -107,6 +114,9 @@ function submitCallback(data, responseCode) {
     actions = eval(data);
     var routePlan = "";
     var routePath = new Array();
+
+    var walkPathColour = "#0000ff";
+    var busPathColour = "#ff0000";
 
     var bounds = new GLatLngBounds;
     bounds.extend(origin);
@@ -141,6 +151,9 @@ function submitCallback(data, responseCode) {
                 routePlan += "<p><b>" + actions[i].time + ":</b> ";
                 routePlan += "Board the " + routeListLong[routeId];
                 routePlan += " departing from " + stopList[id].name + ".</p>";
+
+                addLine(map, routePath, walkPathColour);
+                routePath = new Array();
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
                 routePlan += "<p><b>" + actions[i].time + ":</b> ";
@@ -151,6 +164,9 @@ function submitCallback(data, responseCode) {
                     routePlan += " and walk to " + dest_str;
                 }
                 routePlan += ".</p>";
+
+                addLine(map, routePath, busPathColour);
+                routePath = new Array();
             } 
             
             // if we have to get off and walk, show a nice icon
@@ -169,8 +185,7 @@ function submitCallback(data, responseCode) {
     var zoom = map.getBoundsZoomLevel(bounds);
     map.setCenter(bounds.getCenter(), zoom);
 
-    var polyline = new GPolyline(routePath, "#ff0000", 5);
-    map.addOverlay(polyline);
+    addLine(map, routePath, walkPathColour);
     document.getElementById("route-plan-content").innerHTML = routePlan;
 }
 
