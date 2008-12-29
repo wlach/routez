@@ -1,7 +1,3 @@
-var routeListShort;
-var routeListLong;
-var stopList;
-
 var origin = null;
 var dest = null;
 
@@ -25,38 +21,6 @@ function initIcons() {
     walkStopIcon.image = "lib/small_walk_marker.png";
     walkStopIcon.iconSize = new GSize(30, 50);
     walkStopIcon.iconAnchor = new GPoint(5, 45);    
-}
-
-
-function loadRouteListCallback(data, responseCode) {
-    if (responseCode != 200) {
-        return;
-    }
-
-    routeListShort = new Array();
-    routeListLong = new Array();
-
-    var myData = eval(data);
-    for (var i=0; i<myData.length; ++i) {
-        route = myData[i];
-        routeListShort[route['id']] = route['shortname'];
-        routeListLong[route['id']] = route['shortname'] + " (" +  route['longname'] + ")";
-    }    
-}
-
-function loadStopListCallback(data, responseCode) {
-    if (responseCode != 200) {
-        return;
-    }
-
-    stopList = new Array();
-
-    var myData = eval(data);
-
-    for (var i=0; i<myData.length; ++i) {
-        var stop = myData[i];
-        stopList[stop['id']] = stop;
-    }
 }
 
 function addWalkingOverlay(origin, dest) {
@@ -146,26 +110,24 @@ function submitCallback(data, responseCode) {
             }
 
             if (actions[i].type == "board") {
-                var id = actions[i].id;
-                var routeId = actions[i].route_id;
-
                 var markerOpts = new Object();
                 markerOpts.icon = busStopIcon;
-                markerOpts.labelText = routeListShort[routeId];
+                markerOpts.labelText = actions[i].route_shortname;
                 markerOpts.labelClass = "tooltip";
                 markerOpts.labelOffset = new GSize(24, -44);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
                 
                 routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Board the " + routeListLong[routeId];
-                routePlan += " departing from " + stopList[id].name + ".</p>";
+                routePlan += "Board the " + actions[i].route_shortname + " (";
+                routePlan += actions[i].route_longname + ")";
+                routePlan += " departing from " + actions[i].stopname + ".</p>";
 
                 addLine(map, routePath, walkPathColour);
                 routePath = new Array();
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
                 routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Descend at " + stopList[previd].name;
+                routePlan += "Descend at " + actions[i].stopname;
 
                 if (actions.length > i+1 && actions[i].type == "alight" && 
                     actions[i+1].type != "board") {

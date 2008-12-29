@@ -9,11 +9,13 @@ from tripgraph import *
 import sys
 import os
 import simplejson
-from django.conf import settings as DjangoSettings
 import settings
+
+# Manually import django
+sys.path.append(os.path.join(os.getcwd(), os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-from travel.models import Route, Stop, Map, Shape
+from routez.travel.models import Route, Stop, Map, Shape
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -43,7 +45,7 @@ if __name__ == '__main__':
         r2.save()
 
     for s in schedule.GetStopList():
-        s2 = Stop(stop_id=s.stop_id, name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
+        s2 = Stop(stop_id="gtfs"+s.stop_id, name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
         s2.save()
 
     (_min_lat, _min_lon, _max_lat, _max_lon) = schedule.GetStopBoundingBox()

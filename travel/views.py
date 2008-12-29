@@ -30,24 +30,8 @@ def main_page(request):
     now_str = human_time()
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
-            'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-            'key': settings.GMAPS_API_KEY, 'now': " " + now_str})
-
-def stoplist(request):
-    matches = []
-    for s in Stop.objects.all():
-        matches.append({'id': "gtfs" + s.stop_id, 
-                        'name': s.name, 
-                        'lat': s.lat, 
-                        'lng': s.lng })
-    return HttpResponse(simplejson.dumps(matches), mimetype="application/json")
-
-def routelist(request):
-    matches = []
-    for r in Route.objects.all():
-        matches.append({ 'id':r.route_id, 'shortname':r.short_name, 
-                       'longname':r.long_name } )
-    return HttpResponse(simplejson.dumps(matches), mimetype="application/json")
+         'max_lat': m.max_lat, 'max_lon': m.max_lng, 
+         'key': settings.GMAPS_API_KEY, 'now': " " + now_str})
 
 def routeplan(request):
     start_lat = float(request.GET['startlat'])
@@ -77,31 +61,43 @@ def routeplan(request):
                     start_lat, start_lng, end_lat, end_lng, None)
 
     actions_desc = []
+    route_shortnames = []
     last_action = None
     for action in trippath.get_actions():
         # order is always: get off (if applicable), board (if applicable), 
         # then move
         if last_action and last_action.route_id != action.route_id:
             if last_action.route_id != -1:
-                ts = graph.get_tripstop(last_action.dest_id)
-                action_time = human_time(daysecs + last_action.start_time)
+                stop = Stop.objects.filter(stop_id=last_action.dest_id)[0]
+                action_time = human_time(daysecs + last_action.end_time)
                 actions_desc.append({ 'type':'alight', 
-                                    'lat': ts.lat, 
-                                    'lng': ts.lng, 
+                                    'lat': stop.lat, 
+                                    'lng': stop.lng, 
+                                    'stopname': stop.name,
                                     'time': action_time })
 
         if not last_action or last_action.route_id != action.route_id:
             if action.route_id >= 0:
                 action_time = human_time(daysecs + action.start_time)
-                actions_desc.append({ 'type':'board', 'id':action.src_id, 
-                                    'time': action_time,
-                                    'route_id':action.route_id })
+                route = Route.objects.filter(route_id=action.route_id)[0]
+                print "src_id %s" % action.src_id
+                stops = Stop.objects.filter(stop_id=action.src_id)
+                print "stops: %s" % len(stops)
+                stop = stops[0]
+                actions_desc.append({ 'type':'board', 
+                                      'lat':stop.lat,
+                                      'lng':stop.lng,
+                                      'stopname':stop.name,
+                                      'time': action_time,
+                                      'route_id': action.route_id,
+                                      'route_shortname': route.short_name,
+                                      'route_longname': route.long_name }) 
 
         shape = None
         ts = graph.get_tripstop(action.src_id)
         if action.route_id != -1:
             shapes = Shape.objects.filter(src_id=action.src_id, 
-                                              dest_id=action.dest_id)
+                                          dest_id=action.dest_id)
             shape = None
             if len(shapes):
                 shape = simplejson.loads(shapes[0].polyline)

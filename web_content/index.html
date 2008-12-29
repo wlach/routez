@@ -10,10 +10,6 @@
         // hide the route plan when the page is first loaded
         document.getElementById('route-plan').style.display = 'none';
     if (GBrowserIsCompatible()) {
-        GDownloadUrl("/json/stoplist", loadStopListCallback);
-        GDownloadUrl("/json/routelist", loadRouteListCallback);
-
-        //sizeRouteList();
         var map_dom = document.getElementById("map");
         map = new GMap2(map_dom);
         map.addControl(new GLargeMapControl());
@@ -83,10 +79,10 @@
 		<p class="example">Example: 9:26am</p>
 
 		<div class="buttons">
+		  <p class="error" id="error-from">Didn't understand "from" location.</p>
+		  <p class="error" id="error-to">Didn't understand "to" location.</p>
 		  <input value="Plan!" class="button" type="submit" id="plan-button">
 		  </div>
-		<p class="error" id="error-from">Didn't understand "from" location.</p>
-		<p class="error" id="error-to">Didn't understand "to" location.</p>
 
 	      </form> 
 	    </div>
