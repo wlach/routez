@@ -131,10 +131,18 @@ function submitCallback(data, responseCode) {
 
         for (var i=0; i<actions.length; ++i) {
             if (actions[i].type == "alight" || actions[i].type == "pass") {
-                var latlng = new GLatLng(actions[i].lat, 
-                                         actions[i].lng)
+                var latlng = new GLatLng(actions[i].lat, actions[i].lng);
                 routePath[routePath.length] = latlng;
                 bounds.extend(latlng);
+
+                 // also add any shape to the path
+                if (actions[i].shape) {
+                      for (var j=0; j<actions[i].shape.length; ++j) {
+                          
+                          routePath[routePath.length] = new GLatLng(
+                              actions[i].shape[j][0], actions[i].shape[j][1]);
+                      }
+                }
             }
 
             if (actions[i].type == "board") {

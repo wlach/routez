@@ -36,7 +36,7 @@ just a matter of typing 'make', once everything's set up.
 
 I put up a semi-recent set at:
 
-   http://wlach.masalalabs.ca/most-of-halifax-plus-brentwood.osm
+   http://wlach.masalalabs.ca/greater-hrm-geobase.osm.gz
 
 3. Build the C++ graph module.
 
@@ -50,7 +50,7 @@ Something like:
 
  - ./creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez
 
-5. Build a database of stop and route information from the GTFS feed
+5. Build a database of stop, route, and shape information from the GTFS feed
 
  - ./manage.py syncdb
  - ./createdb.py /path/to/hfxfeed.zip

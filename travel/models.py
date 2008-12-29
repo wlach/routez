@@ -16,3 +16,8 @@ class Stop(models.Model):
     name = models.CharField(max_length=80)
     lat = models.FloatField()
     lng = models.FloatField()
+
+class Shape(models.Model):
+    src_id = models.CharField(max_length=20)
+    dest_id = models.CharField(max_length=20)
+    polyline = models.CharField(max_length=512)

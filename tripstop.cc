@@ -105,7 +105,6 @@ void TripStop::write(FILE *fp)
         assert(fwrite(&dest_id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
         assert(fwrite(&i->second, sizeof(float), 1, fp) == 1);        
     }
-
 }
 
 
@@ -117,7 +116,8 @@ static bool sort_triphops(const shared_ptr<TripHop> &x,
 
 
 void TripStop::add_triphop(int32_t start_time, int32_t end_time, 
-                           string dest_id, int32_t route_id, string service_id)
+                           string dest_id, int32_t route_id,
+                           string service_id)
 {
     tdict[service_id][route_id].push_back(shared_ptr<TripHop>(
                                               new TripHop(start_time, 

@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <boost/python.hpp>
 #include <tr1/unordered_map>
+#include <map>
 
 using namespace boost;
 using namespace std;
@@ -20,8 +21,10 @@ static inline double degrees(double radians)
     return radians*180.0f/M_PI;
 }
 
-static double distance(double src_lat, double src_lng, double dest_lat, double dest_lng)
+static double distance(double src_lat, double src_lng, double dest_lat, 
+                       double dest_lng)
 {
+    // returns distance in meters
     if (src_lat == dest_lat && src_lng == dest_lng)
         return 0.0f;
 
@@ -80,6 +83,7 @@ void TripGraph::save(string fname)
         return;
     }
 
+    // write triphops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
     for (TripStopDict::iterator i = tripstops.begin(); 
@@ -90,10 +94,12 @@ void TripGraph::save(string fname)
 }
 
 
-void TripGraph::add_triphop(int32_t start_time, int32_t end_time, string src_id, 
-                            string dest_id, int route_id, string service_id)
+void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
+                            string src_id, string dest_id, int32_t route_id, 
+                            string service_id)
 {
     assert(tripstops.count(src_id) > 0);
+
     tripstops[src_id]->add_triphop(start_time, end_time, dest_id, 
                                    route_id, service_id);
 }
@@ -118,42 +124,121 @@ void TripGraph::add_walkhop(string src_id, string dest_id)
 }
 
 
+struct Point
+{
+    Point(double _lat, double _lng) { lat=_lat; lng=_lng; }
+    double lat;
+    double lng;
+};
+
+bool operator==(const Point &p1, const Point &p2)
+{
+    // we say that anything within a distance of 1 meter is identical
+    return (distance(p1.lat, p1.lng, p2.lat, p2.lng) < 1.0f);
+}
+
+Point get_closest_point(Point &a, Point &b, Point &c)
+{
+    // given a line made up of a and b, and a point c,
+    // return the point on the line closest to c (may be a or b)
+    double ab2 = pow((b.lat - a.lat), 2) + pow((b.lng - a.lng), 2);
+    double ap_ab = (c.lat - a.lat)*(b.lat-a.lat) + (c.lng-a.lng)*(b.lng-a.lng);
+    double t = ap_ab / ab2;
+ 
+    // clamp t to be between a and b
+    if (t < 0.0f)
+        t = 0.0f;
+    else if (t>1.0f)
+        t = 1.0f;
+    
+    return Point(a.lat + (b.lat - a.lat)*t, a.lng + (b.lng - a.lng)*t);
+}
+
+
 void TripGraph::link_osm_gtfs()
 {
+    // this complicated-looking method attempts to link gtfs stops 
+    // to osm nodes. if a stop lies between two osm nodes on a polyline,
+    // we will link the gtfs stop to both of them
+
+    map<string, pair<string, string> > new_walkhops;
+
     for (TripStopDict::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
         if (strcmp(i->second->type, "gtfs") == 0)
         {
-            shared_ptr<TripStop> nearest_osm;
+            Point p(i->second->lat, i->second->lng);
+            
+            pair<string, string> nearest_walkhop;
             double min_dist;
-            for (TripStopDict::iterator j = osmstops.begin(); 
-                 j != osmstops.end(); j++)
+            for (TripStopDict::iterator j = tripstops.begin(); 
+                 j != tripstops.end(); j++)
             {
-                double dist = distance(i->second->lat, i->second->lng, 
-                                      j->second->lat, j->second->lng);
-                if (!nearest_osm || dist < min_dist)
+                for (TripStop::WalkHopDict::iterator k = j->second->wdict.begin(); 
+                     k != j->second->wdict.end(); k++)
                 {
-                    nearest_osm = j->second;
-                    min_dist = dist;
+                    Point p1(j->second->lat, j->second->lng);
+
+                    shared_ptr<TripStop> dest_stop = tripstops[k->first];
+                    Point p2(dest_stop->lat, dest_stop->lng);
+
+                    Point p3 = get_closest_point(p1, p2, p);
+
+                    double dist = distance(p.lat, p.lng, 
+                                           p3.lat, p3.lng);
+                    if ((nearest_walkhop.first.empty() && 
+                         nearest_walkhop.second.empty()) || dist < min_dist)
+                    {
+                        nearest_walkhop = pair<string,string>();
+                        if (p1 == p3)
+                            nearest_walkhop.first = j->first;
+                        else if (p2 == p3)
+                            nearest_walkhop.first = k->first;
+                        else
+                        {
+                            nearest_walkhop.first = j->first;
+                            nearest_walkhop.second = k->first;
+                        }
+
+                        min_dist = dist;
+                    }
                 }
             }
             
-            assert(nearest_osm);
-            printf("Linking %s -> %s\n", i->second->id, nearest_osm->id);
-            add_walkhop(i->second->id, nearest_osm->id);
-            add_walkhop(nearest_osm->id, i->second->id);
+            new_walkhops[i->first] = nearest_walkhop;
+            printf("Linking %s -> %s, %s\n", i->first.c_str(), 
+                   nearest_walkhop.first.c_str(), 
+                   nearest_walkhop.second.c_str());
+        }
+    }
+
+
+    for (map<string, pair<string, string> >::iterator i = new_walkhops.begin();
+         i != new_walkhops.end(); i++)
+    {
+        string osmstop1 = i->second.first;
+        string osmstop2 = i->second.second;
+
+        assert(!osmstop1.empty());
+        add_walkhop(i->first, osmstop1);
+        add_walkhop(osmstop1, i->first);
+
+        if (!osmstop2.empty())
+        {
+            add_walkhop(i->first, osmstop2);
+            add_walkhop(osmstop2, i->first);
         }
     }
 }
 
 
-shared_ptr<TripStop> TripGraph::get_nearest_osmstop(double lat, double lng)
+shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
 {
     shared_ptr<TripStop> closest_stop;
     double min_dist = 0.0f;
-    for (TripStopDict::iterator i = osmstops.begin(); 
-         i != osmstops.end(); i++)
+    for (TripStopDict::iterator i = tripstops.begin(); 
+         i != tripstops.end(); i++)
     {
         shared_ptr<TripStop> s = i->second;
         double dist = pow((s->lat - lat), 2) + pow((s->lng - lng), 2);
@@ -168,7 +253,7 @@ shared_ptr<TripStop> TripGraph::get_nearest_osmstop(double lat, double lng)
 }
 
 
-TripPath TripGraph::find_path(int secs, string service_period, 
+TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                               double src_lat, double src_lng, 
                               double dest_lat, double dest_lng, PyObject *cb)
 {
@@ -178,8 +263,8 @@ TripPath TripGraph::find_path(int secs, string service_period,
     VisitedRouteMap visited_routes;
     VisitedWalkMap visited_walks;
 
-    shared_ptr<TripStop> start_node = get_nearest_osmstop(src_lat, src_lng);
-    shared_ptr<TripStop> end_node = get_nearest_osmstop(dest_lat, dest_lng);
+    shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
+    shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
     printf("Start: %s End: %s\n", start_node->id, end_node->id);
 
     // consider distance required to reach the start node from the 
@@ -202,8 +287,8 @@ TripPath TripGraph::find_path(int secs, string service_period,
     {
         shared_ptr<TripPath> path = uncompleted_paths.top();
         uncompleted_paths.pop();
-        extend_path(path, service_period, end_node->id, num_paths_considered,
-                    visited_routes, visited_walks, 
+        extend_path(path, service_period, walkonly, end_node->id, 
+                    num_paths_considered, visited_routes, visited_walks, 
                     uncompleted_paths, completed_paths, cb);        
 
         //# if we've still got open paths, but their weight exceeds that
@@ -238,6 +323,7 @@ TripStop TripGraph::get_tripstop(string id)
 
 void TripGraph::extend_path(shared_ptr<TripPath> &path, 
                             string &service_period, 
+                            bool walkonly,
                             const char *goal_id,
                             int &num_paths_considered,
                             VisitedRouteMap &visited_routes,
@@ -274,7 +360,8 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     // explore walkhops that are better than the ones we've already visited
     // if we're on a bus, don't allow a transfer if we've been on for
-    // less than 5 minutes (FIXME: probably better to measure distance travelled?)
+    // less than 5 minutes (FIXME: probably better to measure distance 
+    // travelled?)
     if (last_route_id == -1 || path->route_time > (2 * 60))
     {
         for (TripStop::WalkHopDict::iterator i = src_stop->wdict.begin();
@@ -316,12 +403,22 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         }
     }
 
+    
+    // if we're doing a walkonly path (mostly for generating shapes?), stop
+    // and return here
+    if (walkonly)
+        return;
+
     // find outgoing triphops from the source and get a list of paths to
     // them. 
     for (unordered_set<int>::iterator i = outgoing_route_ids.begin();
          i != outgoing_route_ids.end(); i++)
     {
-        shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time, 
+        int LEEWAY = 0;
+        if ((*i) != last_route_id)
+            LEEWAY = (5*60); // give 5 mins to make a transfer
+
+        shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time + LEEWAY, 
                                                        (*i), 
                                                        service_period);
         if (t)

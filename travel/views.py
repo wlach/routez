@@ -6,7 +6,7 @@ import datetime
 import simplejson
 import time
 
-from routez.travel.models import Route, Stop, Map
+from routez.travel.models import Route, Stop, Map, Shape
 
 # Returns the hours and minutes of the given Unix timestamp, formatted
 # nicely.  If the timestamp is not given, defaults to the current time.
@@ -73,7 +73,7 @@ def routeplan(request):
     # Use the TripGraph loaded in __init__.py, so we don't load it per request
     import routez
     graph = routez.travel.graph
-    trippath = graph.find_path(today_secs, service_period, 
+    trippath = graph.find_path(today_secs, service_period, False,
                     start_lat, start_lng, end_lat, end_lng, None)
 
     actions_desc = []
@@ -97,11 +97,19 @@ def routeplan(request):
                                     'time': action_time,
                                     'route_id':action.route_id })
 
+        shape = None
         ts = graph.get_tripstop(action.src_id)
+        if action.route_id != -1:
+            shapes = Shape.objects.filter(src_id=action.src_id, 
+                                              dest_id=action.dest_id)
+            shape = None
+            if len(shapes):
+                shape = simplejson.loads(shapes[0].polyline)
         actions_desc.append({ 'type':'pass', 'id':action.src_id, 
-                            'lat': ts.lat, 
-                            'lng': ts.lng,
-                            'dest_id':action.dest_id })
+                              'lat': ts.lat, 
+                              'lng': ts.lng,
+                              'dest_id':action.dest_id,
+                              'shape':shape })
         last_action = action
 
     # if we had a path at all, append the last getting off action here

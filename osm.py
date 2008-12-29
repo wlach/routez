@@ -99,11 +99,14 @@ class OSM:
             @classmethod
             def startElement(self, name, attrs):
                 if name=='node':
+                    print "Parsing node %s" % attrs['id']
                     self.currElem = Node(attrs['id'], float(attrs['lon']), float(attrs['lat']))
                 elif name=='way':
+                    print "Parsing way %s" % attrs['id']
                     self.currElem = Way(attrs['id'], superself)
                 elif name=='tag':
-                    self.currElem.tags[attrs['k']] = attrs['v']
+                    pass
+                    #self.currElem.tags[attrs['k']] = attrs['v']
                 elif name=='nd':
                     self.currElem.nds.append( attrs['ref'] )
 
@@ -125,11 +128,11 @@ class OSM:
 
         #count times each node is used
         node_histogram = dict.fromkeys( self.nodes.keys(), 0 )
+        print "Counting and pruning ways"
         for way in self.ways.values():
             #if a way has only one node, delete it out of the osm collection
             #similarly if it's not a road
-            if len(way.nds) < 2 or not way.tags.get('highway') or \
-                    way.tags['highway'] == 'footway':  
+            if len(way.nds) < 2:# or not way.tags.get('highway') or way.tags['highway'] == 'footway':  
                 del self.ways[way.id]
             else:
                 for node in way.nds:
@@ -141,6 +144,7 @@ class OSM:
                 del self.nodes[node.id]
 
         #use that histogram to split all ways, replacing the member set of ways
+        print "Splitting ways"
         new_ways = {}
         for id, way in self.ways.iteritems():
             split_ways = way.split(node_histogram)
