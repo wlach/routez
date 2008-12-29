@@ -16,7 +16,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 from travel.models import Route, Stop, Map, Shape
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print "Usage: %s: <gtfs feed> <routez graph>" % sys.argv[0]
         exit(1)
 

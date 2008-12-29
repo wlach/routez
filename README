@@ -53,7 +53,7 @@ Something like:
 5. Build a database of stop, route, and shape information from the GTFS feed
 
  - ./manage.py syncdb
- - ./createdb.py /path/to/hfxfeed.zip
+ - ./createdb.py /path/to/hfxfeed.zip mygraph.routez
 
 6. Configure it.
 
