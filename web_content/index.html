@@ -10,10 +10,6 @@
         // hide the route plan when the page is first loaded
         document.getElementById('route-plan').style.display = 'none';
     if (GBrowserIsCompatible()) {
-        GDownloadUrl("/json/stoplist", loadStopListCallback);
-        GDownloadUrl("/json/routelist", loadRouteListCallback);
-
-        //sizeRouteList();
         var map_dom = document.getElementById("map");
         map = new GMap2(map_dom);
         map.addControl(new GLargeMapControl());
