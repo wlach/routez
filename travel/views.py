@@ -84,7 +84,7 @@ def routeplan(request):
         if last_action and last_action.route_id != action.route_id:
             if last_action.route_id != -1:
                 ts = graph.get_tripstop(last_action.dest_id)
-                action_time = human_time(daysecs + last_action.start_time)
+                action_time = human_time(daysecs + last_action.end_time)
                 actions_desc.append({ 'type':'alight', 
                                     'lat': ts.lat, 
                                     'lng': ts.lng, 
