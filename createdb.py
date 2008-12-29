@@ -9,11 +9,13 @@ from tripgraph import *
 import sys
 import os
 import simplejson
-from django.conf import settings as DjangoSettings
 import settings
+
+# Manually import django
+sys.path.append(os.path.join(os.getcwd(), os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-from travel.models import Route, Stop, Map, Shape
+from routez.travel.models import Route, Stop, Map, Shape
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
