@@ -411,7 +411,11 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     for (unordered_set<int>::iterator i = outgoing_route_ids.begin();
          i != outgoing_route_ids.end(); i++)
     {
-        shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time, 
+        int LEEWAY = 0;
+        if ((*i) != last_route_id)
+            LEEWAY = (5*60); // give 5 mins to make a transfer
+
+        shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time + LEEWAY, 
                                                        (*i), 
                                                        service_period);
         if (t)
