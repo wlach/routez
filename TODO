@@ -6,8 +6,6 @@
 
 == Medium term ==
 
-- Just use Django instead of Railways? Problem is that a graph needs
-   to be loaded on startup-- need/want a way to do that cleanly.
 - Add better heuristics to make libroutez consider less options
 - Clean up libroutez, make into a proper library.
 - De-entangle application from Halifax (not much work required).
@@ -15,3 +13,4 @@
 == Blue sky ==
 
 - Make maps visualization use OpenStreetMap instead of Google Maps.
+
