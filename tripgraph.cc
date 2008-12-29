@@ -51,7 +51,8 @@ void TripGraph::load(string fname)
     FILE *fp = fopen(fname.c_str(), "r");
     if (!fp)
     {
-        printf("Error: Couldn't open graph.\n");
+        printf("Error: Couldn't open graph file %s: %s (%d).\n", 
+            fname.c_str(), strerror(errno), errno);
         return;
     }
         
@@ -79,7 +80,8 @@ void TripGraph::save(string fname)
     FILE *fp = fopen(fname.c_str(), "w");
     if (!fp)
     {
-        printf("Error: Couldn't open graph %s for writing.\n", fname.c_str());
+        printf("Error: Couldn't open graph %s for writing: %s (%d).\n", 
+            fname.c_str(), strerror(errno), errno);
         return;
     }
 
