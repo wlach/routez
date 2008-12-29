@@ -85,7 +85,7 @@ void TripPath::_get_heuristic_weight()
     heuristic_weight = weight;
 
     // then, calculate the time remaining based on going directly
-    // from the last vertice to the destination vertice at the fastest
+    // from the last vertex to the destination vertex at the fastest
     // possible speed in the graph
     double remaining_distance = distance(last_stop->lat, last_stop->lng, 
                                         dest_stop->lat, dest_stop->lng);

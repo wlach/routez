@@ -263,7 +263,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 #endif
     }
     
-    // printf("Extending path at vertice %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
+    // printf("Extending path at vertex %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
     //         last_route_id, path->time, path->walking_time, path->route_time);
 
     shared_ptr<TripStop> src_stop(tripstops[src_id]);
