@@ -19,21 +19,23 @@ public:
     void save(std::string fname);
 
     void add_triphop(int32_t start_time, int32_t end_time, std::string src_id, 
-                     std::string dest_id, int route_id, std::string service_id);
-
+                     std::string dest_id, int32_t route_id,
+                     std::string service_id);
     void add_tripstop(std::string id, std::string type, float lat, float lng);
     void add_walkhop(std::string src_id, std::string dest_id);
+
     void link_osm_gtfs();
 
     TripStop get_tripstop(std::string id);
 
-    boost::shared_ptr<TripStop> get_nearest_osmstop(double lat, double lng);
+    boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
+    boost::shared_ptr<TripStop> get_nearest_stop(std::string id);
 
     typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
     typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
     typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, boost::shared_ptr<TripPath> > > VisitedWalkMap;
 
-    TripPath find_path(int secs, std::string service_period, 
+    TripPath find_path(int secs, std::string service_period, bool walkonly,
                        double src_lat, double src_lng, 
                        double dest_lat, double dest_lng, PyObject *cb);
 
@@ -49,19 +51,16 @@ public:
     typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
 
     void extend_path(boost::shared_ptr<TripPath> &path, 
-                             std::string &service_period, 
-                             const char *end_id,
-                             int &num_paths_considered,
-                             VisitedRouteMap &visited_routes, 
-                             VisitedWalkMap &visited_walks, 
-                             PathQueue &uncompleted_paths,
-                             PathQueue &completed_paths,
-                             PyObject *cb);
-
+                     std::string &service_period, bool walkonly, 
+                     const char *end_id, int &num_paths_considered,
+                     VisitedRouteMap &visited_routes, 
+                     VisitedWalkMap &visited_walks, 
+                     PathQueue &uncompleted_paths, PathQueue &completed_paths,
+                     PyObject *cb);
+    
     typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
     TripStopDict tripstops;
     TripStopDict osmstops;
-        
 };
 
 #endif // __TRIPGRAPH

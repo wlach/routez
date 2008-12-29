@@ -41,7 +41,7 @@ TripAction::TripAction(const char *_src_id, const char *_dest_id, int _route_id,
     route_id = _route_id;
     start_time = _start_time;
     end_time = _end_time;
-}    
+}
 
 
 TripPath::TripPath()

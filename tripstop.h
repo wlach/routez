@@ -11,7 +11,8 @@
 
 #define MAX_ID_LEN 16
 
-
+// a triphop represents a hop to a specific node on the graph at a 
+// particular time (with a particular duration)
 struct TripHop
 {
     TripHop() { }
@@ -39,7 +40,7 @@ struct TripStop
     void write(FILE *fp);
 
     void add_triphop(int32_t start_time, int32_t end_time, std::string dest_id, 
-                     int route_id, std::string service_id);
+                     int32_t route_id, std::string service_id);
     void add_walkhop(std::string dest_id, float walktime);
     std::tr1::unordered_set<int> get_routes(std::string service_id);
     boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 

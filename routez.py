@@ -19,7 +19,7 @@ from django.conf import settings as DjangoSettings
 import settings
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-from travel.models import Route, Stop, Map
+from travel.models import Route, Stop, Map, Shape
 from tripgraph import *
 
 
@@ -109,7 +109,9 @@ class Main(Component):
             service_period = 'sunday'
 
         trippath = self.graph.find_path(today_secs, service_period, 
-                        start_lat, start_lng, end_lat, end_lng, None)
+                                        False,
+                                        start_lat, start_lng, 
+                                        end_lat, end_lng, None)
 
         actions_desc = []
         last_action = None
@@ -133,11 +135,20 @@ class Main(Component):
                                         'time': action_time,
                                         'route_id':action.route_id })
 
+            shape = None
             ts = self.graph.get_tripstop(action.src_id)
+            if action.route_id != -1:
+                shapes = Shape.objects.filter(src_id=action.src_id, 
+                                              dest_id=action.dest_id)
+                shape = None
+                if len(shapes):
+                    shape = simplejson.loads(shapes[0].polyline)
+
             actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                                 'lat': ts.lat, 
                                 'lng': ts.lng,
-                                'dest_id':action.dest_id })
+                                'dest_id':action.dest_id,
+                                'shape':shape })
             last_action = action
 
         # if we had a path at all, append the last getting off action here
