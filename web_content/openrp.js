@@ -8,6 +8,13 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
+function setupLocations() {
+    // if no cookie yet exists, no biggie, these values just won't get set
+    // to anything
+    document.getElementById('routePlanStart').value = YAHOO.util.Cookie.getSub("routeplan", "start"); 
+    document.getElementById('routePlanEnd').value = YAHOO.util.Cookie.getSub("routeplan", "end");         
+}
+
 /**
  * Initialize icons. Call once during load.
  */
@@ -161,7 +168,12 @@ function submitCallback(data, responseCode) {
 
 function checkPlanRoute() {
  
-    if (origin && dest) {        
+    if (origin && dest) {
+        YAHOO.util.Cookie.setSubs("routeplan", 
+                                  { start: document.getElementById('routePlanStart').value, 
+                                      end: document.getElementById('routePlanEnd').value },
+                                  { expires: new Date("January 12, 2025") });
+
         time = document.getElementById('time').value;
 
         url = "/json/routeplan" + 
