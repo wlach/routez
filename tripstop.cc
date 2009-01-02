@@ -11,12 +11,6 @@ static bool operator<(const TripHop& x, const TripHop& y)
 }
 
 
-TripStop::TripStop() 
-{ 
-    assert(0); 
-}
-
-
 TripStop::TripStop(FILE *fp) 
 {
     assert(fread(id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);

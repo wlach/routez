@@ -58,7 +58,7 @@ def routeplan(request):
     import routez
     graph = routez.travel.graph
     trippath = graph.find_path(today_secs, service_period, False,
-                    start_lat, start_lng, end_lat, end_lng, None)
+                    start_lat, start_lng, end_lat, end_lng)
 
     actions_desc = []
     route_shortnames = []
@@ -80,9 +80,7 @@ def routeplan(request):
             if action.route_id >= 0:
                 action_time = human_time(daysecs + action.start_time)
                 route = Route.objects.filter(route_id=action.route_id)[0]
-                print "src_id %s" % action.src_id
                 stops = Stop.objects.filter(stop_id=action.src_id)
-                print "stops: %s" % len(stops)
                 stop = stops[0]
                 actions_desc.append({ 'type':'board', 
                                       'lat':stop.lat,

@@ -33,7 +33,6 @@ struct TripHop
 
 struct TripStop
 {
-    TripStop();
     TripStop(FILE *fp);
     TripStop(std::string _id, std::string _type, float _lat, float _lng);
 

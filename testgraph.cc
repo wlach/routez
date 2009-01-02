@@ -6,5 +6,5 @@ int main(int argc, char *argv[])
     g.load("mygraph.routez");
 
     g.find_path(46167, "weekday", false, 44.657304, -63.591096, 
-                44.7321379, -63.657304, NULL);
+                44.7321379, -63.657304);
 }

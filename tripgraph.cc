@@ -68,8 +68,6 @@ void TripGraph::load(string fname)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
         tripstops.insert(pair<string,shared_ptr<TripStop> >(s->id, s));
-        if (strcmp(s->type, "osm") == 0)
-            osmstops.insert(pair<string,shared_ptr<TripStop> >(s->id, s));
         i++;
     }
 }
@@ -100,10 +98,9 @@ void TripGraph::add_triphop(int32_t start_time, int32_t end_time,
                             string src_id, string dest_id, int32_t route_id, 
                             string service_id)
 {
-    assert(tripstops.count(src_id) > 0);
-
-    tripstops[src_id]->add_triphop(start_time, end_time, dest_id, 
-                                   route_id, service_id);
+    // will assert if src_id doesn't exist!!
+    get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
+                           service_id);
 }
 
 
@@ -111,18 +108,19 @@ void TripGraph::add_tripstop(string id, string type, float lat, float lng)
 {
     shared_ptr<TripStop> s(new TripStop(id, type, lat, lng));
     tripstops.insert(pair<string,shared_ptr<TripStop> >(id, s));
-    if (type == "osm")
-        osmstops.insert(pair<string,shared_ptr<TripStop> >(id, s));        
 }
 
 
 void TripGraph::add_walkhop(string src_id, string dest_id)
 {
-    double dist = distance(tripstops[src_id]->lat, tripstops[src_id]->lng,
-                           tripstops[dest_id]->lat, 
-                           tripstops[dest_id]->lng);
+    // will assert if src_id or dest_id doesn't exist!!
+    shared_ptr<TripStop> ts_src = get_tripstop(src_id);
+    shared_ptr<TripStop> ts_dest = get_tripstop(dest_id);
 
-    tripstops[src_id]->add_walkhop(dest_id, dist / est_walk_speed);
+    double dist = distance(ts_src->lat, ts_src->lng,
+                           ts_dest->lat, ts_dest->lng);
+
+    ts_src->add_walkhop(dest_id, dist / est_walk_speed);
 }
 
 
@@ -182,7 +180,7 @@ void TripGraph::link_osm_gtfs()
                 {
                     Point p1(j->second->lat, j->second->lng);
 
-                    shared_ptr<TripStop> dest_stop = tripstops[k->first];
+                    shared_ptr<TripStop> dest_stop = get_tripstop(k->first);
                     Point p2(dest_stop->lat, dest_stop->lng);
 
                     Point p3 = get_closest_point(p1, p2, p);
@@ -257,7 +255,7 @@ shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
 
 TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                               double src_lat, double src_lng, 
-                              double dest_lat, double dest_lng, PyObject *cb)
+                              double dest_lat, double dest_lng)
 {
     PathQueue uncompleted_paths;
     PathQueue completed_paths;
@@ -291,7 +289,7 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
         uncompleted_paths.pop();
         extend_path(path, service_period, walkonly, end_node->id, 
                     num_paths_considered, visited_routes, visited_walks, 
-                    uncompleted_paths, completed_paths, cb);        
+                    uncompleted_paths, completed_paths);
 
         //# if we've still got open paths, but their weight exceeds that
         // of the weight of a completed path, break
@@ -317,9 +315,12 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 }
 
 
-TripStop TripGraph::get_tripstop(string id)
+shared_ptr<TripStop> TripGraph::get_tripstop(string id)
 {
-    return TripStop(*(tripstops[id]));
+    TripStopDict::iterator ts = tripstops.find(id);
+    assert(ts != tripstops.end());
+
+    return ts->second;
 }
 
 
@@ -331,30 +332,29 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                             VisitedRouteMap &visited_routes,
                             VisitedWalkMap &visited_walks, 
                             PathQueue &uncompleted_paths,
-                            PathQueue &completed_paths,
-                            PyObject *cb)
+                            PathQueue &completed_paths)
 {
     TripPathList newpaths;
     const char * src_id = path->last_stop->id;
     int last_route_id = path->last_route_id;
 
+#if 0
     if (path->last_action)
     {
         string last_src_id = path->last_action->src_id;
-#if 0
         if (cb)
             python::call<void>(cb, tripstops[last_src_id]->lat, 
                                tripstops[last_src_id]->lng,
                                tripstops[src_id]->lat, 
                                tripstops[src_id]->lng,
                                last_route_id);
-#endif
     }
+#endif
     
     // printf("Extending path at vertex %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
     //         last_route_id, path->time, path->walking_time, path->route_time);
 
-    shared_ptr<TripStop> src_stop(tripstops[src_id]);
+    shared_ptr<TripStop> src_stop = get_tripstop(src_id);
 
     // keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here
@@ -381,10 +381,11 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 continue;
                 
             shared_ptr<TripAction> action(
-                new TripAction(src_id, dest_id, -1, 
-                               path->time, (path->time + walktime)));
+                new TripAction(src_id, dest_id, -1, path->time, 
+                               (path->time + walktime)));
+            shared_ptr<TripStop> ds = get_tripstop(dest_id);
             shared_ptr<TripPath> path2 = path->add_action(
-                action, outgoing_route_ids, tripstops[dest_id]);
+                action, outgoing_route_ids, ds);
 
             //printf("- Considering walkpath to %s\n", dest_id.c_str());
 
@@ -449,8 +450,9 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 shared_ptr<TripAction> action = shared_ptr<TripAction>(
                     new TripAction(src_id, t->dest_id, (*i), t->start_time,
                                    t->end_time));
+                shared_ptr<TripStop> ds = get_tripstop(t->dest_id);
                 shared_ptr<TripPath> path2 = path->add_action(
-                    action, outgoing_route_ids, tripstops[t->dest_id]);
+                    action, outgoing_route_ids, ds);
                 
 
                 if (v == visited_routes[src_id].end() || 
@@ -471,7 +473,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     }
 }    
 
-
+#if 0
 BOOST_PYTHON_MODULE(tripgraph)
 {
     using namespace boost::python;
@@ -500,3 +502,4 @@ BOOST_PYTHON_MODULE(tripgraph)
     .def_readonly("start_time", &TripAction::start_time)
     .def_readonly("end_time", &TripAction::end_time);
 }
+#endif

@@ -1,3 +1,4 @@
+_tripgraph.so
 aclocal.m4
 autom4te.cache
 config.log
@@ -11,4 +12,4 @@ gmap_api_key
 routez.db
 .*.swp
 testgraph
-tripgraph.so
+tripgraph.py

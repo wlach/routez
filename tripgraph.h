@@ -26,19 +26,13 @@ public:
 
     void link_osm_gtfs();
 
-    TripStop get_tripstop(std::string id);
-
-    boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
-    boost::shared_ptr<TripStop> get_nearest_stop(std::string id);
-
-    typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
-    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
-    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, boost::shared_ptr<TripPath> > > VisitedWalkMap;
+    boost::shared_ptr<TripStop> get_tripstop(std::string id);
 
     TripPath find_path(int secs, std::string service_period, bool walkonly,
                        double src_lat, double src_lng, 
-                       double dest_lat, double dest_lng, PyObject *cb);
+                       double dest_lat, double dest_lng);
 
+    // various internal types
     struct PathCompare
     {
         inline bool operator() (const boost::shared_ptr<TripPath> &x, 
@@ -48,19 +42,23 @@ public:
         }
     };
 
+    typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, boost::shared_ptr<TripPath> > > VisitedWalkMap;
     typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
+    typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
+    
+  private:
+    boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
     void extend_path(boost::shared_ptr<TripPath> &path, 
                      std::string &service_period, bool walkonly, 
                      const char *end_id, int &num_paths_considered,
                      VisitedRouteMap &visited_routes, 
                      VisitedWalkMap &visited_walks, 
-                     PathQueue &uncompleted_paths, PathQueue &completed_paths,
-                     PyObject *cb);
+                     PathQueue &uncompleted_paths, PathQueue &completed_paths);
     
-    typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
     TripStopDict tripstops;
-    TripStopDict osmstops;
 };
 
 #endif // __TRIPGRAPH

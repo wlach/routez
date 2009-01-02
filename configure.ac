@@ -7,12 +7,15 @@ AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_CXXCPP
 AX_PYTHON
-AX_BOOST_PYTHON
 
-AC_LANG_CPLUSPLUS
+AC_CHECK_PROG(SWIG, swig, swig)
 
-if test x"$BOOST_PYTHON_LIB" = "x"; then
-    AC_MSG_ERROR("boost python not found")
+if test x"$SWIG" = "x"; then
+    AC_MSG_ERROR("swig not found")
+fi
+
+if test x"$PYTHON_LIB" = "x"; then
+    AC_MSG_ERROR("python not found")
 fi
 
 AC_CONFIG_FILES(config.mk)

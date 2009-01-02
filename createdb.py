@@ -78,8 +78,7 @@ if __name__ == '__main__':
                 # way intersections). 
                 trippath = graph.find_path(0, "", True,
                                                 stop1.stop_lat, stop1.stop_lon, 
-                                                stop2.stop_lat, stop2.stop_lon,
-                                           None)
+                                                stop2.stop_lat, stop2.stop_lon)
                 points = []
                 prevaction = False
                 for action in trippath.get_actions():

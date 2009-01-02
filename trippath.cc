@@ -33,8 +33,8 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
 }
 
 
-TripAction::TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
-                       double _start_time, double _end_time)
+TripAction::TripAction(const char *_src_id, const char *_dest_id, 
+                       int _route_id, double _start_time, double _end_time)
 {
     src_id = _src_id;
     dest_id = _dest_id;
@@ -42,15 +42,6 @@ TripAction::TripAction(const char *_src_id, const char *_dest_id, int _route_id,
     start_time = _start_time;
     end_time = _end_time;
 }
-
-
-TripPath::TripPath()
-{
-    // FIXME: allowing this for now, but we really shouldn't-- should hide it
-    // in a private constructor instead
-    // assert(0);
-}
-
 
 TripPath::TripPath(double _time, double _fastest_speed, 
                    shared_ptr<TripStop> &_dest_stop, 
@@ -69,7 +60,7 @@ TripPath::TripPath(double _time, double _fastest_speed,
     _get_heuristic_weight();
 }
 
-
+#if 0
 python::object TripPath::get_last_action()
 {
     if (last_action)
@@ -77,7 +68,7 @@ python::object TripPath::get_last_action()
 
     return python::object();
 }
-
+#endif
 
 void TripPath::_get_heuristic_weight() 
 {
@@ -120,19 +111,21 @@ void TripPath::_get_heuristic_weight()
         heuristic_weight += (5*60);
 }
 
-static void _add_actions_to_list(python::list &l, shared_ptr<TripAction> &action)
+static void _add_actions_to_list(list<TripAction> &l, 
+                                 shared_ptr<TripAction> &action)
 {
     if (action)
     {
         if (action->parent)
             _add_actions_to_list(l, action->parent);
-        l.append(TripAction(*action));
+        l.push_back(TripAction(*action));
     }            
 }
 
-python::list TripPath::get_actions()
+list<TripAction> TripPath::get_actions()
 {
-    python::list l;
+    list<TripAction> l;
+
     // recursively add actions to list, so we get them back in the
     // correct order
     _add_actions_to_list(l, last_action);
