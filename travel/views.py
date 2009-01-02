@@ -31,7 +31,7 @@ def main_page(request):
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.GMAPS_API_KEY, 'now': " " + now_str})
+         'key': settings.GMAPS_API_KEY, 'now': now_str})
 
 def routeplan(request):
     start_lat = float(request.GET['startlat'])
