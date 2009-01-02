@@ -386,14 +386,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             shared_ptr<TripPath> path2 = path->add_action(
                 action, outgoing_route_ids, tripstops[dest_id]);
 
-            //printf("- Considering walkpath to %s\n", dest_id.c_str());
+            //printf("- Considering walkpath to %s\n", dest_id);
 
             if (v1 == vsrc.end() || 
                 v1->second->heuristic_weight > path2->heuristic_weight ||
                 ((v1->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                  v1->second->walking_time > path2->walking_time))
             {
-                //printf("-- Adding walkpath to %s\n", dest_id.c_str());
+                //printf("-- Adding walkpath to %s\n", dest_id);
                 if (strcmp(dest_id, goal_id) == 0)
                     completed_paths.push(path2);
                 else
