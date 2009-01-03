@@ -4,8 +4,6 @@
 - Improve web interface.
 - Make libroutez return multiple possible routes
 - Use a kd-tree to speed up finding closest stop to a latlng pair.
-- Return route and stop information as needed, instead of loading it all
-every time a page is accessed.
 
 == Medium term ==
 

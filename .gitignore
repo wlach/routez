@@ -6,10 +6,14 @@ config.mk
 config.status
 configure
 gmap_api_key
+*~
 *.o
 *.pyc
 *.routez
+libroutez.so
 routez.db
 .*.swp
 testgraph
 tripgraph.py
+tripgraph_wrap_py.cc
+tripgraph_wrap_rb.cc
