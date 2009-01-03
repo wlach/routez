@@ -8,6 +8,17 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
+
+/**
+ * Setup locations based on cookie. Call once during load."
+ */
+function setupLocations() {
+    // if no cookie yet exists, no biggie, these values just won't get set
+    // to anything
+    document.getElementById('routePlanStart').value = YAHOO.util.Cookie.getSub("routeplan", "start"); 
+    document.getElementById('routePlanEnd').value = YAHOO.util.Cookie.getSub("routeplan", "end");         
+}
+
 /**
  * Initialize icons. Call once during load.
  */
@@ -32,6 +43,13 @@ function addWalkingOverlay(origin, dest) {
     directions.loadFromWaypoints(waypoints, {getPolyline: true});
     GEvent.addListener(directions, "load", function() {
             map.addOverlay(directions.getPolyline())}); 
+}
+
+function reverseDirections() {
+    var tmp = document.getElementById('routePlanStart').value; 
+    document.getElementById('routePlanStart').value = document.getElementById('routePlanEnd').value;   
+    document.getElementById('routePlanEnd').value = tmp;
+
 }
 
 // Capitalizes a string, first letter in upper case and the rest in lower case.
@@ -198,7 +216,12 @@ function showDebugInfo(actions) {
 
 function checkPlanRoute() {
  
-    if (origin && dest) {        
+    if (origin && dest) {
+        YAHOO.util.Cookie.setSubs("routeplan", 
+                                  { start: document.getElementById('routePlanStart').value, 
+                                      end: document.getElementById('routePlanEnd').value },
+                                  { expires: new Date("January 12, 2025") });
+
         time = document.getElementById('time').value;
 
         url = "/json/routeplan" + 

@@ -2,13 +2,17 @@
 
 <head>
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
-
   <script src="lib/labeled_marker.js" type="text/javascript"></script>
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
+	 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/cookie/cookie-min.js"></script> 
   <script src="lib/openrp.js" type="text/javascript"></script>
   <script type="text/javascript">
     function load() {
         // hide the route plan when the page is first loaded
         document.getElementById('route-plan').style.display = 'none';
+        setupLocations();
+ 
     if (GBrowserIsCompatible()) {
         var map_dom = document.getElementById("map");
         map = new GMap2(map_dom);
@@ -66,11 +70,14 @@
 	    <div class="contents">
 	      <form id="routePlan" onSubmit="mysubmit(); return false;">
 		<label class="label" for="routePlanStart">From:</label>
-		<input type="text" id="routePlanStart" class="textfield"/>
+		<input type="text" id="routePlanStart" class="textfield"
+		       onFocus="select();"/>
+		
+		<p id="reverse-directions"><a href="javascript:reverseDirections()" class="reverse" title="Reverse Directions">&#x21c6;</a></p>
 		<p class="example">Example: North and Agricola</p>
-
 		<label class="label" for="routePlanEnd">To:</label>
-		<input type="text" id="routePlanEnd" class="textfield"/>
+		<input type="text" id="routePlanEnd" class="textfield"
+		       onFocus="select();"/>
 		<p class="example">Example: 1496 Lower Water</p>
 
 		<label class="label" for="time">Time:</label>

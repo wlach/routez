@@ -114,6 +114,20 @@ body, select, ol, ul, td {
       margin-bottom: .3em; 
 }
 
+P#reverse-directions {
+    font-size:20px; 
+    border: 0pt none; 
+    position: absolute; 
+    top:25px; 
+    left: 260px;
+}
+
+P#reverse-directions .reverse { 
+    text-decoration: none;
+    color: #11f;
+}
+
+
 .sidebar-box .contents .error {
     float:left;
     font-size: 10px;
