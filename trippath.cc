@@ -34,13 +34,36 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
 
 
 TripAction::TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
-                       double _start_time, double _end_time)
+                       double _start_time, double _end_time):
+    src_id(_src_id),
+    dest_id(_dest_id),
+    route_id(_route_id),
+    start_time(_start_time),
+    end_time(_end_time),
+    parent()
 {
-    src_id = _src_id;
-    dest_id = _dest_id;
-    route_id = _route_id;
-    start_time = _start_time;
-    end_time = _end_time;
+}
+
+
+TripAction::TripAction(const TripAction &other):
+    src_id(other.src_id),
+    dest_id(other.dest_id),
+    route_id(other.route_id),
+    start_time(other.start_time),
+    end_time(other.end_time),
+    parent(other.parent)
+{
+}
+
+
+TripAction& TripAction::operator=(const TripAction &other)
+{
+    src_id = other.src_id;
+    dest_id = other.dest_id;
+    route_id = other.route_id;
+    start_time = other.start_time;
+    end_time = other.end_time;
+    parent = other.parent;
 }
 
 

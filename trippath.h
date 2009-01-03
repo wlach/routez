@@ -18,7 +18,11 @@ struct TripAction
 
     TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
                double _start_time, double _end_time);
+    TripAction(const TripAction &other);
 
+    ~TripAction() { }
+
+    TripAction &operator=(const TripAction &other);
 };
 
 
