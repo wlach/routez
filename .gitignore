@@ -10,5 +10,6 @@ gmap_api_key
 *.routez
 routez.db
 .*.swp
+tags
 testgraph
 tripgraph.so
