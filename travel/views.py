@@ -101,9 +101,11 @@ def routeplan(request):
             shape = None
             if len(shapes):
                 shape = simplejson.loads(shapes[0].polyline)
+        action_time = human_time(daysecs + action.start_time);
         actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                               'lat': ts.lat, 
                               'lng': ts.lng,
+                              'time': action_time,
                               'dest_id':action.dest_id,
                               'shape':shape })
         last_action = action
@@ -116,3 +118,4 @@ def routeplan(request):
 
     return HttpResponse(simplejson.dumps(actions_desc), 
         mimetype="application/json")
+

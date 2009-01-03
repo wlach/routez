@@ -93,7 +93,20 @@ function submitCallback(data, responseCode) {
     } else {
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
 
-        for (var i=0; i<actions.length; ++i) {
+        var first_stop = "";
+        for (var i = 0; i < actions.length; ++i) {
+            if (actions[i].route_id) {
+                first_stop = actions[i].stopname;
+                break;
+            }
+        }
+        if (first_stop == "")
+            first_stop = dest_str;
+
+        routePlan += "<p><b>" + actions[0].time + ":</b> ";
+        routePlan += "Walk to " + first_stop + ".</p>";
+
+        for (var i = 0; i < actions.length; ++i) {
             if (actions[i].type == "alight" || actions[i].type == "pass") {
                 var latlng = new GLatLng(actions[i].lat, actions[i].lng);
                 routePath[routePath.length] = latlng;
@@ -119,8 +132,7 @@ function submitCallback(data, responseCode) {
                 
                 routePlan += "<p><b>" + actions[i].time + ":</b> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
-                routePlan += actions[i].route_longname + ")";
-                routePlan += " departing from " + actions[i].stopname + ".</p>";
+                routePlan += actions[i].route_longname + ").</p>";
 
                 addLine(map, routePath, walkPathColour);
                 routePath = new Array();
