@@ -54,8 +54,14 @@ struct TripPath
         std::tr1::unordered_set<int> &_possible_route_ids,
         boost::shared_ptr<TripStop> &_last_stop);
 
+private:
     void _get_heuristic_weight();
 
+    // Given an action just after the end of a walk in the path, delays
+    // that walk by the given number of seconds.
+    void delay_walk(boost::shared_ptr<TripAction> walk, float secs);
+
+public:
     // the following are for the benefit of our python wrapper
     boost::python::list get_actions();
     boost::python::object get_last_action();
