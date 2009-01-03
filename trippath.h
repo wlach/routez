@@ -2,7 +2,6 @@
 #define __TRIPPATH_H
 #include <tr1/unordered_set>
 #include <list>
-#include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include "tripstop.h"
 

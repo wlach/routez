@@ -1,8 +1,9 @@
 #include "tripgraph.h"
 #include <assert.h>
-#include <boost/python.hpp>
+#include <errno.h>
 #include <tr1/unordered_map>
 #include <map>
+#include <math.h>
 
 using namespace boost;
 using namespace std;
@@ -472,34 +473,3 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         }
     }
 }    
-
-#if 0
-BOOST_PYTHON_MODULE(tripgraph)
-{
-    using namespace boost::python;
-    class_<TripGraph>("TripGraph")
-    .def("add_tripstop", &TripGraph::add_tripstop)
-    .def("add_triphop", &TripGraph::add_triphop)
-    .def("add_walkhop", &TripGraph::add_walkhop)
-    .def("link_osm_gtfs", &TripGraph::link_osm_gtfs)
-    .def("save", &TripGraph::save)
-    .def("load", &TripGraph::load)
-    .def("find_path", &TripGraph::find_path)    
-    .def("get_tripstop", &TripGraph::get_tripstop)
-    ;
-
-    class_<TripStop>("TripStop")
-    .def_readonly("lat", &TripStop::lat)
-    .def_readonly("lng", &TripStop::lng);
-
-    class_<TripPath>("TripPath")
-    .def("get_actions", &TripPath::get_actions);
-    
-    class_<TripAction>("TripAction", init<const char *, const char *, int, double, double>())
-    .def_readonly("src_id", &TripAction::src_id)
-    .def_readonly("dest_id", &TripAction::dest_id)
-    .def_readonly("route_id", &TripAction::route_id)
-    .def_readonly("start_time", &TripAction::start_time)
-    .def_readonly("end_time", &TripAction::end_time);
-}
-#endif

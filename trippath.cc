@@ -1,4 +1,5 @@
 #include "trippath.h"
+#include <math.h>
 
 using namespace std;
 using namespace tr1;
