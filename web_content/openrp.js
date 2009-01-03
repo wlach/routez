@@ -169,6 +169,31 @@ function submitCallback(data, responseCode) {
 
     addLine(map, routePath, walkPathColour);
     document.getElementById("route-plan-content").innerHTML = routePlan;
+
+    //showDebugInfo(actions);
+}
+
+function showDebugInfo(actions) {
+    var debug_str = "<p>";
+    for (var i = 0; i < actions.length; ++i) {
+        debug_str += "Action " + i + ":"; 
+        debug_str += " id=" + actions[i].id;
+        debug_str += "; route_id=" + actions[i].route_id;
+        debug_str += "; type=" + actions[i].type;
+        debug_str += "; time=" + actions[i].time;
+        debug_str += "; lat=" + actions[i].lat;
+        debug_str += "; lng=" + actions[i].lng;
+        debug_str += "; stopname=" + actions[i].stopname;
+        debug_str += "<br/>\n";
+    }
+    debug_str += "</p>";
+
+    debug_div = document.getElementById("debug");
+    if (!debug_div) {
+        document.getElementById("footer").innerHTML += "<div id='debug'></div>";
+        debug_div = document.getElementById("debug");
+    }
+    debug_div.innerHTML = debug_str;
 }
 
 function checkPlanRoute() {
