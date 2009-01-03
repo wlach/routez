@@ -100,7 +100,7 @@ void TripGraph::add_triphop(int32_t start_time, int32_t end_time,
                             string service_id)
 {
     // will assert if src_id doesn't exist!!
-    get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
+    _get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
                            service_id);
 }
 
@@ -115,8 +115,8 @@ void TripGraph::add_tripstop(string id, string type, float lat, float lng)
 void TripGraph::add_walkhop(string src_id, string dest_id)
 {
     // will assert if src_id or dest_id doesn't exist!!
-    shared_ptr<TripStop> ts_src = get_tripstop(src_id);
-    shared_ptr<TripStop> ts_dest = get_tripstop(dest_id);
+    shared_ptr<TripStop> ts_src = _get_tripstop(src_id);
+    shared_ptr<TripStop> ts_dest = _get_tripstop(dest_id);
 
     double dist = distance(ts_src->lat, ts_src->lng,
                            ts_dest->lat, ts_dest->lng);
@@ -181,7 +181,7 @@ void TripGraph::link_osm_gtfs()
                 {
                     Point p1(j->second->lat, j->second->lng);
 
-                    shared_ptr<TripStop> dest_stop = get_tripstop(k->first);
+                    shared_ptr<TripStop> dest_stop = _get_tripstop(k->first);
                     Point p2(dest_stop->lat, dest_stop->lng);
 
                     Point p3 = get_closest_point(p1, p2, p);
@@ -254,6 +254,13 @@ shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
 }
 
 
+TripStop TripGraph::get_tripstop(string id)
+{
+    shared_ptr<TripStop> ts = _get_tripstop(id);
+    return TripStop(*ts);
+}
+
+
 TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                               double src_lat, double src_lng, 
                               double dest_lat, double dest_lng)
@@ -316,7 +323,7 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 }
 
 
-shared_ptr<TripStop> TripGraph::get_tripstop(string id)
+shared_ptr<TripStop> TripGraph::_get_tripstop(string id)
 {
     TripStopDict::iterator ts = tripstops.find(id);
     assert(ts != tripstops.end());
@@ -355,7 +362,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     // printf("Extending path at vertex %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
     //         last_route_id, path->time, path->walking_time, path->route_time);
 
-    shared_ptr<TripStop> src_stop = get_tripstop(src_id);
+    shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
 
     // keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here
@@ -384,7 +391,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             shared_ptr<TripAction> action(
                 new TripAction(src_id, dest_id, -1, path->time, 
                                (path->time + walktime)));
-            shared_ptr<TripStop> ds = get_tripstop(dest_id);
+            shared_ptr<TripStop> ds = _get_tripstop(dest_id);
             shared_ptr<TripPath> path2 = path->add_action(
                 action, outgoing_route_ids, ds);
 
@@ -451,7 +458,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 shared_ptr<TripAction> action = shared_ptr<TripAction>(
                     new TripAction(src_id, t->dest_id, (*i), t->start_time,
                                    t->end_time));
-                shared_ptr<TripStop> ds = get_tripstop(t->dest_id);
+                shared_ptr<TripStop> ds = _get_tripstop(t->dest_id);
                 shared_ptr<TripPath> path2 = path->add_action(
                     action, outgoing_route_ids, ds);
                 

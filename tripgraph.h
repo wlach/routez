@@ -26,7 +26,7 @@ public:
 
     void link_osm_gtfs();
 
-    boost::shared_ptr<TripStop> get_tripstop(std::string id);
+    TripStop get_tripstop(std::string id);
 
     TripPath find_path(int secs, std::string service_period, bool walkonly,
                        double src_lat, double src_lng, 
@@ -49,6 +49,9 @@ public:
     typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
     
   private:
+    // internal copy of get_tripstop: returns a pointer, not a copy, so
+    // much faster (when called many times)
+    boost::shared_ptr<TripStop> _get_tripstop(std::string id);
     boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
     void extend_path(boost::shared_ptr<TripPath> &path, 
