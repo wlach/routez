@@ -11,6 +11,10 @@ struct TripAction
     TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
                double _start_time, double _end_time);
     TripAction() {} // for swig, which wants to call resize for some dumb reason
+    TripAction(const TripAction &other);
+    ~TripAction() { }
+
+    TripAction &operator=(const TripAction &other);
 
     std::string src_id, dest_id;
     float start_time, end_time;
@@ -53,7 +57,12 @@ struct TripPath
     double weight;
     double heuristic_weight;
 
+private:
     void _get_heuristic_weight();
+
+    // Given an action just after the end of a walk in the path, delays
+    // that walk by the given number of seconds.
+    void delay_walk(boost::shared_ptr<TripAction> walk, float secs);
 };
 
 #endif // __TRIPPATH_H

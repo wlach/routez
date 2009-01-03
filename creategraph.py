@@ -32,7 +32,7 @@ def load_gtfs(tripgraph, sched):
 
 def load_osm(tripgraph, map):
     for node in map.nodes.values():
-        tripgraph.add_tripstop(str("osm"+node.id), "osm", node.lat, node.lon)
+        tripgraph.add_tripstop(str("osm"+node.id), str("osm"), node.lat, node.lon)
         
     for way in map.ways.values():
         prev_id = None

@@ -134,19 +134,19 @@ struct Point
 
 bool operator==(const Point &p1, const Point &p2)
 {
-    // we say that anything within a distance of 1 meter is identical
+    // We say that anything within a distance of 1 meter is identical.
     return (distance(p1.lat, p1.lng, p2.lat, p2.lng) < 1.0f);
 }
 
 Point get_closest_point(Point &a, Point &b, Point &c)
 {
-    // given a line made up of a and b, and a point c,
-    // return the point on the line closest to c (may be a or b)
+    // Given a line made up of a and b, and a point c,
+    // return the point on the line closest to c (may be a or b).
     double ab2 = pow((b.lat - a.lat), 2) + pow((b.lng - a.lng), 2);
     double ap_ab = (c.lat - a.lat)*(b.lat-a.lat) + (c.lng-a.lng)*(b.lng-a.lng);
     double t = ap_ab / ab2;
  
-    // clamp t to be between a and b
+    // Clamp t to be between a and b.
     if (t < 0.0f)
         t = 0.0f;
     else if (t>1.0f)
@@ -158,9 +158,9 @@ Point get_closest_point(Point &a, Point &b, Point &c)
 
 void TripGraph::link_osm_gtfs()
 {
-    // this complicated-looking method attempts to link gtfs stops 
-    // to osm nodes. if a stop lies between two osm nodes on a polyline,
-    // we will link the gtfs stop to both of them
+    // This complicated-looking method attempts to link gtfs stops 
+    // to osm nodes. If a stop lies between two osm nodes on a polyline,
+    // we will link the gtfs stop to both of them.
 
     map<string, pair<string, string> > new_walkhops;
 
@@ -275,8 +275,8 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
     printf("Start: %s End: %s\n", start_node->id, end_node->id);
 
-    // consider distance required to reach the start node from the 
-    // beginning, add that to our start time
+    // Consider the distance required to reach the start node from the 
+    // beginning, and add that to our start time.
     double dist_from_start = distance(src_lat, src_lng, 
                                       start_node->lat, start_node->lng);
     secs += (int)(dist_from_start / est_walk_speed);
@@ -299,8 +299,8 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                     num_paths_considered, visited_routes, visited_walks, 
                     uncompleted_paths, completed_paths);
 
-        //# if we've still got open paths, but their weight exceeds that
-        // of the weight of a completed path, break
+        // If we've still got open paths, but their weight exceeds that
+        // of the weight of a completed path, break.
         if (uncompleted_paths.size() > 0 && completed_paths.size() > 0 &&
             uncompleted_paths.top()->heuristic_weight > 
             completed_paths.top()->heuristic_weight)
@@ -364,12 +364,12 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
 
-    // keep track of outgoing route ids at this node: make sure that we 
-    // don't get on a route later when we could have gotten on here
+    // Keep track of outgoing route ids at this node: make sure that we 
+    // don't get on a route later when we could have gotten on here.
     unordered_set<int> outgoing_route_ids = src_stop->get_routes(service_period);
 
-    // explore walkhops that are better than the ones we've already visited
-    // if we're on a bus, don't allow a transfer if we've been on for
+    // Explore walkhops that are better than the ones we've already visited.
+    // If we're on a bus, don't allow a transfer if we've been on for
     // less than 5 minutes (FIXME: probably better to measure distance 
     // travelled?)
     if (last_route_id == -1 || path->route_time > (2 * 60))
@@ -380,7 +380,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             const char *dest_id = i->first.c_str();
             double walktime = i->second;
 
-            // do a quick test to make sure that the potential basis for a 
+            // Do a quick test to make sure that the potential basis for a 
             // new path isn't worse than what we have already, before
             // incurring the cost of creating a new path and evaluating it.
             unordered_map<const char*, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
@@ -395,14 +395,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             shared_ptr<TripPath> path2 = path->add_action(
                 action, outgoing_route_ids, ds);
 
-            //printf("- Considering walkpath to %s\n", dest_id.c_str());
+            //printf("- Considering walkpath to %s\n", dest_id);
 
             if (v1 == vsrc.end() || 
                 v1->second->heuristic_weight > path2->heuristic_weight ||
                 ((v1->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                  v1->second->walking_time > path2->walking_time))
             {
-                //printf("-- Adding walkpath to %s\n", dest_id.c_str());
+                //printf("-- Adding walkpath to %s\n", dest_id);
                 if (strcmp(dest_id, goal_id) == 0)
                     completed_paths.push(path2);
                 else
@@ -415,13 +415,12 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     }
 
     
-    // if we're doing a walkonly path (mostly for generating shapes?), stop
-    // and return here
+    // If we're doing a walkonly path (mostly for generating shapes?), stop
+    // and return here.
     if (walkonly)
         return;
 
-    // find outgoing triphops from the source and get a list of paths to
-    // them. 
+    // Find outgoing triphops from the source and get a list of paths to them. 
     for (unordered_set<int>::iterator i = outgoing_route_ids.begin();
          i != outgoing_route_ids.end(); i++)
     {
@@ -434,13 +433,13 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                                                        service_period);
         if (t)
         {
-            // if we've been on the route before (or could have been), 
-            // don't get on again
+            // If we've been on the route before (or could have been), 
+            // don't get on again.
             if ((*i) != last_route_id && path->possible_route_ids.count(*i))
             {
                 // pass
             }
-            // disallow more than three transfers
+            // Disallow more than three transfers.
             else if ((*i) != last_route_id && 
                      path->traversed_route_ids > 3)
             {
@@ -448,7 +447,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             }
             else
             {
-                // do a quick test to make sure that the potential basis for a 
+                // Do a quick test to make sure that the potential basis for a 
                 // new path isn't worse than what we have already, before
                 // incurring the cost of creating a new path and evaluating it.
                 unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*i);

@@ -1,6 +1,12 @@
 #include "trippath.h"
 #include <math.h>
 
+#if 0
+#define LOG(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 using namespace std;
 using namespace tr1;
 using namespace boost;
@@ -35,13 +41,36 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
 
 
 TripAction::TripAction(const char *_src_id, const char *_dest_id, 
-                       int _route_id, double _start_time, double _end_time)
+                       int _route_id, double _start_time, double _end_time) :
+    src_id(_src_id),
+    dest_id(_dest_id),
+    route_id(_route_id),
+    start_time(_start_time),
+    end_time(_end_time),
+    parent()
 {
-    src_id = _src_id;
-    dest_id = _dest_id;
-    route_id = _route_id;
-    start_time = _start_time;
-    end_time = _end_time;
+}
+
+
+TripAction::TripAction(const TripAction &other):
+    src_id(other.src_id),
+    dest_id(other.dest_id),
+    route_id(other.route_id),
+    start_time(other.start_time),
+    end_time(other.end_time),
+    parent(other.parent)
+{
+}
+
+
+TripAction& TripAction::operator=(const TripAction &other)
+{
+    src_id = other.src_id;
+    dest_id = other.dest_id;
+    route_id = other.route_id;
+    start_time = other.start_time;
+    end_time = other.end_time;
+    parent = other.parent;
 }
 
 TripPath::TripPath(double _time, double _fastest_speed, 
@@ -134,21 +163,35 @@ list<TripAction> TripPath::get_actions()
     return l;
 }
 
-shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, unordered_set<int> &_possible_route_ids,
-                              shared_ptr<TripStop> &_last_stop)
+shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, 
+                            unordered_set<int> &_possible_route_ids,
+                            shared_ptr<TripStop> &_last_stop)
 {
     shared_ptr<TripPath> new_trippath(new TripPath(*this));
+
+    float departure_delay = 0.0f;
 
     if (action->route_id == -1)
     {
         new_trippath->walking_time += (action->end_time - action->start_time);
         new_trippath->route_time = 0;
     }
-    else if (new_trippath->last_action && 
-             action->route_id != new_trippath->last_action->route_id)
+    else if (new_trippath->last_action)
     {
-        new_trippath->traversed_route_ids++;
-        new_trippath->route_time = 0;
+        // Starting first bus route, adjust the start time to match.
+        if (new_trippath->traversed_route_ids == 0)
+        {
+            departure_delay = 
+                action->start_time - new_trippath->last_action->end_time;
+            // Aim to be at the bus stop 3 minutes early.
+            departure_delay -= 3*60;
+        }
+
+        if (action->route_id != new_trippath->last_action->route_id)
+        {
+            new_trippath->traversed_route_ids++;
+            new_trippath->route_time = 0;
+        }
     }
 
     for (unordered_set<int>::iterator i = _possible_route_ids.begin(); 
@@ -169,5 +212,48 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, unorde
     new_trippath->_get_heuristic_weight();
     new_trippath->time = action->end_time;
 
+    if (departure_delay > 0.0f)
+    {
+        LOG("Delaying start by %f seconds\n", departure_delay);
+        new_trippath->delay_walk(new_trippath->last_action, departure_delay);
+    }
+
     return new_trippath;
 }
+
+
+void TripPath::delay_walk(boost::shared_ptr<TripAction> walk, float secs)
+{
+    if (!walk)
+        return;
+
+    // Don't delay partial walks; we need to be given the element *after* 
+    // the final walk.
+    if (walk->route_id == -1)
+        return;
+
+    // Only delay actual walks.
+    if (!walk->parent || walk->parent->route_id != -1)
+        return;
+
+    boost::shared_ptr<TripAction> w(walk);
+    while (w && w->parent && w->parent->route_id == -1)
+    {
+        // We need to clone the actions, as they're no longer safe to share
+        // (for instance, they could be shared by another bus trip that leaves
+        // earlier).
+        w->parent = boost::shared_ptr<TripAction>(new TripAction(*(w->parent)));
+        w = w->parent;
+
+        w->start_time += secs;
+        w->end_time += secs;
+    }
+
+    // If we delayed the initial walk, then we've reduced the total trip time.
+    if (!w)
+    {
+        weight -= secs;
+        _get_heuristic_weight();
+    }
+}
+

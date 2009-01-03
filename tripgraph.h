@@ -13,7 +13,7 @@
 
 class TripGraph
 {
-public:
+  public:
     TripGraph();
     void load(std::string fname);
     void save(std::string fname);
