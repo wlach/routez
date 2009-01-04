@@ -99,10 +99,12 @@ class OSM:
             @classmethod
             def startElement(self, name, attrs):
                 if name=='node':
-                    print "Parsing node %s" % attrs['id']
+                    if (int(attrs['id']) % 1000) == 0:
+                        print "Parsing node %s" % attrs['id']
                     self.currElem = Node(attrs['id'], float(attrs['lon']), float(attrs['lat']))
                 elif name=='way':
-                    print "Parsing way %s" % attrs['id']
+                    if (int(attrs['id']) % 1000) == 0:
+                        print "Parsing way %s" % attrs['id']
                     self.currElem = Way(attrs['id'], superself)
                 elif name=='tag':
                     pass
