@@ -222,7 +222,7 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action,
 }
 
 
-void TripPath::delay_walk(boost::shared_ptr<TripAction> walk, float secs)
+void TripPath::delay_walk(shared_ptr<TripAction> walk, float secs)
 {
     if (!walk)
         return;
@@ -236,13 +236,13 @@ void TripPath::delay_walk(boost::shared_ptr<TripAction> walk, float secs)
     if (!walk->parent || walk->parent->route_id != -1)
         return;
 
-    boost::shared_ptr<TripAction> w(walk);
+    shared_ptr<TripAction> w(walk);
     while (w && w->parent && w->parent->route_id == -1)
     {
         // We need to clone the actions, as they're no longer safe to share
         // (for instance, they could be shared by another bus trip that leaves
         // earlier).
-        w->parent = boost::shared_ptr<TripAction>(new TripAction(*(w->parent)));
+        w->parent = shared_ptr<TripAction>(new TripAction(*(w->parent)));
         w = w->parent;
 
         w->start_time += secs;
