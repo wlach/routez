@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
-AC_INIT(routez)
+AC_INIT(libroutez)
 
 AC_PROG_CC
 AC_PROG_CXX
