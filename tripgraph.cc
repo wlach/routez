@@ -163,9 +163,12 @@ void TripGraph::link_osm_gtfs()
 {
     map<string, pair<string, string> > new_walkhops;
 
+    int tripstop_count = 0;
+    int tripstop_total = tripstops.size();
     for (TripStopDict::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
+        tripstop_count++;
         // For each GTFS stop...
         if (strcmp(i->second->type, "gtfs") == 0)
         {
@@ -221,9 +224,11 @@ void TripGraph::link_osm_gtfs()
             }
             
             new_walkhops[i->first] = nearest_walkhop;
-            printf("Linking %s -> %s, %s\n", i->first.c_str(), 
-                   nearest_walkhop.first.c_str(), 
-                   nearest_walkhop.second.c_str());
+            printf("%02.2f%% done: Linking %s -> %s, %s\n", 
+                    ((float)tripstop_count * 100.0f) / ((float)tripstop_total),
+                    i->first.c_str(), 
+                    nearest_walkhop.first.c_str(), 
+                    nearest_walkhop.second.c_str());
         }
     }
 
