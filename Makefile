@@ -43,4 +43,4 @@ testgraph: testgraph.cc libroutez.so
 	g++ testgraph.cc -o testgraph libroutez.so -fPIC -g
 
 clean:
-	rm -f _tripgraph.so *.o testgraph tripgraph.py tripgraph_wrap_py.cc *~
+	rm -f _tripgraph.so *.o *.pyc */*.pyc testgraph tripgraph.py tripgraph_wrap_py.cc *~ 
