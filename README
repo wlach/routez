@@ -11,6 +11,8 @@ eventually be abstracted out and released seperately.
    - As of this writing you need what's in SVN, as it has a fix that I made
    to actually handle interpolated stops correctly. The next version after
    1.1.9 should have my fix.
+ - libroutez
+   - Checkout from http://github.com/wlach/libroutez
  - Python ParseDateTime (http://code-bear.com/code/parsedatetime/)
    - I used version 0.8.6.
  - Django (http://www.djangoproject.com/)
@@ -20,7 +22,7 @@ eventually be abstracted out and released seperately.
  - Python YAML
    - Just getting these from your Linux distribution is probably easiest.
 
-To install a python package in a local prefix, do:
+Hint: To install a python package in a local prefix, do:
  
   "python setup.py install --home=$HOME --prefix="
 
@@ -39,17 +41,13 @@ I put up a semi-recent set at:
 
    http://wlach.masalalabs.ca/greater-hrm-geobase.osm.gz
 
-3. Build the C++ graph module.
-
-The usual...
-
- - ./autogen.sh && ./configure && make
-
 4. Build a graph corresponding to the OSM and GTFS data
 
 Something like:
 
- - ./creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez
+ - creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez
+
+(note this assumes libroutez installed in creategraph.py in your $PATH)
 
 5. Build a database of stop, route, and shape information from the GTFS feed
 
