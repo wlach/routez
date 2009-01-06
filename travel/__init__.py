@@ -1,4 +1,4 @@
-from tripgraph import TripGraph
+from libroutez.tripgraph import TripGraph
 from django.conf import settings
 
 # This is expensive to load, and doesn't change, so do it just once per server
