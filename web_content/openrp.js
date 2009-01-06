@@ -1,7 +1,7 @@
 var origin = null;
 var dest = null;
 
-var map;
+var map = null;
 var geocoder;
 var busStopIcon;
 var walkStopIcon;
@@ -78,36 +78,19 @@ function submitCallback(data, responseCode) {
         return;
     }
 
-    // show the route plan, hide the about box
-    document.getElementById('route-plan').style.display = 'block';
-    document.getElementById('intro').style.display = 'none';
+    actions = eval(data);
 
-    // nuke any existing map overlays
-    map.clearOverlays();
-    
-    // add start and end markers
-    function orderOfCreation(marker,b) {
-        return 1;
+    // update the map, if we have one
+    if (map) {
+        updateMapDirections(actions);
     }
 
-    map.addOverlay(new GMarker(origin, {icon:G_START_ICON}));
-    map.addOverlay(new GMarker(dest, {icon:G_END_ICON}));
-
-    actions = eval(data);
+    // now update our directions
     var routePlan = "";
-    var routePath = new Array();
-
-    var walkPathColour = "#0000ff";
-    var busPathColour = "#ff0000";
-
-    var bounds = new GLatLngBounds;
-    bounds.extend(origin);
-    bounds.extend(dest);
 
     if (actions.length == 0) {
         routePlan += "We couldn't find any transit directions for this trip. ";
         routePlan += "This probably means it's faster to walk.";
-        addWalkingOverlay(origin, dest);
     } else {
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
 
@@ -124,6 +107,63 @@ function submitCallback(data, responseCode) {
         routePlan += "<p><b>" + actions[0].time + ":</b> ";
         routePlan += "Walk to " + first_stop + ".</p>";
 
+        for (var i = 0; i < actions.length; ++i) {
+
+            if (actions[i].type == "board") {                
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
+                routePlan += "Board the " + actions[i].route_shortname + " (";
+                routePlan += actions[i].route_longname + ").</p>";
+            } else if (actions[i].type == "alight") {
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
+                routePlan += "Descend at " + actions[i].stopname;
+
+                if (actions.length > i+1 && actions[i].type == "alight" && 
+                    actions[i+1].type != "board") {
+                    routePlan += " and walk to " + dest_str;
+                }
+                routePlan += ".</p>";
+            } 
+            
+            if (i==(actions.length-1)) {
+                routePlan += "<p><b>" + actions[i].time + ":</b> ";
+                routePlan += "Arrive at " + dest_str + ".</p>";
+            }
+        }
+    }
+
+    document.getElementById("route-plan-content").innerHTML = routePlan;
+
+    // show the route plan, hide the about box
+    document.getElementById('route-plan').style.display = 'block';
+    document.getElementById('intro').style.display = 'none';
+
+    //showDebugInfo(actions);
+}
+
+function updateMapDirections(actions) {
+    // nuke any existing map overlays
+    map.clearOverlays();
+    
+    // add start and end markers
+    function orderOfCreation(marker,b) {
+        return 1;
+    }
+
+    map.addOverlay(new GMarker(origin, {icon:G_START_ICON}));
+    map.addOverlay(new GMarker(dest, {icon:G_END_ICON}));
+
+    var routePath = new Array();
+
+    var walkPathColour = "#0000ff";
+    var busPathColour = "#ff0000";
+
+    var bounds = new GLatLngBounds;
+    bounds.extend(origin);
+    bounds.extend(dest);
+
+    if (actions.length == 0) {
+        addWalkingOverlay(origin, dest);
+    } else {
         for (var i = 0; i < actions.length; ++i) {
             if (actions[i].type == "alight" || actions[i].type == "pass") {
                 var latlng = new GLatLng(actions[i].lat, actions[i].lng);
@@ -148,23 +188,9 @@ function submitCallback(data, responseCode) {
                 markerOpts.labelOffset = new GSize(24, -44);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
                 
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Board the " + actions[i].route_shortname + " (";
-                routePlan += actions[i].route_longname + ").</p>";
-
                 addLine(map, routePath, walkPathColour);
                 routePath = new Array();
             } else if (actions[i].type == "alight") {
-                var previd = actions[i-1].dest_id;
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Descend at " + actions[i].stopname;
-
-                if (actions.length > i+1 && actions[i].type == "alight" && 
-                    actions[i+1].type != "board") {
-                    routePlan += " and walk to " + dest_str;
-                }
-                routePlan += ".</p>";
-
                 addLine(map, routePath, busPathColour);
                 routePath = new Array();
             } 
@@ -174,11 +200,6 @@ function submitCallback(data, responseCode) {
                 actions[i].type != "board") {
                 map.addOverlay(new GMarker(latlng, walkStopIcon));
             }
-
-            if (i==(actions.length-1)) {
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Arrive at " + dest_str + ".</p>";
-            }
         }
     }
     map.setCenter(bounds.getCenter());
@@ -186,9 +207,6 @@ function submitCallback(data, responseCode) {
     map.setCenter(bounds.getCenter(), zoom);
 
     addLine(map, routePath, walkPathColour);
-    document.getElementById("route-plan-content").innerHTML = routePlan;
-
-    //showDebugInfo(actions);
 }
 
 function showDebugInfo(actions) {
