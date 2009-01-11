@@ -20,6 +20,7 @@ eventually be abstracted out and released seperately.
  - SWIG
    - A recentish version is desirable. I used 1.3.36.
  - Python YAML
+ - Python SimpleJSON
    - Just getting these from your Linux distribution is probably easiest.
 
 Hint: To install a python package in a local prefix, do:
