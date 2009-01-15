@@ -40,11 +40,7 @@
 
 </head>
 <body onload="load();" onunload="GUnload()">
-  <div id='header'>
-    <div id='header-logo'>
-      <img src="lib/routez-logo.png"/>
-    </div>
-  </div>
+  {% include 'header.html' %}
   <div id='content'>
       <div id='sidebar-wrapper'>
 	<div id='sidebar'>
@@ -97,7 +93,5 @@
       </div>
       <div id="map-wrapper"> <div id="map"></div></div>       
   </div>
-  <div id="footer">
-    Routez is copyright 2008 William Lachance. It are my routez.ca. <a href="about">Learn more...</a>
-  </div>
+  {% include 'footer.html' %}
 </body>
