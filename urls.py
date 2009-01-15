@@ -8,6 +8,7 @@ import os
 
 urlpatterns = patterns('',
     (r'^$', 'routez.travel.views.main_page'),
+    (r'^about$', 'routez.travel.views.about'),
     (r'^json/stoplist$', 'routez.travel.views.stoplist'),
     (r'^json/routelist$', 'routez.travel.views.routelist'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),

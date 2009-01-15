@@ -33,6 +33,9 @@ def main_page(request):
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
          'key': settings.GMAPS_API_KEY, 'now': now_str})
 
+def about(request):
+    return render_to_response('about.html')
+
 def routeplan(request):
     start_lat = float(request.GET['startlat'])
     start_lng = float(request.GET['startlng'])
