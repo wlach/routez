@@ -78,8 +78,9 @@ function submitCallback(data, responseCode) {
         return;
     }
 
-    // show the route plan, hide the about box
+    // show the route plan (and options), hide the about box
     document.getElementById('route-plan').style.display = 'block';
+    document.getElementById('route-plan-options').style.display = 'block';
     document.getElementById('intro').style.display = 'none';
 
     // nuke any existing map overlays

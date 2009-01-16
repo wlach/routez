@@ -10,6 +10,7 @@
   <script type="text/javascript">
     function load() {
         // hide the route plan when the page is first loaded
+        document.getElementById('route-plan-options').style.display = 'none';
         document.getElementById('route-plan').style.display = 'none';
         setupLocations();
  
@@ -54,7 +55,9 @@
  	  <div id="route-plan-options" class="sidebar-box">
 	    <div class="title">Suggested Routes</div>
 	    <div class="contents">
-	      <div class="content-element">
+	      <div class="content-element" id="routeOption1"
+		   onmouseover="document.getElementById('routeOption1').style.background = '#aaf';"
+		   onmouseout="document.getElementById('routeOption1').style.background = '#fff';">
 		<b>7 17</b><br/>
 		<ul>
 		  <li>9:00am-9:40am (40 minutes)</li>
@@ -62,7 +65,9 @@
 		</ul>
 		<p><b>(NOTE: this is just a placeholder!)</b></p>
 	      </div>
-	      <div class="content-element">
+	      <div class="content-element" id="routeOption2" 
+		   onmouseover="document.getElementById('routeOption2').style.background = '#aaf';"
+		   onmouseout="document.getElementById('routeOption2').style.background = '#fff';">
 		<b>10 23 AF</b><br/>
 		<ul>
 		  <li>9:00am-10:40am (one hour 40 minutes)</li>
