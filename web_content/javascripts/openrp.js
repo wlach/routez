@@ -24,14 +24,34 @@ function setupLocations() {
  */
 function initIcons() {
     busStopIcon = new GIcon();
-    busStopIcon.image = "lib/small_bus_marker.png";
-    busStopIcon.iconSize = new GSize(64, 52);
-    busStopIcon.iconAnchor = new GPoint(5, 47);
+    busStopIcon.image = "lib/images/marker_bus.png";
+    busStopIcon.iconSize = new GSize(76, 36);
+    busStopIcon.iconAnchor = new GPoint(1, 35);
 
     walkStopIcon = new GIcon();
-    walkStopIcon.image = "lib/small_walk_marker.png";
-    walkStopIcon.iconSize = new GSize(30, 50);
-    walkStopIcon.iconAnchor = new GPoint(5, 45);    
+    walkStopIcon.image = "lib/images/marker_walk.png";
+    walkStopIcon.iconSize = new GSize(46, 36);
+    walkStopIcon.iconAnchor = new GPoint(1, 35);
+
+    ferryStopIcon = new GIcon();
+    ferryStopIcon.image = "lib/images/marker_ferry.png";
+    ferryStopIcon.iconSize = new GSize(46, 36);
+    ferryStopIcon.iconAnchor = new GPoint(1, 35);
+
+    switchStopIcon = new GIcon();
+    switchStopIcon.image = "lib/images/marker_switch.png";
+    switchStopIcon.iconSize = new GSize(46, 36);
+    switchStopIcon.iconAnchor = new GPoint(1, 35);
+
+    fromIcon = new GIcon();
+    fromIcon.image = "lib/images/marker_from.png";
+    fromIcon.iconSize = new GSize(46, 36);
+    fromIcon.iconAnchor = new GPoint(1, 35);
+
+    toIcon = new GIcon();
+    toIcon.image = "lib/images/marker_to.png";
+    toIcon.iconSize = new GSize(46, 36);
+    toIcon.iconAnchor = new GPoint(1, 35);
 }
 
 function addWalkingOverlay(origin, dest) {
@@ -106,8 +126,8 @@ function submitCallback(data, responseCode) {
     bounds.extend(dest);
 
     if (actions.length == 0) {
-        routePlan += "We couldn't find any transit directions for this trip. ";
-        routePlan += "This probably means it's faster to walk.";
+        routePlan += "<p>We couldn't find any transit directions for this trip.";
+        routePlan += "This probably means it's faster to walk.</p>";
         addWalkingOverlay(origin, dest);
     } else {
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
@@ -122,8 +142,9 @@ function submitCallback(data, responseCode) {
         if (first_stop == "")
             first_stop = dest_str;
 
-        routePlan += "<p><b>" + actions[0].time + ":</b> ";
-        routePlan += "Walk to " + first_stop + ".</p>";
+        routePlan += "<ol>";
+        routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
+        routePlan += "Walk to " + first_stop + ".</li>";
 
         for (var i = 0; i < actions.length; ++i) {
             if (actions[i].type == "alight" || actions[i].type == "pass") {
@@ -146,25 +167,25 @@ function submitCallback(data, responseCode) {
                 markerOpts.icon = busStopIcon;
                 markerOpts.labelText = actions[i].route_shortname;
                 markerOpts.labelClass = "tooltip";
-                markerOpts.labelOffset = new GSize(24, -44);
+                markerOpts.labelOffset = new GSize(31, -35);
                 map.addOverlay(new LabeledMarker(latlng, markerOpts));
                 
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
+                routePlan += "<li class='board'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
-                routePlan += actions[i].route_longname + ").</p>";
+                routePlan += actions[i].route_longname + ").</li>";
 
                 addLine(map, routePath, walkPathColour);
                 routePath = new Array();
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
+                routePlan += "<li class='alight'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Descend at " + actions[i].stopname;
 
                 if (actions.length > i+1 && actions[i].type == "alight" && 
                     actions[i+1].type != "board") {
                     routePlan += " and walk to " + dest_str;
                 }
-                routePlan += ".</p>";
+                routePlan += ".</li>";
 
                 addLine(map, routePath, busPathColour);
                 routePath = new Array();
@@ -177,10 +198,11 @@ function submitCallback(data, responseCode) {
             }
 
             if (i==(actions.length-1)) {
-                routePlan += "<p><b>" + actions[i].time + ":</b> ";
-                routePlan += "Arrive at " + dest_str + ".</p>";
+                routePlan += "<li class='arrive'><strong>" + actions[i].time + ":</strong> ";
+                routePlan += "Arrive at " + dest_str + ".</li>";
             }
         }
+        routePlan += "</ol>";
     }
     map.setCenter(bounds.getCenter());
     var zoom = map.getBoundsZoomLevel(bounds);
@@ -241,12 +263,10 @@ function gotOriginCallback(latlng) {
     if (latlng) {
         origin = latlng;
         document.getElementById('error-from').style.display = 'none';
-        document.getElementById('routePlanStart').style.border = 
-        '1px solid #aaf';
     } else {
         document.getElementById('error-from').style.display = 'block';
         document.getElementById('routePlanStart').style.border = 
-        '2px solid #f00';
+        '1px solid #800000';
     }
 
     checkPlanRoute();
@@ -256,12 +276,10 @@ function gotDestCallback(latlng) {
     if (latlng) {
         dest = latlng;
         document.getElementById('error-to').style.display = 'none';
-        document.getElementById('routePlanEnd').style.border = 
-        '1px solid #aaf';
     } else {
         document.getElementById('error-to').style.display = 'block';
         document.getElementById('routePlanEnd').style.border = 
-        '2px solid #f00';
+        '1px solid #800000';
     }
 
     checkPlanRoute();
