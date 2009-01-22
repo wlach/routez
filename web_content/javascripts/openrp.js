@@ -8,15 +8,21 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
+var routePlanStartDefault = null;
+var routePlanEndDefault = null;
+
 
 /**
- * Setup locations based on cookie. Call once during load."
+ * Setup locations based on cookie. Call once during load.
  */
 function setupLocations() {
     // if no cookie yet exists, no biggie, these values just won't get set
     // to anything
-    document.getElementById('routePlanStart').value = YAHOO.util.Cookie.getSub("routeplan", "start"); 
-    document.getElementById('routePlanEnd').value = YAHOO.util.Cookie.getSub("routeplan", "end");         
+    routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
+    routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
+
+    document.getElementById('routePlanStart').value = routePlanStartDefault;
+    document.getElementById('routePlanEnd').value = routePlanEndDefault;
 }
 
 /**
@@ -240,9 +246,12 @@ function showDebugInfo(actions) {
 function checkPlanRoute() {
  
     if (origin && dest) {
+        routePlanStartDefault = document.getElementById('routePlanStart').value;
+        routePlanEndDefault = document.getElementById('routePlanEnd').value;
+
         YAHOO.util.Cookie.setSubs("routeplan", 
-                                  { start: document.getElementById('routePlanStart').value, 
-                                      end: document.getElementById('routePlanEnd').value },
+                                  { start: routePlanStartDefault, 
+                                      end: routePlanEndDefault },
                                   { expires: new Date("January 12, 2025") });
 
         time = document.getElementById('time').value;
@@ -293,4 +302,14 @@ function mysubmit() {
     var dest_str = document.getElementById('routePlanEnd').value + extra;
     geocoder.getLatLng(origin_str, gotOriginCallback);
     geocoder.getLatLng(dest_str, gotDestCallback);
+}
+
+
+function locationInputFocused(location) {
+    if (location == "start" && 
+        document.getElementById('routePlanStart').value == routePlanStartDefault) {
+        document.getElementById('routePlanStart').select();
+    } else if (location == "end" && document.getElementById('routePlanEnd').value == routePlanEndDefault) {
+        document.getElementById('routePlanEnd').select();
+    }
 }

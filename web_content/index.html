@@ -69,14 +69,16 @@
           <div>
             <label class="from" for="routePlanStart">From</label>
             <span>
-              <input class="text" type="text" id="routePlanStart" onFocus="select();"/>
+              <input class="text" type="text" id="routePlanStart" 
+		     onFocus="javascript:locationInputFocused('start');"/>
               <label>Ex.: North and Agricola</label>
             </span>
           </div>
           <div>
             <label class="to" for="routePlanEnd">To</label>
             <span>
-              <input class="text" type="text" id="routePlanEnd" onFocus="select();"/>
+              <input class="text" type="text" id="routePlanEnd" 
+		     onFocus="javascript:locationInputFocused('end');"/>
               <label>Ex.: 1496 Lower Water</label>
             </span>
           </div>
