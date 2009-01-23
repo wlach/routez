@@ -64,9 +64,10 @@ body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000
 /* Directions */
 #route-plan ol { margin: 0; padding: 0; }
 #route-plan ol li { margin: 0 0 10px; padding: 0 0 10px 24px; list-style: none; background-position: top left; background-repeat: no-repeat; border-bottom: 1px dotted #808080; }
+#route-plan ol li.depart { background-image: url('../images/label_from.png');}
 #route-plan ol li.walk { background-image: url('../images/icon_walk.png'); }
 #route-plan ol li.board { background-image: url('../images/icon_bus.png'); }
-#route-plan ol li.alight {}
+#route-plan ol li.alight { background-image: url('../images/icon_walk.png'); }
 #route-plan ol li.arrive { background-image: url('../images/label_to.png');}
 #route-plan p { margin: 0 0 10px; }
 #route-plan p.feedback { color: #808080; margin: 0; }

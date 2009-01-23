@@ -8,6 +8,11 @@ import time
 
 from routez.travel.models import Route, Stop, Map, Shape
 
+class TripPlan:
+    def __init__(self, departure_time, actions):
+        self.departure_time = departure_time
+        self.actions = actions
+
 # Returns the hours and minutes of the given Unix timestamp, formatted
 # nicely.  If the timestamp is not given, defaults to the current time.
 def human_time(secs = None):
@@ -117,6 +122,10 @@ def routeplan(request):
         actions_desc.append({ 'type': 'arrive', 
                               'time': action_time })
 
-    return HttpResponse(simplejson.dumps(actions_desc), 
+        
+    trip_plan = { 'actions': actions_desc, 
+                  'departure_time' : human_time(daysecs + today_secs) }
+        
+    return HttpResponse(simplejson.dumps(trip_plan), 
         mimetype="application/json")
 

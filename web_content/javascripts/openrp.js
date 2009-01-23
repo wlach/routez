@@ -120,7 +120,8 @@ function submitCallback(data, responseCode) {
     map.addOverlay(new GMarker(origin, {icon:G_START_ICON}));
     map.addOverlay(new GMarker(dest, {icon:G_END_ICON}));
 
-    actions = eval(data);
+    myresponse = eval( "(" + data + ")");
+    actions = myresponse['actions'];
     var routePlan = "";
     var routePath = new Array();
 
@@ -136,6 +137,8 @@ function submitCallback(data, responseCode) {
         routePlan += "This probably means it's faster to walk.</p>";
         addWalkingOverlay(origin, dest);
     } else {
+                
+        var origin_str = document.getElementById('routePlanStart').value.capitalize();
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
 
         var first_stop = "";
@@ -149,6 +152,8 @@ function submitCallback(data, responseCode) {
             first_stop = dest_str;
 
         routePlan += "<ol>";
+        routePlan += "<li class='depart'><strong>" + myresponse['departure_time'] + ":</strong> ";
+        routePlan += "Start at " + origin_str + ".</li>";
         routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
         routePlan += "Walk to " + first_stop + ".</li>";
 
