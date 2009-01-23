@@ -8,6 +8,11 @@ import time
 
 from routez.travel.models import Route, Stop, Map, Shape
 
+class TripPlan:
+    def __init__(self, departure_time, actions):
+        self.departure_time = departure_time
+        self.actions = actions
+
 # Returns the hours and minutes of the given Unix timestamp, formatted
 # nicely.  If the timestamp is not given, defaults to the current time.
 def human_time(secs = None):
@@ -40,6 +45,9 @@ def iphone(request):
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
          'key': settings.GMAPS_API_KEY, 'now': now_str})
+
+def about(request):
+    return render_to_response('about.html')
 
 def routeplan(request):
     start_lat = float(request.GET['startlat'])
@@ -122,6 +130,10 @@ def routeplan(request):
         actions_desc.append({ 'type': 'arrive', 
                               'time': action_time })
 
-    return HttpResponse(simplejson.dumps(actions_desc), 
+        
+    trip_plan = { 'actions': actions_desc, 
+                  'departure_time' : human_time(daysecs + today_secs) }
+        
+    return HttpResponse(simplejson.dumps(trip_plan), 
         mimetype="application/json")
 

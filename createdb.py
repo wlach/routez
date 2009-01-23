@@ -5,7 +5,7 @@
 # created
 
 import transitfeed
-from tripgraph import *
+from libroutez.tripgraph import *
 import sys
 import os
 import simplejson
