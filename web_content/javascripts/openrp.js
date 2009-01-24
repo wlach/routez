@@ -104,8 +104,61 @@ function updateMapDirections(actions) {
         return 1;
     }
 
+    var routePath = new Array();
+
+    var walkPathColour = "#0000ff";
+    var busPathColour = "#ff0000";
+
+    bounds = new GLatLngBounds;
+    bounds.extend(origin);
+    bounds.extend(dest);
+
     map.addOverlay(new GMarker(origin, {icon:G_START_ICON}));
     map.addOverlay(new GMarker(dest, {icon:G_END_ICON}));
+
+    for (var i = 0; i < actions.length; ++i) {
+        if (actions[i].type == "alight" || actions[i].type == "pass") {
+            var latlng = new GLatLng(actions[i].lat, actions[i].lng);
+            routePath[routePath.length] = latlng;
+            bounds.extend(latlng);
+            
+            // also add any shape to the path
+            if (actions[i].shape) {
+                for (var j=0; j<actions[i].shape.length; ++j) {
+                    routePath[routePath.length] = new GLatLng(
+                        actions[i].shape[j][0], actions[i].shape[j][1]);
+                }
+            }
+        }
+
+        if (actions[i].type == "board") {
+            var markerOpts = new Object();
+            markerOpts.icon = busStopIcon;
+            markerOpts.labelText = actions[i].route_shortname;
+            markerOpts.labelClass = "tooltip";
+            markerOpts.labelOffset = new GSize(31, -35);
+            map.addOverlay(new LabeledMarker(latlng, markerOpts));
+            
+            addLine(map, routePath, walkPathColour);
+            routePath = new Array();
+        } else if (actions[i].type == "alight") {
+            addLine(map, routePath, busPathColour);
+            routePath = new Array();
+        } 
+            
+        // if we have to get off and walk, show a nice icon
+        if (i>0 && actions[i-1].type == "alight" && 
+            actions[i].type != "board") {
+            map.addOverlay(new GMarker(latlng, walkStopIcon));
+        }               
+    }
+
+    addLine(map, routePath, walkPathColour);
+
+    map.setCenter(bounds.getCenter());
+    var zoom = map.getBoundsZoomLevel(bounds);
+    map.setCenter(bounds.getCenter(), zoom);
+
 }
 
 function submitCallback(data, responseCode) {
@@ -120,19 +173,14 @@ function submitCallback(data, responseCode) {
     myresponse = eval( "(" + data + ")");
     actions = myresponse['actions'];
     var routePlan = "";
-    var routePath = new Array();
-
-    var walkPathColour = "#0000ff";
-    var busPathColour = "#ff0000";
-
-    var bounds = new GLatLngBounds;
-    bounds.extend(origin);
-    bounds.extend(dest);
+    
+    if (map) {
+        updateMapDirections(actions);
+    }
 
     if (actions.length == 0) {
-        addWalkingOverlay(origin, dest);
-    } else {
-                
+        routePlan = "<p>Couldn't find a path!</p>";
+    } else {                
         var origin_str = document.getElementById('routePlanStart').value.capitalize();
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
 
@@ -153,37 +201,11 @@ function submitCallback(data, responseCode) {
         routePlan += "Walk to " + first_stop + ".</li>";
 
         for (var i = 0; i < actions.length; ++i) {
-            if (actions[i].type == "alight" || actions[i].type == "pass") {
-                var latlng = new GLatLng(actions[i].lat, actions[i].lng);
-                routePath[routePath.length] = latlng;
-                bounds.extend(latlng);
-
-                 // also add any shape to the path
-                if (actions[i].shape) {
-                      for (var j=0; j<actions[i].shape.length; ++j) {
-                          
-                          routePath[routePath.length] = new GLatLng(
-                              actions[i].shape[j][0], actions[i].shape[j][1]);
-                      }
-                }
-            }
 
             if (actions[i].type == "board") {
-                var markerOpts = new Object();
-                markerOpts.icon = busStopIcon;
-                markerOpts.labelText = actions[i].route_shortname;
-                markerOpts.labelClass = "tooltip";
-                markerOpts.labelOffset = new GSize(31, -35);
-                map.addOverlay(new LabeledMarker(latlng, markerOpts));
-                
-                addLine(map, routePath, walkPathColour);
-                routePath = new Array();
                 routePlan += "<li class='board'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
                 routePlan += actions[i].route_longname + ").</li>";
-
-                addLine(map, routePath, walkPathColour);
-                routePath = new Array();
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
                 routePlan += "<li class='alight'><strong>" + actions[i].time + ":</strong> ";
@@ -194,17 +216,8 @@ function submitCallback(data, responseCode) {
                     routePlan += " and walk to " + dest_str;
                 }
                 routePlan += ".</li>";
-
-                addLine(map, routePath, busPathColour);
-                routePath = new Array();
             } 
             
-            // if we have to get off and walk, show a nice icon
-            if (i>0 && actions[i-1].type == "alight" && 
-                actions[i].type != "board") {
-                map.addOverlay(new GMarker(latlng, walkStopIcon));
-            }
-
             if (i==(actions.length-1)) {
                 routePlan += "<li class='arrive'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Arrive at " + dest_str + ".</li>";
@@ -213,14 +226,9 @@ function submitCallback(data, responseCode) {
 
         routePlan += "</ol>";
     }
-    map.setCenter(bounds.getCenter());
-    var zoom = map.getBoundsZoomLevel(bounds);
-    map.setCenter(bounds.getCenter(), zoom);
-
-    addLine(map, routePath, walkPathColour);
 
     // show the route plan (and options), hide the about box
-    document.getElementById('route-plan').innerHTML = routePlan;
+    document.getElementById('route-plan-content').innerHTML = routePlan;
     document.getElementById('route-plan').style.display = 'block';
     document.getElementById('route-plan-options').style.display = 'block';
     document.getElementById('intro').style.display = 'none';
