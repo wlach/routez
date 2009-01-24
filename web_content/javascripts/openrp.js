@@ -229,8 +229,8 @@ function submitCallback(data, responseCode) {
 
     // show the route plan (and options), hide the about box
     document.getElementById('route-plan-content').innerHTML = routePlan;
+    //document.getElementById('route-plan-options').style.display = 'block';
     document.getElementById('route-plan').style.display = 'block';
-    document.getElementById('route-plan-options').style.display = 'block';
     document.getElementById('intro').style.display = 'none';
 }
 
