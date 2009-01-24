@@ -1,18 +1,24 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Routez!</title>
+    <title>hbus.ca</title>
     <meta name = "viewport" content = "initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width"/>
-  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
+
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
-    
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/cookie/cookie-min.js"></script> 
-    <script src="lib/openrp.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/dragdrop/dragdrop-min.js"></script> 
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/animation/animation-min.js"></script> 
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/resize/resize-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>  
+    <script type="text/javascript" src="lib/javascripts/openrp.js" type="text/javascript"></script>
     
     <script type="text/javascript">
     function load() {
         // hide the route plan when the page is first loaded
-        //document.getElementById('route-plan').style.display = 'none';
+        document.getElementById('route-plan').style.display = 'none';
         setupLocations();
         if (GBrowserIsCompatible()) {
            geocoder = new GClientGeocoder();
@@ -21,63 +27,66 @@
     </script>
   </head>
 
-  <link href="lib/style-iphone.css" rel="stylesheet" type="text/css" />
+  <link href="lib/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
+  <link href="lib/stylesheets/style.css" rel="stylesheet" type="text/css" />
   <style type="text/css">
     v\:* {
     behavior:url(#default#VML);
     }
   </style>
 
-  <body onload="load();" onunload="GUnload()">
+  <body id="nav_home" onload="load();" onunload="GUnload()" class="yui-skin-sam">
 
-    <div id='header'>
-      <div id='header-logo'>
-	<img src="lib/routez-logo.png"/>
-      </div>
-    </div>
-    
-    <div id="intro" class="box">
-      <p>Routez.ca is an <b>unofficial</b> service providing trip planning 
-	and other services for users of 
-	<a href="http://www.halifax.ca/metrotransit/">Metro 
-	  Transit</a> in the greater area of Halifax, Nova Scotia. Try it 
-	and see! </p> 
-    </div>
+    {% include 'header-iphone.html' %}
 
-    <div class="box">
-      <div class="title">Plan a trip</div>
-      <div class="contents">
-	<form id="routePlan" onSubmit="mysubmit(); return false;">
-	  <label class="label" for="routePlanStart">From:</label>
-	  <input type="text" id="routePlanStart" class="textfield"
-		 onFocus="select();"/>
-	  
-	  <p id="reverse-directions"><a href="javascript:reverseDirections()" class="reverse" title="Reverse Directions">&#x21c6;</a></p>
-	  <p class="example">Example: North and Agricola</p>
-	  <label class="label" for="routePlanEnd">To:</label>
-	  <input type="text" id="routePlanEnd" class="textfield"
-		 onFocus="select();"/>
-	  <p class="example">Example: 1496 Lower Water</p>
-	  
-	  <label class="label" for="time">Time:</label>
-	  <input type="text" id="time" class="textfield" value="{{now}}"
-                 onFocus="select();"/>
-	  <p class="example">Example: 9:26am</p>
-	  
-	  <div class="buttons">
-	    <p class="error" id="error-from">Didn't understand "from" location.</p>
-	    <p class="error" id="error-to">Didn't understand "to" location.</p>
-	    <input value="Plan!" class="button" type="submit" id="plan-button">
-	</form>
-	</div>
+  <div id="panels">
+
+    <p id="intro">
+      <strong>hbus.ca</strong> is <em>an unofficial service</em> providing trip planning for users of the <a href="http://www.halifax.ca/metrotransit/">Metro Transit</a> system in the greater area of Halifax, Nova Scotia.
+    </p>
+
+    <div class="panel">
+      <h2>Plan a trip</h2>
+      <div class="content">
+        <form id="routePlan" onSubmit="mysubmit(); return false;">
+          <div>
+            <label class="from" for="routePlanStart">From</label>
+            <span>
+              <input class="text" type="text" id="routePlanStart" 
+		     onFocus="javascript:locationInputFocused('start');"/>
+              <label>Ex.: North and Agricola</label>
+            </span>
+          </div>
+          <div>
+            <label class="to" for="routePlanEnd">To</label>
+            <span>
+              <input class="text" type="text" id="routePlanEnd" 
+		     onFocus="javascript:locationInputFocused('end');"/>
+              <label>Ex.: 1496 Lower Water</label>
+            </span>
+          </div>
+          <a href="javascript:reverseDirections()" class="reverse" title="Reverse Directions">Reverse Directions</a>
+          <div>
+            <label class="time" for="time">Time:</label>
+            <span>
+              <input class="text" type="text" id="time" class="textfield" value="{{now}}" onFocus="select();"/>
+              <label>Ex.: Saturday at 5pm</label>
+            </span>
+          </div>
+          <div class="submit">
+            <p class="error" id="error-from" style="display:none;">Didn't understand "from" location.</p>
+            <p class="error" id="error-to" style="display:none;">Didn't understand "to" location.</p>
+            <input value="Plan!" class="button" type="submit" id="plan-button"/>
+          </div>
+        </form>
       </div>
     </div>
-    <div id="route-plan" class="box">
-      <div class="title">Directions</div>
-      <div class="contents">
-	<div id="route-plan-content">
-	</div>
+    <div id="route-plan" class="panel">
+      <h2>Directions</h2>
+      <div class="content">
+        <div id="route-plan-content"></div>
       </div>
     </div>
+  </div>
   </body>
 </html>
