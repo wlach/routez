@@ -217,10 +217,6 @@ function submitCallback(data, responseCode) {
                 routePlan += "<li class='board'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
                 routePlan += actions[i].route_longname + ").";
-                if (!map) {
-                    showMapLink(actions[i].lat + "," + actions[i].lng);
-                }
-                routePlan += "</li>";
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
                 routePlan += "<li class='alight'><strong>" + actions[i].time + ":</strong> ";
