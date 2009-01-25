@@ -1,6 +1,7 @@
 var origin = null;
 var dest = null;
 
+var routePlan;
 var map = null;
 var geocoder;
 var busStopIcon;
@@ -161,6 +162,11 @@ function updateMapDirections(actions) {
 
 }
 
+function showMapLink(latlngStr) {
+    routePlan += " [<a href=\"http://maps.google.com/maps?q=";
+    routePlan += latlngStr + "\">Map</a>]";
+}
+
 function submitCallback(data, responseCode) {
     planButton = document.getElementById('plan-button');
     planButton.value = 'Plan!';
@@ -172,7 +178,7 @@ function submitCallback(data, responseCode) {
 
     myresponse = eval( "(" + data + ")");
     actions = myresponse['actions'];
-    var routePlan = "";
+    routePlan = "";
     
     if (map) {
         updateMapDirections(actions);
@@ -184,28 +190,37 @@ function submitCallback(data, responseCode) {
         var origin_str = document.getElementById('routePlanStart').value.capitalize();
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
 
-        var first_stop = "";
+        first_stop = "";
         for (var i = 0; i < actions.length; ++i) {
-            if (actions[i].route_id) {
-                first_stop = actions[i].stopname;
+            if (actions[i].route_id >= 0) {
+                firstStop = actions[i].stopname;
+                firstStopLatlng = actions[i].lat + "," + actions[i].lng;
                 break;
             }
         }
-        if (first_stop == "")
-            first_stop = dest_str;
+        if (firstStop == "")
+            firstStop = dest_str;
 
         routePlan += "<ol>";
         routePlan += "<li class='depart'><strong>" + myresponse['departure_time'] + ":</strong> ";
         routePlan += "Start at " + origin_str + ".</li>";
         routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
-        routePlan += "Walk to " + first_stop + ".</li>";
+        routePlan += "Walk to " + firstStop + ".";
+        if (!map) {
+            showMapLink(firstStopLatlng);
+        }
+        routePlan += "</li>";
 
         for (var i = 0; i < actions.length; ++i) {
 
             if (actions[i].type == "board") {
                 routePlan += "<li class='board'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
-                routePlan += actions[i].route_longname + ").</li>";
+                routePlan += actions[i].route_longname + ").";
+                if (!map) {
+                    showMapLink(actions[i].lat + "," + actions[i].lng);
+                }
+                routePlan += "</li>";
             } else if (actions[i].type == "alight") {
                 var previd = actions[i-1].dest_id;
                 routePlan += "<li class='alight'><strong>" + actions[i].time + ":</strong> ";
@@ -215,12 +230,16 @@ function submitCallback(data, responseCode) {
                     actions[i+1].type != "board") {
                     routePlan += " and walk to " + dest_str;
                 }
-                routePlan += ".</li>";
+                routePlan += ".";
+                if (!map) {
+                    showMapLink(actions[i].lat + "," + actions[i].lng);
+                }
+                routePlan += "</li>";
             } 
             
             if (i==(actions.length-1)) {
                 routePlan += "<li class='arrive'><strong>" + actions[i].time + ":</strong> ";
-                routePlan += "Arrive at " + dest_str + ".</li>";
+                routePlan += "Arrive at " + dest_str + ".";
             }
         }
 
