@@ -63,7 +63,6 @@ def routeplan(request):
                 0, 0, 0, 0, 0, 0))
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
-    print "weekday: %s" % now.weekday()
     service_period = 'weekday'
     if now.weekday() == 5:
         service_period = 'saturday'
