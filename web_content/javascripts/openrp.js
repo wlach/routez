@@ -19,6 +19,7 @@ var routePlanEndDefault = null;
 function setupLocations() {
     // if no cookie yet exists, no biggie, these values just won't get set
     // to anything
+    // FIXME: Actually no, you see null on internet explorer. must fix.
     routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
     routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
 
@@ -272,6 +273,12 @@ function showDebugInfo(actions) {
     debug_div.innerHTML = debug_str;
 }
 
+function resetPlanButton() {
+    planButton = document.getElementById('plan-button');
+    planButton.value = 'Plan!';
+    planButton.style.color = "#000";
+}
+
 function checkPlanRoute() {
  
     if (origin && dest) {
@@ -290,37 +297,38 @@ function checkPlanRoute() {
         "&endlat=" + dest.lat() + "&endlng=" + dest.lng() + 
         "&time=" + time;
         GDownloadUrl(url, submitCallback);
-
-        planButton = document.getElementById('plan-button');
-        planButton.value = 'Working...';    
-        planButton.style.color = "#aaa";
     }
 }
+
 
 function gotOriginCallback(latlng) {
     if (latlng) {
         origin = latlng;
         document.getElementById('error-from').style.display = 'none';
-    } else {
-        document.getElementById('error-from').style.display = 'block';
-        document.getElementById('routePlanStart').style.border = 
-        '1px solid #800000';
-    }
+        checkPlanRoute();
+        return;
+    } 
 
-    checkPlanRoute();
+    // fail!
+    document.getElementById('error-from').style.display = 'block';
+    document.getElementById('routePlanStart').style.border = '1px solid #800000';
+    resetPlanButton();
+
 }
 
 function gotDestCallback(latlng) {
     if (latlng) {
         dest = latlng;
         document.getElementById('error-to').style.display = 'none';
-    } else {
-        document.getElementById('error-to').style.display = 'block';
-        document.getElementById('routePlanEnd').style.border = 
-        '1px solid #800000';
-    }
+        checkPlanRoute();
+        return;
+    } 
 
-    checkPlanRoute();
+    // fail!
+    document.getElementById('error-to').style.display = 'block';
+    document.getElementById('routePlanEnd').style.border = '1px solid #800000';
+
+    resetPlanButton();
 }
 
 function mysubmit() {
@@ -329,8 +337,15 @@ function mysubmit() {
     var extra = ", Halifax, Nova Scotia";
     var origin_str = document.getElementById('routePlanStart').value + extra;
     var dest_str = document.getElementById('routePlanEnd').value + extra;
+
+    // let user know something exciting is about to happen!
+    planButton = document.getElementById('plan-button');
+    planButton.value = 'Working...';    
+    planButton.style.color = "#aaa";
+
     geocoder.getLatLng(origin_str, gotOriginCallback);
     geocoder.getLatLng(dest_str, gotDestCallback);
+
 }
 
 
