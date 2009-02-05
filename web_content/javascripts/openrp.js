@@ -305,6 +305,7 @@ function gotOriginCallback(latlng) {
     if (latlng) {
         origin = latlng;
         document.getElementById('error-from').style.display = 'none';
+        document.getElementById('routePlanStart').style.border = '1px solid #000000';
         checkPlanRoute();
         return;
     } 
@@ -320,6 +321,7 @@ function gotDestCallback(latlng) {
     if (latlng) {
         dest = latlng;
         document.getElementById('error-to').style.display = 'none';
+        document.getElementById('routePlanEnd').style.border = '1px solid #000000';
         checkPlanRoute();
         return;
     } 
@@ -345,7 +347,6 @@ function mysubmit() {
 
     geocoder.getLatLng(origin_str, gotOriginCallback);
     geocoder.getLatLng(dest_str, gotDestCallback);
-
 }
 
 
