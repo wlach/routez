@@ -1,8 +1,8 @@
 === About ===
 
-Routez is a trip planning web service written in Python and Javascript as 
-well as a pathfinding library written in C++. The latter part will probably
-eventually be abstracted out and released seperately.
+Routez is a trip planning web service written in Python and Javascript. 
+It uses the libroutez (http://github.com/wlach/libroutez) library for trip
+planning functionality.
 
 === Initial Setup ===
 
@@ -46,14 +46,16 @@ I put up a semi-recent set at:
 
 Something like:
 
- - creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez
+ - creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez \
+   mygraph-mapping.yml
 
 (note this assumes libroutez installed in creategraph.py in your $PATH)
 
 5. Build a database of stop, route, and shape information from the GTFS feed
+and libroutez mapping files.
 
  - ./manage.py syncdb
- - ./createdb.py /path/to/hfxfeed.zip mygraph.routez
+ - ./createdb.py /path/to/hfxfeed.zip mygraph-mapping.yml
 
 6. Configure it.
 

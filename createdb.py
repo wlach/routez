@@ -5,11 +5,11 @@
 # created
 
 import transitfeed
-from libroutez.tripgraph import *
 import sys
 import os
 import simplejson
 import settings
+import yaml
 
 # Manually import django
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
@@ -19,7 +19,7 @@ from routez.travel.models import Route, Stop, Map, Shape
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print "Usage: %s: <gtfs feed> <routez graph>" % sys.argv[0]
+        print "Usage: %s: <gtfs feed> <routez graph mapping>" % sys.argv[0]
         exit(1)
 
     schedule = transitfeed.Schedule(
@@ -27,9 +27,13 @@ if __name__ == '__main__':
     print "Loading schedule."
     schedule.Load(sys.argv[1])
 
-    print "Loading graph."
-    graph = TripGraph()
-    graph.load(sys.argv[2])
+    print "Loading gtfs->libroutez mapping"
+    stream = open(sys.argv[2], 'r')
+    mapping = yaml.load(stream)
+
+    # Use the graph we specify in the config file
+    import travel
+    graph = travel.graph
 
     print "Exporting schedule as database"
     
@@ -41,11 +45,13 @@ if __name__ == '__main__':
 
     # import it all into the db again
     for r in schedule.GetRouteList():
-        r2 = Route(route_id=r.route_id, short_name=r.route_short_name, long_name=r.route_long_name)
+        r2 = Route(route_id=mapping['Routes'][r.route_id], 
+                   short_name=r.route_short_name, long_name=r.route_long_name)
         r2.save()
 
     for s in schedule.GetStopList():
-        s2 = Stop(stop_id="gtfs"+s.stop_id, name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
+        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], name=s.stop_name, 
+                  lat=s.stop_lat, lng=s.stop_lon)
         s2.save()
 
     (_min_lat, _min_lon, _max_lat, _max_lon) = schedule.GetStopBoundingBox()
@@ -59,34 +65,41 @@ if __name__ == '__main__':
     for trip in trips:
         prevstopid = None
         for stoptime in trip.GetStopTimes():
+            stopid = stoptime.stop_id
             # don't calculate the same shape twice
             if not visited_stops.get(prevstopid):
                 visited_stops[prevstopid] = {}
-            if visited_stops[prevstopid].get(stoptime.stop_id):
-                prevstopid = stoptime.stop_id
+            if visited_stops[prevstopid].get(stopid):
+                prevstopid = stopid
                 continue
             elif prevstopid:
-                print "Calculating shape from %s -> %s" % (prevstopid, 
-                                                           stoptime.stop_id)
-                visited_stops[prevstopid][stoptime.stop_id] = 1
+                visited_stops[prevstopid][stopid] = 1
                 path = []
                 stop1 = schedule.GetStop(prevstopid)
-                stop2 = schedule.GetStop(stoptime.stop_id)
+                stop2 = schedule.GetStop(stopid)
+                print "Calculating shape from %s (%s, %s) -> %s (%s, %s)" % \
+                    (prevstopid, stop1.stop_lat, stop1.stop_lon, 
+                     stopid, stop2.stop_lat, stop2.stop_lon)
                 # FIXME: this currently sometimes creates paths which seem
                 # to backtrack, when two stops lie between an intersection
                 # (because they're not connected to each other, only the
                 # way intersections). 
                 trippath = graph.find_path(0, "", True,
-                                                stop1.stop_lat, stop1.stop_lon, 
-                                                stop2.stop_lat, stop2.stop_lon)
-                points = []
-                prevaction = False
-                for action in trippath.get_actions():
-                    dest = graph.get_tripstop(action.dest_id)
-                    points.append([dest.lat, dest.lng])
-                if len(points) > 1:
-                    s = Shape(src_id="gtfs"+prevstopid, 
-                              dest_id = "gtfs"+stoptime.stop_id, 
-                              polyline=simplejson.dumps(points[0:-1]))
-                    s.save()
-            prevstopid = stoptime.stop_id
+                                           stop1.stop_lat, stop1.stop_lon, 
+                                           stop2.stop_lat, stop2.stop_lon)
+                if trippath:
+                    points = []
+                    prevaction = False
+                    for action in trippath.get_actions():
+                        dest = graph.get_tripstop(action.dest_id)
+                        points.append([dest.lat, dest.lng])
+                    if len(points) > 1:
+                        s = Shape(src_id=mapping['Stops'][prevstopid], 
+                                  dest_id=mapping['Stops'][stopid], 
+                                  polyline=simplejson.dumps(points[0:-1]))
+                        s.save()
+                else:
+                    print "WARNING: Couldn't compute path from %s to %s."
+                    "This probably means your street graph isn't properly "
+                    "connected."
+            prevstopid = stopid
