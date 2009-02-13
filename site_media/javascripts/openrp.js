@@ -32,32 +32,32 @@ function setupLocations() {
  */
 function initIcons() {
     busStopIcon = new GIcon();
-    busStopIcon.image = "lib/images/marker_bus.png";
+    busStopIcon.image = "site_media/images/marker_bus.png";
     busStopIcon.iconSize = new GSize(76, 36);
     busStopIcon.iconAnchor = new GPoint(1, 35);
 
     walkStopIcon = new GIcon();
-    walkStopIcon.image = "lib/images/marker_walk.png";
+    walkStopIcon.image = "site_media/images/marker_walk.png";
     walkStopIcon.iconSize = new GSize(46, 36);
     walkStopIcon.iconAnchor = new GPoint(1, 35);
 
     ferryStopIcon = new GIcon();
-    ferryStopIcon.image = "lib/images/marker_ferry.png";
+    ferryStopIcon.image = "site_media/images/marker_ferry.png";
     ferryStopIcon.iconSize = new GSize(46, 36);
     ferryStopIcon.iconAnchor = new GPoint(1, 35);
 
     switchStopIcon = new GIcon();
-    switchStopIcon.image = "lib/images/marker_switch.png";
+    switchStopIcon.image = "site_media/images/marker_switch.png";
     switchStopIcon.iconSize = new GSize(46, 36);
     switchStopIcon.iconAnchor = new GPoint(1, 35);
 
     fromIcon = new GIcon();
-    fromIcon.image = "lib/images/marker_from.png";
+    fromIcon.image = "site_media/images/marker_from.png";
     fromIcon.iconSize = new GSize(46, 36);
     fromIcon.iconAnchor = new GPoint(1, 35);
 
     toIcon = new GIcon();
-    toIcon.image = "lib/images/marker_to.png";
+    toIcon.image = "site_media/images/marker_to.png";
     toIcon.iconSize = new GSize(46, 36);
     toIcon.iconAnchor = new GPoint(1, 35);
 }

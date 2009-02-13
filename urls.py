@@ -20,9 +20,9 @@ urlpatterns = patterns('',
 # web server should do this.
 if settings.DEBUG:
     urlpatterns += patterns('',
-        (r'^lib/(?P<path>.*)$', 
+        (r'^site_media/(?P<path>.*)$', 
             'django.views.static.serve', 
-            {'document_root': os.path.join(settings.PROJECT_PATH, 'web_content'), 
+            {'document_root': os.path.join(settings.PROJECT_PATH, 'site_media'), 
                 'show_indexes': True}),
     )
 
