@@ -12,19 +12,40 @@ var endIcon;
 var routePlanStartDefault = null;
 var routePlanEndDefault = null;
 
-
 /**
- * Setup locations based on cookie. Call once during load.
+ * Setup locations based on previous browser locations or cookie. Call 
+ * during or after location changes. Returns true if we should try to load
+ * a path, false otherwise.
  */
-function setupLocations() {
-    // if no cookie yet exists, no biggie, these values just won't get set
-    // to anything
-    // FIXME: Actually no, you see null on internet explorer. must fix.
-    routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
-    routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
+function setupRoutePlanForm(state) {
+    if (state == "default") {        
+        // if no history state, then (try) to load locations from cookies
 
-    document.getElementById('routePlanStart').value = routePlanStartDefault;
-    document.getElementById('routePlanEnd').value = routePlanEndDefault;
+        // if no cookie yet exists, no biggie, these values just won't get set
+        // to anything
+        // FIXME: Actually no, you see null on internet explorer. must fix.    
+        routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
+        routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
+        
+        document.getElementById('routePlanStart').value = routePlanStartDefault;
+        document.getElementById('routePlanEnd').value = routePlanEndDefault;
+
+        return false;
+    } 
+
+    // otherwise we try to get history out of json 
+    // FIXME: no error handling here yet
+    var stateHash = eval("(" + state + ")");
+    document.getElementById('routePlanStart').value = stateHash.saddr;
+    document.getElementById('routePlanEnd').value = stateHash.daddr;
+    document.getElementById('time').value = stateHash.time;
+    
+    return true;
+}
+
+function parseState() {
+    origin = GLatLng.fromUrlValue(gup('slatlng'));
+    dest = GLatLng.fromUrlValue(gup('dlatlng'));
 }
 
 /**
@@ -77,7 +98,6 @@ function reverseDirections() {
     var tmp = document.getElementById('routePlanStart').value; 
     document.getElementById('routePlanStart').value = document.getElementById('routePlanEnd').value;   
     document.getElementById('routePlanEnd').value = tmp;
-
 }
 
 // Capitalizes a string, first letter in upper case and the rest in lower case.
@@ -97,9 +117,24 @@ function addLine(map, routePath, colour) {
     }
 }
 
+function updateMapBounds(actions) {
+    var bounds = new GLatLngBounds;
+    bounds.extend(origin);
+    bounds.extend(dest);
+
+    for (var i = 0; i < actions.length; ++i) {
+        // only alight and pass actions have latlng info
+        if (actions[i].type == "alight" || actions[i].type == "pass") {
+            bounds.extend(new GLatLng(actions[i].lat, actions[i].lng));
+        }
+    }
+
+    map.setCenter(bounds.getCenter());
+    var zoom = map.getBoundsZoomLevel(bounds);
+    map.setCenter(bounds.getCenter(), zoom);
+}
+
 function updateMapDirections(actions) {
-    // nuke any existing map overlays
-    map.clearOverlays();
     
     // add start and end markers
     function orderOfCreation(marker,b) {
@@ -107,13 +142,15 @@ function updateMapDirections(actions) {
     }
 
     var routePath = new Array();
-
     var walkPathColour = "#0000ff";
     var busPathColour = "#ff0000";
 
-    bounds = new GLatLngBounds;
-    bounds.extend(origin);
-    bounds.extend(dest);
+    // before doing anything else, set bounds (if we're loading
+    // directions on a new page, we need to do this before adding overlays)
+    updateMapBounds(actions);
+
+    // nuke any existing map overlays
+    map.clearOverlays();
 
     map.addOverlay(new GMarker(origin, {icon:G_START_ICON}));
     map.addOverlay(new GMarker(dest, {icon:G_END_ICON}));
@@ -122,7 +159,6 @@ function updateMapDirections(actions) {
         if (actions[i].type == "alight" || actions[i].type == "pass") {
             var latlng = new GLatLng(actions[i].lat, actions[i].lng);
             routePath[routePath.length] = latlng;
-            bounds.extend(latlng);
             
             // also add any shape to the path
             if (actions[i].shape) {
@@ -152,15 +188,10 @@ function updateMapDirections(actions) {
         if (i>0 && actions[i-1].type == "alight" && 
             actions[i].type != "board") {
             map.addOverlay(new GMarker(latlng, walkStopIcon));
-        }               
+        }
     }
 
     addLine(map, routePath, walkPathColour);
-
-    map.setCenter(bounds.getCenter());
-    var zoom = map.getBoundsZoomLevel(bounds);
-    map.setCenter(bounds.getCenter(), zoom);
-
 }
 
 function showMapLink(latlngStr) {
@@ -280,7 +311,6 @@ function resetPlanButton() {
 }
 
 function checkPlanRoute() {
- 
     if (origin && dest) {
         routePlanStartDefault = document.getElementById('routePlanStart').value;
         routePlanEndDefault = document.getElementById('routePlanEnd').value;
@@ -291,13 +321,30 @@ function checkPlanRoute() {
                                   { expires: new Date("January 12, 2025") });
 
         time = document.getElementById('time').value;
+        
+        var currentState = YAHOO.util.History.getCurrentState("plan");
+        var newState = YAHOO.lang.JSON.stringify({ saddr: routePlanStartDefault, 
+                                            daddr: routePlanEndDefault,
+                                            time: time });
 
-        url = "/json/routeplan" + 
-        "?startlat=" + origin.lat() + "&startlng=" + origin.lng() +
-        "&endlat=" + dest.lat() + "&endlng=" + dest.lng() + 
-        "&time=" + time;
-        GDownloadUrl(url, submitCallback);
+        // if currentState is equal to newState, then we've already set the
+        // browser history state to the appropriate value: proceed to plan trip
+        // otherwise, we want to setup the history before doing anything else
+        if (currentState !== newState) {
+            YAHOO.util.History.navigate("plan", newState);
+        } else {
+            GDownloadUrl("/json/routeplan" + 
+                         "?startlat=" + origin.lat() + "&startlng=" + origin.lng() +
+                         "&endlat=" + dest.lat() + "&endlng=" + dest.lng() + 
+                         "&time=" + time, submitCallback);
+        }
     }
+}
+
+
+function planRoute() {
+    // if we don't have latlng coordinates yet, we need to get them
+    // before we can proceed
 }
 
 
@@ -333,16 +380,16 @@ function gotDestCallback(latlng) {
     resetPlanButton();
 }
 
-function mysubmit() {
+function submitRoutePlan() {
     origin = dest = null;
     
     var extra = ", Halifax, Nova Scotia";
     var origin_str = document.getElementById('routePlanStart').value + extra;
     var dest_str = document.getElementById('routePlanEnd').value + extra;
-
+    
     // let user know something exciting is about to happen!
     planButton = document.getElementById('plan-button');
-    planButton.value = 'Working...';    
+    planButton.value = 'Working...';
     planButton.style.color = "#aaa";
 
     geocoder.getLatLng(origin_str, gotOriginCallback);

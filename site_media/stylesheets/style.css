@@ -4,6 +4,14 @@
 div.yui-layout-hd { display: none; }
 .yui-layout-scroll div.yui-layout-bd { overflow: auto; }
 
+/* Hide the YUI history iframe */
+#yui-history-iframe {
+  position:absolute;
+  top:0; left:0;
+  width:1px; height:1px;
+  visibility:hidden;
+}
+
 /* General */
 a { color: #5A7F85; }
 div.container { overflow: hidden; margin: 40px auto; width: 960px; }
