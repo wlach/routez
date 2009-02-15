@@ -35,7 +35,7 @@ function setupRoutePlanForm(state) {
 
     // otherwise we try to get history out of json 
     // FIXME: no error handling here yet
-    var stateHash = eval("(" + state + ")");
+    var stateHash = YAHOO.lang.JSON.parse(state);
     document.getElementById('routePlanStart').value = stateHash.saddr;
     document.getElementById('routePlanEnd').value = stateHash.daddr;
     document.getElementById('time').value = stateHash.time;
@@ -208,7 +208,7 @@ function submitCallback(data, responseCode) {
         return;
     }
 
-    myresponse = eval( "(" + data + ")");
+    myresponse = YAHOO.lang.JSON.parse(data);
     actions = myresponse['actions'];
     routePlan = "";
     
