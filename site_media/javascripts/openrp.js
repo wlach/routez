@@ -352,14 +352,14 @@ function gotOriginCallback(latlng) {
     if (latlng) {
         origin = latlng;
         document.getElementById('error-from').style.display = 'none';
-        document.getElementById('routePlanStart').style.border = '1px solid #000000';
+        document.getElementById('routePlanStart').className = 'text';
         checkPlanRoute();
         return;
     } 
 
     // fail!
+    document.getElementById('routePlanStart').className = 'text text_error';
     document.getElementById('error-from').style.display = 'block';
-    document.getElementById('routePlanStart').style.border = '1px solid #800000';
     resetPlanButton();
 
 }
@@ -368,14 +368,14 @@ function gotDestCallback(latlng) {
     if (latlng) {
         dest = latlng;
         document.getElementById('error-to').style.display = 'none';
-        document.getElementById('routePlanEnd').style.border = '1px solid #000000';
+	document.getElementById('routePlanEnd').className = 'text';
         checkPlanRoute();
         return;
     } 
 
     // fail!
     document.getElementById('error-to').style.display = 'block';
-    document.getElementById('routePlanEnd').style.border = '1px solid #800000';
+    document.getElementById('routePlanEnd').className = 'text text_error';
 
     resetPlanButton();
 }
