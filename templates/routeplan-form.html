@@ -1,0 +1,36 @@
+<div class="panel">
+  <h2>Plan a trip</h2>
+  <div class="content">
+    <form id="routePlan" onSubmit="submitRoutePlan(); return false;">
+      <div>
+        <label class="from" for="routePlanStart">From</label>
+        <span>
+          <input class="text" type="text" id="routePlanStart" 
+		 onFocus="javascript:locationInputFocused('start');"/>
+          <label>Ex.: North and Agricola</label>
+        </span>
+      </div>
+      <div>
+        <label class="to" for="routePlanEnd">To</label>
+        <span>
+          <input class="text" type="text" id="routePlanEnd" 
+		 onFocus="javascript:locationInputFocused('end');"/>
+          <label>Ex.: 1496 Lower Water</label>
+        </span>
+      </div>
+      <a href="javascript:reverseDirections()" class="reverse" title="Reverse Directions">Reverse Directions</a>
+      <div>
+        <label class="time" for="time">Time:</label>
+        <span>
+          <input class="text" type="text" id="time" class="textfield" value="{{now}}" onFocus="select();"/>
+          <label>Ex.: Saturday at 5pm</label>
+        </span>
+      </div>
+      <div class="submit">
+        <p class="error" id="error-from" style="display:none;">Didn't understand "from" location.</p>
+        <p class="error" id="error-to" style="display:none;">Didn't understand "to" location.</p>
+        <input value="Plan!" class="button" type="submit" id="plan-button"/>
+      </div>
+    </form>
+  </div>
+</div>

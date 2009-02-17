@@ -4,6 +4,14 @@
 div.yui-layout-hd { display: none; }
 .yui-layout-scroll div.yui-layout-bd { overflow: auto; }
 
+/* Hide the YUI history iframe */
+#yui-history-iframe {
+  position:absolute;
+  top:0; left:0;
+  width:1px; height:1px;
+  visibility:hidden;
+}
+
 /* General */
 a { color: #5A7F85; }
 div.container { overflow: hidden; margin: 40px auto; width: 960px; }
@@ -49,6 +57,7 @@ body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000
 #panels form a.reverse { display: block; position: absolute; left: 225px; top: 21px; height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; text-indent: -9000px; }
 
 /* Alternate Routes */
+#route-plan-options { display: none; }
 #route-plan-options ul { margin: 0; padding: 0; overflow: hidden; }
 #route-plan-options ul li { list-style: none; }
 #route-plan-options ul.options li { padding: 10px; margin: 0; border-bottom: 1px dotted #808080; }
@@ -62,6 +71,7 @@ body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000
 #route-plan-options span.walking_time { display: block; color: #808080; }
 
 /* Directions */
+#route-plan { display: none; }
 #route-plan ol { margin: 0; padding: 0; }
 #route-plan ol li { margin: 0 0 10px; padding: 0 0 10px 24px; list-style: none; background-position: top left; background-repeat: no-repeat; border-bottom: 1px dotted #808080; }
 #route-plan ol li.depart { background-image: url('../images/label_from.png');}
