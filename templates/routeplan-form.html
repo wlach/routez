@@ -18,7 +18,6 @@
           <label>Ex.: 1496 Lower Water</label>
         </span>
       </div>
-      <a href="javascript:reverseDirections()" class="reverse" title="Reverse Directions">Reverse Directions</a>
       <div>
         <label class="time" for="time">Time:</label>
         <span>
@@ -27,10 +26,21 @@
         </span>
       </div>
       <div class="submit">
-        <p class="error" id="error-from" style="display:none;">Didn't understand "from" location.</p>
-        <p class="error" id="error-to" style="display:none;">Didn't understand "to" location.</p>
-        <input value="Plan!" class="button" type="submit" id="plan-button"/>
+	<p class="error" id="error-from" style="display:none;">Didn't understand "from" location.</p>
+	<p class="error" id="error-to" style="display:none;">Didn't understand "to" location.</p>
+        <div class="submit-buttons">
+	  <table>
+	    <tr>
+	      <td align="left" width="100%">
+		<a href="javascript:reverseDirections()" title="Reverse Directions">Reverse directions</a>
+	      </td>
+	      <td align="right">
+		<input value="Plan!" class="button" type="submit" id="plan-button"/>
+	      </td>
+	    </tr>
+	  </table>
+	</div>
       </div>
     </form>
-  </div>
+   </div>
 </div>

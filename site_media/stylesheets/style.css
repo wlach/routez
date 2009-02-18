@@ -44,7 +44,7 @@ body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000
 #panels div.content { padding: 10px; }
 
 /* Plan a Trip */
-#panels form { position: relative; }
+#panels form { }
 #panels form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 5px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }
 #panels form label { display: block; height: 16px; width: 16px; float: left; margin: 2px 0 0; text-indent: -9000px; }
@@ -56,6 +56,7 @@ body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000
 #panels form input.text { height: 20px; padding: 2px 0 0; background: #FFFFFF; border-width: 1px; border-style: solid; border-color: #727272 #B4B4B4 #DADADA #B4B4B4; -moz-border-radius: 2px; -webkit-border-radius: 2px; width: 199px; }
 #panels form input.text_error { border-color: #BB0000 #EE0000 #FF0000 #EE0000; }
 #panels form a.reverse { display: block; position: absolute; left: 225px; top: 21px; height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; text-indent: -9000px; }
+#panels form table { width:200px; overflow: hidden; padding: 0; margin: 0;}
 
 /* Alternate Routes */
 #route-plan-options { display: none; }
