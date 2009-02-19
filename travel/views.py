@@ -31,6 +31,10 @@ def human_time(secs = None):
     return dtstr
 
 def main_page(request):
+
+    if request.META['HTTP_USER_AGENT'].find("iPhone") > 0:
+        return iphone(request)
+
     m = Map.objects.get(id=1)
     now_str = human_time()
     return render_to_response('index.html', 
