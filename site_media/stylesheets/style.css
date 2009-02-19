@@ -21,6 +21,8 @@ p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.62em; }
 /* Header */
 #header { background: #679297 url('../images/header_bg.gif') repeat-x left bottom; padding: 10px; height: 30px; margin: 0 0 10px; position: relative; }
 #header h1 { line-height: 1; float: left; margin: 0; font-size: 24px; font-weight: bold; color: #FFFFFF; }
+#header h1 a { line-height: 1; float: left; margin: 0; font-size: 24px; font-weight: bold; color: #FFFFFF; }
+#header h1 a:hover { text-decoration: none; }
 #header h1 span { font-size: 18px; font-weight: normal; color: #ADBFC2; }
 #header p { float: left; line-height: 1; margin: 0 0 0 10px; font-size: 18px; color: #D6DFE1; position: relative; bottom: -5px;  }
 
@@ -33,7 +35,7 @@ p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.62em; }
 body#nav_home ul.nav li.nav_home a,
 body#nav_about ul.nav li.nav_about a,
 body#nav_blog ul.nav li.nav_blog a,
-body#nav_colophon ul.nav li.nav_colophon a { background: #FFFFFF; color: #000000; }
+body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; }
 
 /* Panels */
 #panels { padding: 0 10px; overflow: auto; }

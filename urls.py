@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     (r'^$', 'routez.travel.views.main_page'),
     (r'^iphone$', 'routez.travel.views.iphone'),
     (r'^about$', 'routez.travel.views.about'),
+    (r'^privacy$', 'routez.travel.views.privacy'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
 
     # Uncomment this for admin:
