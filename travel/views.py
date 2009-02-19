@@ -49,6 +49,9 @@ def iphone(request):
 def about(request):
     return render_to_response('about.html')
 
+def privacy(request):
+    return render_to_response('privacy.html')
+
 def routeplan(request):
     start_lat = float(request.GET['startlat'])
     start_lng = float(request.GET['startlng'])
