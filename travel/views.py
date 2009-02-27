@@ -36,19 +36,17 @@ def main_page(request):
         return iphone(request)
 
     m = Map.objects.get(id=1)
-    now_str = human_time()
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.GMAPS_API_KEY, 'now': now_str})
+         'key': settings.GMAPS_API_KEY })
 
 def iphone(request):
     m = Map.objects.get(id=1)
-    now_str = human_time()
     return render_to_response('iphone.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.GMAPS_API_KEY, 'now': now_str})
+         'key': settings.GMAPS_API_KEY })
 
 def about(request):
     return render_to_response('about.html')
