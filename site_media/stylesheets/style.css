@@ -49,16 +49,19 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels form { }
 #panels form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 5px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }
+#panels form div.submit { margin: 0; padding: 0 0 0 21px; }
 #panels form label { display: block; height: 16px; width: 16px; float: left; margin: 2px 0 0; text-indent: -9000px; }
 #panels form label.from { background: url('../images/label_from.png') no-repeat left top; }
 #panels form label.to { background: url('../images/label_to.png') no-repeat left top; }
 #panels form label.time { background: url('../images/label_time.png') no-repeat left top; }
 #panels form span { float: left; margin: 0 0 0 5px; display: block; }
 #panels form span label { line-height: 1; background: none; font-size: 11px; color: #808080; text-indent: 0; height: auto; width: auto; float: none; margin: 2px 0 0 0; }
-#panels form input.text { height: 20px; padding: 2px 0 0; background: #FFFFFF; border-width: 1px; border-style: solid; border-color: #727272 #B4B4B4 #DADADA #B4B4B4; -moz-border-radius: 2px; -webkit-border-radius: 2px; width: 199px; }
+#panels form input.text { height: 20px; padding: 2px 0 0; background: #FFFFFF; border-width: 1px; border-style: solid; border-color: #727272 #B4B4B4 #DADADA #B4B4B4; -moz-border-radius: 2px; -webkit-border-radius: 2px; width: 179px; }
 #panels form input.text_error { border-color: #BB0000 #EE0000 #FF0000 #EE0000; }
-#panels form a.reverse { display: block; position: absolute; left: 225px; top: 21px; height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; text-indent: -9000px; }
-#panels form table { width:200px; overflow: hidden; padding: 0; margin: 0;}
+#panels form a.reverse { height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; }
+#panels form table.location-input { width:230px; overflow: hidden; padding: 0; margin: 0; }
+#panels form td.location-cell { width:210px; overflow: hidden;}
+#panels form td.rev-cell { width:20px; vertical-align: middle; overflow: hidden;}
 
 /* Alternate Routes */
 #route-plan-options { display: none; }
