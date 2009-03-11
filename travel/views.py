@@ -65,7 +65,7 @@ def routeplan(request):
     calendar = pdt.Calendar()
     start_time = calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
-                0, 0, 0, 0, 0, 0))
+                0, 0, 0, 0, 0, -1))
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
     service_period = 'weekday'
@@ -100,8 +100,7 @@ def routeplan(request):
             if action.route_id >= 0:
                 action_time = human_time(daysecs + action.start_time)
                 route = Route.objects.filter(route_id=action.route_id)[0]
-                stops = Stop.objects.filter(stop_id=action.src_id)
-                stop = stops[0]
+                stop = Stop.objects.filter(stop_id=action.src_id)[0]
                 actions_desc.append({ 'type':'board', 
                                       'lat':stop.lat,
                                       'lng':stop.lng,
