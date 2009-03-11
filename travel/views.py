@@ -65,7 +65,7 @@ def routeplan(request):
     calendar = pdt.Calendar()
     start_time = calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
-                0, 0, 0, 0, 0, 0))
+                0, 0, 0, 0, 0, -1))
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
     service_period = 'weekday'
