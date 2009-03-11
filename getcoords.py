@@ -67,10 +67,14 @@ if __name__ == '__main__':
     myre = re.compile("\W*and\W*", re.I)
     streets = myre.split(name)
     if len(streets) == 1:
-        print "single street!"
+        #(streetString, region) = geoparser.
         addr = geoparser.streetAddress.parseString(name)
+        print "single street! (name: %s suffix: %s)" % (addr.street.name, addr.street.type)
 
-        r = Road.objects.filter(name=addr.street.name, suffix=addr.suffix, firstHouseNumber__lte=addr.street.number, lastHouseNumber__gte=addr.street.number)        
+        r = Road.objects.filter(name=addr.street.name, firstHouseNumber__lte=addr.street.number, lastHouseNumber__gte=addr.street.number)        
+        if addr.street.type:
+            r = r.filter(suffix=addr.street.type)
+
         if len(r) > 0:
             print "name: %s firsthouse: %s lasthouse: %s" % (r[0].name, r[0].firstHouseNumber, r[0].lastHouseNumber)
             coords = pickle.loads(str(r[0].coords))

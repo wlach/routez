@@ -29,19 +29,19 @@ class RoadSegment:
         self.left = {}
         self.right = {}        
 
-    def dumpsqls(self):
+    def dumpsqls(self, side):
         even = 0
-        if (self.right['firstNumber'] % 2 == 0):
+        if (side['firstNumber'] % 2 == 0):
             even = 1
 
         print "insert into geocoder_road (name,suffix,coords," \
         "firstHouseNumber,lastHouseNumber,numberingTypeEven,length) values " \
         "('%s', '%s', '%s', '%s', '%s', '%s', '%s');" % (
-            self.right['name'], 
-            self.right['suffix'], 
+            side['name'], 
+            side['suffix'], 
             pickle.dumps(self.coords),
-            self.right['firstNumber'],
-            self.right['lastNumber'],
+            side['firstNumber'],
+            side['lastNumber'],
             even,
             self.length)
 
@@ -75,6 +75,10 @@ class GMLHandler(xml.sax.ContentHandler):
         self.cdata = ""
 
     def endElement(self,name):
+        def setNameAndSuffix(hash):
+            hash['name'] = string.join(self.cdata.split(" ")[0:-1], " ")
+            hash['suffix'] = self.cdata.split(" ")[-1]            
+
         if name=='nrn:RoadSegment':
             self.inRoadSegment = False
             inRange = False
@@ -82,13 +86,26 @@ class GMLHandler(xml.sax.ContentHandler):
                 if lat > self.min_lat and lat < self.max_lat and \
                         lng > self.min_lng and lng < self.max_lng:
                     inRange = True
-            if inRange and self.curRoadSegment.right['name'] != "Unknown":
-                self.curRoadSegment.dumpsqls()
+            if inRange:
+                if self.curRoadSegment.right['name'] != "Unknown":
+                    if self.curRoadSegment.left['firstNumber'] > 0 and \
+                            self.curRoadSegment.left['lastNumber'] > 0:
+                        self.curRoadSegment.dumpsqls(self.curRoadSegment.left)
+                    if self.curRoadSegment.right['firstNumber'] > 0 and \
+                            self.curRoadSegment.right['lastNumber'] > 0:
+                        self.curRoadSegment.dumpsqls(self.curRoadSegment.right)
         elif name == 'gml:lineStringProperty':
             self.inRoadLineString = False
+        # left side
+        elif name=='nrn:left_OfficialStreetNameConcat':
+            setNameAndSuffix(self.curRoadSegment.left)
+        elif name=="nrn:left_FirstHouseNumber":
+            self.curRoadSegment.left['firstNumber'] = int(self.cdata)
+        elif name=="nrn:left_LastHouseNumber":
+            self.curRoadSegment.left['lastNumber'] = int(self.cdata)
+        # right side
         elif name=='nrn:right_OfficialStreetNameConcat':
-            self.curRoadSegment.right['name'] = string.join(self.cdata.split(" ")[0:-1], " ")
-            self.curRoadSegment.right['suffix'] = self.cdata.split(" ")[-1]
+            setNameAndSuffix(self.curRoadSegment.right)
         elif name=="nrn:right_FirstHouseNumber":
             self.curRoadSegment.right['firstNumber'] = int(self.cdata)
         elif name=="nrn:right_LastHouseNumber":
