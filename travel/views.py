@@ -100,8 +100,7 @@ def routeplan(request):
             if action.route_id >= 0:
                 action_time = human_time(daysecs + action.start_time)
                 route = Route.objects.filter(route_id=action.route_id)[0]
-                stops = Stop.objects.filter(stop_id=action.src_id)
-                stop = stops[0]
+                stop = Stop.objects.filter(stop_id=action.src_id)[0]
                 actions_desc.append({ 'type':'board', 
                                       'lat':stop.lat,
                                       'lng':stop.lng,
