@@ -22,7 +22,6 @@ def latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
     dist = math.degrees(math.acos(dist)) * (60.0 * 1.1515 * 1.609344 * 1000.0)
     return dist
 
-
 class RoadSegment:
     def __init__(self):
         self.coords = []
@@ -77,7 +76,7 @@ class GMLHandler(xml.sax.ContentHandler):
     def endElement(self,name):
         def setNameAndSuffix(hash):
             hash['name'] = string.join(self.cdata.split(" ")[0:-1], " ")
-            hash['suffix'] = self.cdata.split(" ")[-1]            
+            hash['suffix'] = string.lower(self.cdata.split(" ")[-1])
 
         if name=='nrn:RoadSegment':
             self.inRoadSegment = False
