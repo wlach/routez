@@ -26,7 +26,7 @@ class RoadSegment:
     def __init__(self):
         self.coords = []
         self.left = {}
-        self.right = {}        
+        self.right = {}
 
     def dumpsqls(self, side):
         even = 0
@@ -50,6 +50,7 @@ class GMLHandler(xml.sax.ContentHandler):
         self.min_lng = min_lng
         self.max_lat = max_lat
         self.max_lng = max_lng
+        self.nodes = {}
 
         self.inRoadSegment = False
         self.inRoadLineString = False
@@ -63,6 +64,30 @@ class GMLHandler(xml.sax.ContentHandler):
         pass
 
     def endDocument(self):
+        for latlng in self.nodes.keys():
+            roadsegs = self.nodes[latlng]
+            
+            if len(roadsegs) > 1:
+                (lat, lng) = latlng.split(",")
+                names_inserted = {}
+                for i in range (1, len(roadsegs)):
+                    roadseg1 = roadsegs[(i-1)].right
+                    roadseg2 = roadsegs[i].right
+                    name1 = roadseg1['name']
+                    name2 = roadseg2['name']
+                    if name1 > name2:
+                        name1, name2 = name2, name1
+                    if name1 and roadseg2['name'] and name1 != name2:
+                        if not names_inserted.get(name1) or \
+                                not names_inserted.get(name2):
+                            print "insert into geocoder_intersection " \
+                                "(name1, suffix1, name2, suffix2, lat, " \
+                                "lng) values ('%s', '%s', '%s', '%s', '%s', " \
+                                "'%s');" %  (name1, roadseg1['suffix'], 
+                                             name2, roadseg2['suffix'], lat, lng)
+                                
+                            names_inserted[name1] = 1
+                            names_inserted[name2] = 1
         pass
         
     def startElement(self, name, attrs):
@@ -115,6 +140,16 @@ class GMLHandler(xml.sax.ContentHandler):
             for coordtuple_str in self.cdata.split(" "):
                 coordtuple = coordtuple_str.split(",")
                 (lng, lat) = (float(coordtuple[0]), float(coordtuple[1]))
+                # updating intersection db (only if lat,lng in range of
+                # interest!)
+                if lat > self.min_lat and lat < self.max_lat and \
+                        lng > self.min_lng and lng < self.max_lng:
+                    inRange = True
+                    key = str(lat)+","+str(lng)
+                    if not self.nodes.get(key):
+                        self.nodes[key] = []
+                    self.nodes[key].append(self.curRoadSegment)
+                # updating road db
                 self.curRoadSegment.coords.append((lat, lng))
                 if prevcoord:
                     self.curRoadSegment.length += latlng_dist(lat, lng, 

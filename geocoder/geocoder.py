@@ -4,7 +4,7 @@ import parser
 import re
 import string
 
-from routez.geocoder.models import Road
+from routez.geocoder.models import Road, Intersection
 import routez.geocoder.parser as geoparser
 
 suffix_mapping = { "ave": "avenue",
@@ -60,19 +60,16 @@ def __get_interpolated_latlng(coords, length, pct):
 def __normalize_suffix(suffix):
     tmpsuffix = string.lower(suffix)
 
-    print "tmpsuffix: %s" % tmpsuffix
     if suffix_mapping.get(tmpsuffix):
-        print "mapping: %s" % suffix_mapping[tmpsuffix]
         return suffix_mapping[tmpsuffix]
 
     return tmpsuffix
 
 def get_location(location_str):
-    myre = re.compile("\W*and\W*", re.I)
+    myre = re.compile("\W*and|&\W*", re.I)
     streets = myre.split(location_str)
     if len(streets) == 1:
         addr = geoparser.streetAddress.parseString(location_str)
-        print "single street! (name: %s suffix: %s)" % (addr.street.name, addr.street.type)
 
         r = Road.objects.filter(name=addr.street.name)        
         if addr.street.type:
@@ -82,7 +79,6 @@ def get_location(location_str):
                          lastHouseNumber__gte=addr.street.number)
 
         if len(r) > 0:
-            print "name: %s firsthouse: %s lasthouse: %s" % (r[0].name, r[0].firstHouseNumber, r[0].lastHouseNumber)
             coords = pickle.loads(str(r[0].coords))
             percent = float(float(addr.number) - r[0].firstHouseNumber) / \
                 float(r[0].lastHouseNumber - r[0].firstHouseNumber)
@@ -91,9 +87,19 @@ def get_location(location_str):
             return None
                                                
     elif len(streets) == 2:
-        print "Intersection!"
+        addr1 = geoparser.streetAddress.parseString(streets[0])
+        addr2 = geoparser.streetAddress.parseString(streets[1])
+        if addr1.street.name > addr2.street.name:
+            addr2, addr1 = addr1, addr2
+        r = Intersection.objects.filter(name1=addr1.street.name, name2=addr2.street.name)
+        if addr1.street.type:
+            r.filter(suffix1=__normalize_suffix(addr1.street.type))
+        if addr2.street.type:
+            r.filter(suffix2=__normalize_suffix(addr2.street.type))            
+        if len(r) > 0:
+            return (r[0].lat, r[0].lng)
         return None
+
     else:
-        print "Do not understand"
         return None
 
