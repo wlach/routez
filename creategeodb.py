@@ -64,31 +64,31 @@ class GMLHandler(xml.sax.ContentHandler):
         pass
 
     def endDocument(self):
+        intersections_inserted = {}
         for latlng in self.nodes.keys():
             roadsegs = self.nodes[latlng]
             
             if len(roadsegs) > 1:
                 (lat, lng) = latlng.split(",")
-                names_inserted = {}
-                for i in range (1, len(roadsegs)):
-                    roadseg1 = roadsegs[(i-1)].right
-                    roadseg2 = roadsegs[i].right
-                    name1 = roadseg1['name']
-                    name2 = roadseg2['name']
-                    if name1 > name2:
-                        name1, name2 = name2, name1
-                    if name1 and roadseg2['name'] and name1 != name2:
-                        if not names_inserted.get(name1) or \
-                                not names_inserted.get(name2):
-                            print "insert into geocoder_intersection " \
-                                "(name1, suffix1, name2, suffix2, lat, " \
-                                "lng) values ('%s', '%s', '%s', '%s', '%s', " \
-                                "'%s');" %  (name1, roadseg1['suffix'], 
-                                             name2, roadseg2['suffix'], lat, lng)
-                                
-                            names_inserted[name1] = 1
-                            names_inserted[name2] = 1
-        pass
+                for i in range (0, len(roadsegs)):
+                    for j in range (0, len(roadsegs)):
+                        if i != j:
+                            roadseg1 = roadsegs[i].right
+                            roadseg2 = roadsegs[j].right
+                            name1 = roadseg1['name']
+                            name2 = roadseg2['name']
+                            if name1 > name2:
+                                name1, name2 = name2, name1
+                                if name1 and name2 and name1 != name2:
+                                    
+                                    intersection_key = name1+roadseg1['suffix']+","+name2+roadseg2['suffix']
+                                    if not intersections_inserted.get(intersection_key):
+                                        print "insert into geocoder_intersection " \
+                                            "(name1, suffix1, name2, suffix2, lat, " \
+                                            "lng) values ('%s', '%s', '%s', '%s', '%s', " \
+                                            "'%s');" %  (name1, roadseg1['suffix'], 
+                                                         name2, roadseg2['suffix'], lat, lng)
+                                        intersections_inserted[intersection_key] = 1
         
     def startElement(self, name, attrs):
         if name=='nrn:RoadSegment':
@@ -145,7 +145,7 @@ class GMLHandler(xml.sax.ContentHandler):
                 if lat > self.min_lat and lat < self.max_lat and \
                         lng > self.min_lng and lng < self.max_lng:
                     inRange = True
-                    key = str(lat)+","+str(lng)
+                    key = str(round(lat,4))+","+str(round(lng,4))
                     if not self.nodes.get(key):
                         self.nodes[key] = []
                     self.nodes[key].append(self.curRoadSegment)
