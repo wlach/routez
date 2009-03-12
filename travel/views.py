@@ -7,6 +7,7 @@ import simplejson
 import time
 
 from routez.travel.models import Route, Stop, Map, Shape
+import routez.geocoder.geocoder as geocoder
 
 class TripPlan:
     def __init__(self, departure_time, actions):
@@ -55,11 +56,12 @@ def privacy(request):
     return render_to_response('privacy.html')
 
 def routeplan(request):
-    start_lat = float(request.GET['startlat'])
-    start_lng = float(request.GET['startlng'])
-    end_lat = float(request.GET['endlat'])
-    end_lng = float(request.GET['endlng'])
+    start = request.GET['start']
+    end = request.GET['end']
     time_str = request.GET.get('time', "")
+
+    start_latlng = geocoder.get_location(start)
+    end_latlng = geocoder.get_location(end)
 
     import parsedatetime.parsedatetime as pdt
     calendar = pdt.Calendar()
@@ -78,7 +80,8 @@ def routeplan(request):
     import routez
     graph = routez.travel.graph
     trippath = graph.find_path(today_secs, service_period, False,
-                    start_lat, start_lng, end_lat, end_lng)
+                               start_latlng[0], start_latlng[1], end_latlng[0], 
+                               end_latlng[1])
 
     actions_desc = []
     route_shortnames = []
@@ -131,12 +134,17 @@ def routeplan(request):
     if last_action:
         action_time = human_time(daysecs + last_action.end_time)
         actions_desc.append({ 'type': 'arrive', 
+                              'lat': end_latlng[0],
+                              'lng': end_latlng[1],
                               'time': action_time })
 
         
-    trip_plan = { 'actions': actions_desc, 
+    trip_plan = { 
+        'start': { "lat": start_latlng[0], "lng": start_latlng[1] },
+        'end': { "lat": end_latlng[0], "lng": end_latlng[1] },
+        'actions': actions_desc, 
                   'departure_time' : human_time(daysecs + today_secs) }
         
     return HttpResponse(simplejson.dumps(trip_plan), 
-        mimetype="application/json")
+                        mimetype="application/json")
 

@@ -7,7 +7,7 @@ import string
 from routez.geocoder.models import Road, Intersection
 import routez.geocoder.parser as geoparser
 
-suffix_mapping = { "ave": "avenue",
+__suffix_mapping = { "ave": "avenue",
                    "av": "avenue",
                    "aven": "avenue",
                    "avenu": "avenue",
@@ -60,8 +60,8 @@ def __get_interpolated_latlng(coords, length, pct):
 def __normalize_suffix(suffix):
     tmpsuffix = string.lower(suffix)
 
-    if suffix_mapping.get(tmpsuffix):
-        return suffix_mapping[tmpsuffix]
+    if __suffix_mapping.get(tmpsuffix):
+        return __suffix_mapping[tmpsuffix]
 
     return tmpsuffix
 
