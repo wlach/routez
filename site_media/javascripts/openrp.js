@@ -206,10 +206,7 @@ function submitCallback(data, responseCode) {
         return;
     }
 
-    // update our default routeplan fields
-    routePlanStartDefault = document.getElementById('routePlanStart').value;
-    routePlanEndDefault = document.getElementById('routePlanEnd').value;
-
+    // FIXME: only do this in the event of success
     YAHOO.util.Cookie.setSubs("routeplan", 
                               { start: routePlanStartDefault, 
                                   end: routePlanEndDefault },
@@ -345,7 +342,7 @@ function submitRoutePlan() {
         YAHOO.util.History.navigate("plan", newState);
     } else {
         GDownloadUrl("/json/routeplan" + 
-                     "?start=" + origin_str + "&end=" + dest_str +
+                     "?start=" + routePlanStartDefault + "&end=" + routePlanEndDefault +
                      "&time=" + time, submitCallback);
     }
 }
