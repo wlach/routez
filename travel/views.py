@@ -7,6 +7,7 @@ import simplejson
 import time
 
 from routez.travel.models import Route, Stop, Map, Shape
+import routez.geocoder.geocoder as geocoder
 
 class TripPlan:
     def __init__(self, departure_time, actions):
@@ -36,19 +37,17 @@ def main_page(request):
         return iphone(request)
 
     m = Map.objects.get(id=1)
-    now_str = human_time()
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.GMAPS_API_KEY, 'now': now_str})
+         'key': settings.CMAPS_API_KEY })
 
 def iphone(request):
     m = Map.objects.get(id=1)
-    now_str = human_time()
     return render_to_response('iphone.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.GMAPS_API_KEY, 'now': now_str})
+         'key': settings.CMAPS_API_KEY })
 
 def about(request):
     return render_to_response('about.html')
@@ -57,17 +56,29 @@ def privacy(request):
     return render_to_response('privacy.html')
 
 def routeplan(request):
-    start_lat = float(request.GET['startlat'])
-    start_lng = float(request.GET['startlng'])
-    end_lat = float(request.GET['endlat'])
-    end_lng = float(request.GET['endlng'])
+    start = request.GET['start']
+    end = request.GET['end']
     time_str = request.GET.get('time', "")
+
+    errors = []
+    start_latlng = geocoder.get_location(start)
+    end_latlng = geocoder.get_location(end)
+
+    if not start_latlng:
+        errors.append("start_latlng_decode")
+    if not end_latlng:
+        errors.append("end_latlng_decode")
+
+    if len(errors):
+        return HttpResponse(simplejson.dumps({ 'errors': errors }), 
+                            mimetype="application/json")
+
 
     import parsedatetime.parsedatetime as pdt
     calendar = pdt.Calendar()
     start_time = calendar.parse(time_str)[0]
     daysecs = time.mktime((start_time[0], start_time[1], start_time[2],
-                0, 0, 0, 0, 0, 0))
+                0, 0, 0, 0, 0, -1))
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
     service_period = 'weekday'
@@ -80,7 +91,8 @@ def routeplan(request):
     import routez
     graph = routez.travel.graph
     trippath = graph.find_path(today_secs, service_period, False,
-                    start_lat, start_lng, end_lat, end_lng)
+                               start_latlng[0], start_latlng[1], end_latlng[0], 
+                               end_latlng[1])
 
     actions_desc = []
     route_shortnames = []
@@ -102,8 +114,7 @@ def routeplan(request):
             if action.route_id >= 0:
                 action_time = human_time(daysecs + action.start_time)
                 route = Route.objects.filter(route_id=action.route_id)[0]
-                stops = Stop.objects.filter(stop_id=action.src_id)
-                stop = stops[0]
+                stop = Stop.objects.filter(stop_id=action.src_id)[0]
                 actions_desc.append({ 'type':'board', 
                                       'lat':stop.lat,
                                       'lng':stop.lng,
@@ -134,12 +145,17 @@ def routeplan(request):
     if last_action:
         action_time = human_time(daysecs + last_action.end_time)
         actions_desc.append({ 'type': 'arrive', 
+                              'lat': end_latlng[0],
+                              'lng': end_latlng[1],
                               'time': action_time })
 
         
-    trip_plan = { 'actions': actions_desc, 
+    trip_plan = { 
+        'start': { "lat": start_latlng[0], "lng": start_latlng[1] },
+        'end': { "lat": end_latlng[0], "lng": end_latlng[1] },
+        'actions': actions_desc, 
                   'departure_time' : human_time(daysecs + today_secs) }
         
     return HttpResponse(simplejson.dumps(trip_plan), 
-        mimetype="application/json")
+                        mimetype="application/json")
 
