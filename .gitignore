@@ -13,8 +13,7 @@ gmap_api_key
 libroutez.so
 routez.db
 .*.swp
+site_media/images/bus/*
 tags
 testgraph
 tripgraph.py
-tripgraph_wrap_py.cc
-tripgraph_wrap_rb.cc

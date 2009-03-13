@@ -1,4 +1,5 @@
 var routePlan;
+var cloudmade = new CM.Tiles.CloudMade.Web({key: '6cf313fb0cac592a98c0f60ab0693118' });
 var map = null;
 
 var busStopIcon;
@@ -8,9 +9,8 @@ var endIcon;
 
 var routePlanStart = null;
 var routePlanEnd = null;
-var routePlanStartDefault = null
-var routePlanEndDefault = null
-
+var routePlanStartDefault = null;
+var routePlanEndDefault = null;
 
 /**
  * Setup locations based on previous browser locations or cookie. Call 
@@ -49,46 +49,31 @@ function setupRoutePlanForm(state) {
  * Initialize icons. Call once during load.
  */
 function initIcons() {
-    busStopIcon = new GIcon();
-    busStopIcon.image = "site_media/images/marker_bus.png";
-    busStopIcon.iconSize = new GSize(76, 36);
-    busStopIcon.iconAnchor = new GPoint(1, 35);
-
-    walkStopIcon = new GIcon();
+    /*
+    walkStopIcon = new CM.Icon();
     walkStopIcon.image = "site_media/images/marker_walk.png";
     walkStopIcon.iconSize = new GSize(46, 36);
     walkStopIcon.iconAnchor = new GPoint(1, 35);
 
-    ferryStopIcon = new GIcon();
+    ferryStopIcon = new CM.Icon();
     ferryStopIcon.image = "site_media/images/marker_ferry.png";
     ferryStopIcon.iconSize = new GSize(46, 36);
     ferryStopIcon.iconAnchor = new GPoint(1, 35);
 
-    switchStopIcon = new GIcon();
+    switchStopIcon = new CM.Icon();
     switchStopIcon.image = "site_media/images/marker_switch.png";
     switchStopIcon.iconSize = new GSize(46, 36);
     switchStopIcon.iconAnchor = new GPoint(1, 35);
-
-    fromIcon = new GIcon();
-    fromIcon.image = "site_media/images/marker_from.png";
-    fromIcon.iconSize = new GSize(46, 36);
-    fromIcon.iconAnchor = new GPoint(1, 35);
-
-    toIcon = new GIcon();
-    toIcon.image = "site_media/images/marker_to.png";
-    toIcon.iconSize = new GSize(46, 36);
-    toIcon.iconAnchor = new GPoint(1, 35);
-}
-
-function addWalkingOverlay(origin, dest) {
-    var directions = new GDirections();
-    var options;
-    var waypoints = new Array();   
-    waypoints[0] = origin.lat() + "," + origin.lng();
-    waypoints[1] = dest.lat() + "," + dest.lng();
-    directions.loadFromWaypoints(waypoints, {getPolyline: true});
-    GEvent.addListener(directions, "load", function() {
-            map.addOverlay(directions.getPolyline())}); 
+    */
+    startIcon = new CM.Icon();
+    startIcon.image = "site_media/images/marker_from.png";
+    startIcon.iconSize = new CM.Size(34, 36);
+    startIcon.iconAnchor = new CM.Point(11, 35);
+    
+    endIcon = new CM.Icon();
+    endIcon.image = "site_media/images/marker_to.png";
+    endIcon.iconSize = new CM.Size(34, 36);
+    endIcon.iconAnchor = new CM.Point(11, 35);
 }
 
 function reverseDirections() {
@@ -109,20 +94,23 @@ String.prototype.capitalize = function(){
 
 function addLine(map, routePath, colour) {
     if (routePath.length > 0) {
-        var polyline = new GPolyline(routePath, colour, 5);
+        var polyline = new CM.Polyline(routePath, colour, 5);
         map.addOverlay(polyline);
     }
 }
 
 function updateMapBounds(actions) {
-    var bounds = new GLatLngBounds;
+
+    var bound_latlngs = new Array();
+
     for (var i = 0; i < actions.length; ++i) {
         // only alight and pass actions have latlng info
         if (actions[i].type == "alight" || actions[i].type == "pass") {
-            bounds.extend(new GLatLng(actions[i].lat, actions[i].lng));
+            bound_latlngs[bound_latlngs.length] = new CM.LatLng(actions[i].lat, actions[i].lng);
         }
     }
 
+    var bounds = new CM.LatLngBounds(bound_latlngs);
     map.setCenter(bounds.getCenter());
     var zoom = map.getBoundsZoomLevel(bounds);
     map.setCenter(bounds.getCenter(), zoom);
@@ -136,8 +124,8 @@ function updateMapDirections(start, end, actions) {
     }
 
     var routePath = new Array();
-    var walkPathColour = "#0000ff";
-    var busPathColour = "#ff0000";
+    var walkPathColour = "#004";
+    var busPathColour = "#22f";
 
     // before doing anything else, set bounds (if we're loading
     // directions on a new page, we need to do this before adding overlays)
@@ -146,19 +134,20 @@ function updateMapDirections(start, end, actions) {
     // nuke any existing map overlays
     map.clearOverlays();
 
-    map.addOverlay(new GMarker(new GLatLng(start.lat, start.lng), {icon:G_START_ICON}));
-    map.addOverlay(new GMarker(new GLatLng(end.lat, end.lng, {icon:G_END_ICON})));
-
-    routePath[routePath.length] = new GLatLng(start.lat, start.lng);
+    map.addOverlay(new CM.Marker(new CM.LatLng(start.lat, start.lng), 
+                                 { icon: startIcon, title: "start" }));
+    map.addOverlay(new CM.Marker(new CM.LatLng(end.lat, end.lng), 
+                                 { icon: endIcon, title: "end" }));
+    routePath[routePath.length] = new CM.LatLng(start.lat, start.lng);
 
     for (var i = 0; i < actions.length; ++i) {
-        var latlng = new GLatLng(actions[i].lat, actions[i].lng);
+        var latlng = new CM.LatLng(actions[i].lat, actions[i].lng);
 
         if (actions[i].type == "alight" || actions[i].type == "pass") {
             // also add any shape to the path
             if (actions[i].shape) {
                 for (var j=0; j<actions[i].shape.length; ++j) {
-                    routePath[routePath.length] = new GLatLng(
+                    routePath[routePath.length] = new CM.LatLng(
                         actions[i].shape[j][0], actions[i].shape[j][1]);
                 }
             } else {
@@ -169,12 +158,13 @@ function updateMapDirections(start, end, actions) {
         if (actions[i].type == "board") {
             routePath[routePath.length] = latlng;
 
-            var markerOpts = new Object();
-            markerOpts.icon = busStopIcon;
-            markerOpts.labelText = actions[i].route_shortname;
-            markerOpts.labelClass = "tooltip";
-            markerOpts.labelOffset = new GSize(31, -35);
-            map.addOverlay(new LabeledMarker(latlng, markerOpts));
+            var icon = new CM.Icon();
+            icon.image = "site_media/images/bus/marker_bus_" + 
+            actions[i].route_shortname + ".png"
+            icon.iconSize = new CM.Size(76, 36);
+            icon.iconAnchor = new CM.Point(1, 35);
+            map.addOverlay(new CM.Marker(latlng, 
+                                         { icon: icon, title: "Board" }));
             
             addLine(map, routePath, walkPathColour);
             routePath = new Array();
@@ -187,11 +177,16 @@ function updateMapDirections(start, end, actions) {
         // if we have to get off and walk, show a nice icon
         if (i>0 && actions[i-1].type == "alight" && 
             actions[i].type != "board") {
-            map.addOverlay(new GMarker(new GLatLng(actions[i-1].lat, actions[i-1].lng), walkStopIcon));
+            var icon = new CM.Icon();
+            icon.image = "site_media/images/marker_walk.png"
+            icon.iconSize = new CM.Size(46, 36);
+            icon.iconAnchor = new CM.Point(1, 35);
+            map.addOverlay(new CM.Marker(latlng, 
+                                         { icon: icon, title: "Walk" }));
         }
     }
     
-    routePath[routePath.length] = new GLatLng(end.lat, end.lng);
+    routePath[routePath.length] = new CM.LatLng(end.lat, end.lng);
     addLine(map, routePath, walkPathColour);
 }
 
@@ -200,14 +195,10 @@ function showMapLink(latlngStr) {
     routePlan += latlngStr + "\">Map</a>]";
 }
 
-function submitCallback(data, responseCode) {
+var submitCallback = function(o) {
     planButton = document.getElementById('plan-button');
     planButton.value = 'Plan!';
     planButton.style.color = "#000";
-
-    if (responseCode != 200) {
-        return;
-    }
 
     // FIXME: only do this in the event of success
     YAHOO.util.Cookie.setSubs("routeplan", 
@@ -215,7 +206,7 @@ function submitCallback(data, responseCode) {
                                   end: routePlanEnd },
                               { expires: new Date("January 12, 2025") });
 
-    myresponse = YAHOO.lang.JSON.parse(data);
+    myresponse = YAHOO.lang.JSON.parse(o.responseText);
     actions = myresponse['actions'];
     routePlan = "";
 
@@ -339,9 +330,12 @@ function submitRoutePlan() {
     if (currentState !== newState) {
         YAHOO.util.History.navigate("plan", newState);
     } else {
-        GDownloadUrl("/json/routeplan" + 
-                     "?start=" + routePlanStart + "&end=" + routePlanEnd +
-                     "&time=" + time, submitCallback);
+        
+        YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
+                                        "?start=" + routePlanStart + "&end=" + routePlanEnd +
+                                        "&time=" + time, 
+                                        { success:submitCallback, failure:submitCallback }, null);
+        
     }
 }
 
