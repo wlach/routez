@@ -74,7 +74,10 @@ def get_location(location_str):
                          lastHouseNumber__gte=addr.street.number)
         if len(r) > 0:
             coords = pickle.loads(str(r[0].coords))
-            percent = float(float(addr.street.number) - r[0].firstHouseNumber) / \
+            number = 0.0
+            if addr.street.number:
+                number = float(addr.street.number)
+            percent = float(number - r[0].firstHouseNumber) / \
                 float(r[0].lastHouseNumber - r[0].firstHouseNumber)
             return __get_interpolated_latlng(coords, r[0].length, percent)
         else:
