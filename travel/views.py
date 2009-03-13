@@ -37,7 +37,6 @@ def main_page(request):
         return iphone(request)
 
     m = Map.objects.get(id=1)
-    print "Key: %s" % settings.CMAPS_API_KEY
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
@@ -61,8 +60,19 @@ def routeplan(request):
     end = request.GET['end']
     time_str = request.GET.get('time', "")
 
+    errors = []
     start_latlng = geocoder.get_location(start)
     end_latlng = geocoder.get_location(end)
+
+    if not start_latlng:
+        errors.append("start_latlng_decode")
+    if not end_latlng:
+        errors.append("end_latlng_decode")
+
+    if len(errors):
+        return HttpResponse(simplejson.dumps({ 'errors': errors }), 
+                            mimetype="application/json")
+
 
     import parsedatetime.parsedatetime as pdt
     calendar = pdt.Calendar()

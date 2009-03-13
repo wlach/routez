@@ -18,7 +18,6 @@ CMAPS_API_KEY = ""
 # If specified, CMAPS_API_KEY is set to the contents of this file
 CMAPS_API_KEY_FILE = PROJECT_PATH + "/" + "cmap_api_key"
 
-print "Key: %s" % CMAPS_API_KEY_FILE
 if CMAPS_API_KEY_FILE != "" and os.path.isfile(CMAPS_API_KEY_FILE):
     file_key = open(CMAPS_API_KEY_FILE).read().strip()
     if file_key != "":

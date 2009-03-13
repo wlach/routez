@@ -22,6 +22,7 @@
     function load() {
         // initialize map
         var cloudmade = new CM.Tiles.CloudMade.Web({key: '{{ key }}',styleId: 4});
+        bb = new CM.LatLngBounds(new CM.LatLng({{ min_lat }}, {{ min_lon }}),new CM.LatLng({{ max_lat }}, {{ max_lon }}));
         map = new CM.Map('map', cloudmade);
         map.addControl(new CM.LargeMapControl());
         initIcons();
@@ -37,7 +38,6 @@
                 submitRoutePlan();
             } else {
                   document.getElementById('route-plan').style.display = 'none';
-                  var bb = new CM.LatLngBounds(new CM.LatLng({{ min_lat }}, {{ min_lon }}),new CM.LatLng({{ max_lat }}, {{ max_lon }}));
                   map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb));
                   map.clearOverlays();
             } 
