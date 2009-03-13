@@ -119,11 +119,7 @@ function updateMapBounds(actions) {
     }
 
     var bounds = new CM.LatLngBounds(bound_latlngs);
-    map.setCenter(bounds.getCenter());
     var zoom = map.getBoundsZoomLevel(bounds);
-    if (zoom > 0) {
-        zoom -= 1;
-    }
 
     map.setCenter(bounds.getCenter(), zoom);
 }
