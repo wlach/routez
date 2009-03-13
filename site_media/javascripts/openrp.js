@@ -203,10 +203,25 @@ function showMapLink(latlngStr) {
     routePlan += latlngStr + "\">Map</a>]";
 }
 
-var submitCallback = function(o) {
+var submitCallbackError = function(o) {
+    // reset plan button
     planButton = document.getElementById('plan-button');
     planButton.value = 'Plan!';
     planButton.style.color = "#000";
+
+    // show the error message
+    document.getElementById('error-submit').style.display = 'block';
+    reset();
+}
+
+var submitCallback = function(o) {
+    // reset plan button
+    planButton = document.getElementById('plan-button');
+    planButton.value = 'Plan!';
+    planButton.style.color = "#000";
+
+    // clear any previous submit error notices
+    document.getElementById('error-submit').style.display = 'none';
 
     myresponse = YAHOO.lang.JSON.parse(o.responseText);
 
@@ -366,7 +381,7 @@ function submitRoutePlan() {
         YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
                                         "?start=" + routePlanStart + "&end=" + routePlanEnd +
                                         "&time=" + time, 
-                                        { success:submitCallback, failure:submitCallback }, null);
+                                        { success:submitCallback, failure:submitCallbackError }, null);
         
     }
 }
