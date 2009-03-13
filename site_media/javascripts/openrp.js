@@ -379,7 +379,7 @@ function submitRoutePlan() {
     } else {
         
         YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
-                                        "?start=" + routePlanStart + "&end=" + routePlanEnd +
+                                        "?start=" + escape(routePlanStart) + "&end=" + escape(routePlanEnd) +
                                         "&time=" + time, 
                                         { success:submitCallback, failure:submitCallbackError }, null);
         
