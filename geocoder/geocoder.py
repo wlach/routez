@@ -66,7 +66,7 @@ def get_location(location_str):
     if len(streets) == 1:
         addr = geoparser.streetAddress.parseString(location_str)
 
-        r = Road.objects.filter(name=addr.street.name)        
+        r = Road.objects.filter(name__iexact=addr.street.name)        
         if addr.street.type:
             r = r.filter(suffix=__normalize_suffix(addr.street.type))
         if addr.street.number:
@@ -86,7 +86,8 @@ def get_location(location_str):
         addr2 = geoparser.streetAddress.parseString(streets[1])
         if addr1.street.name > addr2.street.name:
             addr2, addr1 = addr1, addr2
-        r = Intersection.objects.filter(name1=addr1.street.name, name2=addr2.street.name)
+        r = Intersection.objects.filter(name1__iexact=addr1.street.name, 
+                                        name2__iexact=addr2.street.name)
         if addr1.street.type:
             r.filter(suffix1=__normalize_suffix(addr1.street.type))
         if addr2.street.type:
