@@ -37,9 +37,7 @@
             if (setupRoutePlanForm(state)) {
                 submitRoutePlan();
             } else {
-                  document.getElementById('route-plan').style.display = 'none';
-                  map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb));
-                  map.clearOverlays();
+                reset();
             } 
         }
         YAHOO.util.History.register("plan", routezInitialState, 
@@ -51,10 +49,7 @@
             if (setupRoutePlanForm(YAHOO.util.History.getCurrentState("plan"))) {
                 submitRoutePlan();
             } else {
-                  document.getElementById('route-plan').style.display = 'none';
-                  var bb = new CM.LatLngBounds(new CM.LatLng({{ min_lat }}, {{ min_lon }}),new CM.LatLng({{ max_lat }}, {{ max_lon }}));
-                  map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb));
-                  map.clearOverlays();
+                reset();
             }
         });
     }
