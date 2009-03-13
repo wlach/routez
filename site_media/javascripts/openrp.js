@@ -6,8 +6,11 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
-var routePlanStartDefault = null;
-var routePlanEndDefault = null;
+var routePlanStart = null;
+var routePlanEnd = null;
+var routePlanStartDefault = null
+var routePlanEndDefault = null
+
 
 /**
  * Setup locations based on previous browser locations or cookie. Call 
@@ -208,8 +211,8 @@ function submitCallback(data, responseCode) {
 
     // FIXME: only do this in the event of success
     YAHOO.util.Cookie.setSubs("routeplan", 
-                              { start: routePlanStartDefault, 
-                                  end: routePlanEndDefault },
+                              { start: routePlanStart, 
+                                  end: routePlanEnd },
                               { expires: new Date("January 12, 2025") });
 
     myresponse = YAHOO.lang.JSON.parse(data);
@@ -314,15 +317,10 @@ function resetPlanButton() {
     planButton.style.color = "#000";
 }
 
-function planRoute() {
-    // if we don't have latlng coordinates yet, we need to get them
-    // before we can proceed
-}
-
 function submitRoutePlan() {
-    var origin_str = document.getElementById('routePlanStart').value;
-    var dest_str = document.getElementById('routePlanEnd').value;
-    
+    routePlanStart = document.getElementById('routePlanStart').value;
+    routePlanEnd = document.getElementById('routePlanEnd').value;
+
     // let user know something exciting is about to happen!
     planButton = document.getElementById('plan-button');
     planButton.value = 'Working...';
@@ -331,8 +329,8 @@ function submitRoutePlan() {
     time = document.getElementById('time').value;
         
     var currentState = YAHOO.util.History.getCurrentState("plan");
-    var newState = YAHOO.lang.JSON.stringify({ saddr: routePlanStartDefault, 
-                                               daddr: routePlanEndDefault,
+    var newState = YAHOO.lang.JSON.stringify({ saddr: routePlanStart, 
+                                               daddr: routePlanEnd,
                                                time: time });
 
     // if currentState is equal to newState, then we've already set the
@@ -342,7 +340,7 @@ function submitRoutePlan() {
         YAHOO.util.History.navigate("plan", newState);
     } else {
         GDownloadUrl("/json/routeplan" + 
-                     "?start=" + routePlanStartDefault + "&end=" + routePlanEndDefault +
+                     "?start=" + routePlanStart + "&end=" + routePlanEnd +
                      "&time=" + time, submitCallback);
     }
 }
