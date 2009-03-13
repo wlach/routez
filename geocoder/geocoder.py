@@ -39,13 +39,8 @@ def __get_interpolated_latlng(coords, length, pct):
     prevcoord = None
     for coord in coords:
         if prevcoord:
-            print "prevcoord: %s, %s coord: %s, %s" % \
-                (prevcoord[0], prevcoord[1], coord[0], coord[1])
             seg_travel = __latlng_dist(prevcoord[0], prevcoord[1],
                                      coord[0], coord[1])
-            print "seg travel: %s distance travelled: %s "\
-                "distance to travel: %s" % (seg_travel, distance_travelled,
-                                            distance_to_travel)
             if distance_travelled + seg_travel >= distance_to_travel:
                 seg_pct = (distance_to_travel - distance_travelled) / \
                     seg_travel
