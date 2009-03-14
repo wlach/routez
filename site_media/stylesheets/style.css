@@ -61,7 +61,7 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels form a.reverse { height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; }
 #panels form table.location-input { width:230px; overflow: hidden; padding: 0; margin: 0; }
 #panels form td.location-cell { width:210px; overflow: hidden;}
-#panels form td.rev-cell { width:20px; vertical-align: middle; overflow: hidden;}
+#panels form td.rev-cell { width:16px; vertical-align: middle; overflow: hidden;}
 
 /* Alternate Routes */
 #route-plan-options { display: none; }
