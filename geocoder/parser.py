@@ -5,7 +5,7 @@ import string
 
 __splitre = re.compile("\W*and|&\W*", re.I)
 
-__suffix_mapping = { "ave": "avenue",
+suffix_mapping = { "ave": "avenue",
                    "av": "avenue",
                    "aven": "avenue",
                    "avenu": "avenue",
@@ -15,6 +15,8 @@ __suffix_mapping = { "ave": "avenue",
                    "streets": "street",
                    "strt": "street"
                    }
+
+__all_suffixes = string.join(suffix_mapping.keys() + list(set(suffix_mapping.values())), " ")
 
 # number can be any of the forms 123, 21B, or 23 1/2
 number = ( Combine(Word(nums) + 
@@ -26,9 +28,8 @@ numberSuffix = oneOf("st th nd")
 # just a basic word of alpha characters, Maple, Main, etc.
 name = ~numberSuffix + Word(alphas)
 
-# types of streets - extend as desired
-type_ = Combine( oneOf("Street St Boulevard Blvd Lane Ln Road Rd Avenue Ave "
-                        "Circle Cir Cove Cv Drive Dr Parkway Pkwy Court Ct",
+# suffixs of streets - extend as desired
+suffix_ = Combine( oneOf(__all_suffixes,
                         caseless=True) + Optional(".").suppress())
 
 # region
@@ -41,10 +42,10 @@ and_ = oneOf("and &", caseless=True)
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
                         Optional("1/2") + 
                         Optional(numberSuffix), joinString=" ", adjacent=False ) 
-              | Combine(OneOrMore(~type_ + ~region_ + ~and_ + name), joinString=" ",adjacent=False) )
+              | Combine(OneOrMore(~suffix_ + ~region_ + ~and_ + name), joinString=" ",adjacent=False) )
 
 # basic street address
-streetReference = streetName.setResultsName("name") + Optional(type_.setResultsName("type"))
+streetReference = streetName.setResultsName("name") + Optional(suffix_.setResultsName("suffix"))
 streetReferenceWithRegion = streetReference + Optional(region_.setResultsName("region"))
 direct = number.setResultsName("number") + streetReference
 directWithRegion = number.setResultsName("number") + streetReferenceWithRegion
@@ -56,15 +57,14 @@ intersection = (streetReferenceWithRegion.setResultsName("street1") + \
                 and_ + \
                 (streetReferenceWithRegion.setResultsName("street2")))
 
-def __normalize_suffix(addr):
-    tmpsuffix = string.lower(addr.suffix)
-    
-    if __suffix_mapping.get(tmpsuffix):
-        addr.suffix = __suffix_mapping[tmpsuffix]
-
-
 class Address:
-    pass
+    def __init__(self, addr):
+        self.name = addr.name
+        self.number = addr.number
+        self.region = addr.region
+        self.suffix = string.lower(addr.suffix)        
+        if suffix_mapping.get(self.suffix):
+            self.suffix = suffix_mapping[self.suffix]
 
 def parse_address(location_str):
     # strip out and commas from the string, to make it easier
@@ -75,11 +75,10 @@ def parse_address(location_str):
 
     if len(location_strs) == 1:
         addr = streetAddress.parseString(location_str)
-        __normalize_suffix(addr)
-        
-        return [addr]
+        return [Address(addr)]
 
     elif len(location_strs) == 2:
         inters = intersection.parseString(location_str)
-        return [inters.street1, inters.street2]
+
+        return [Address(inters.street1), Address(inters.street2)]
     

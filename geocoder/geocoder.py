@@ -42,14 +42,13 @@ def __get_interpolated_latlng(coords, length, pct):
         prevcoord = coord
 
 def get_location(location_str):
-    myre = re.compile("\W*and|&\W*", re.I)
-    streets = myre.split(location_str)
+    streets = geoparser.parse_address(location_str)
     if len(streets) == 1:
         addr = geoparser.streetAddress.parseString(location_str)
 
         r = Road.objects.filter(name__iexact=addr.street.name)        
         if addr.street.type:
-            r = r.filter(suffix=__normalize_suffix(addr.street.type))
+            r = r.filter(suffix=addr.street.type)
         if addr.street.number:
             r = r.filter(firstHouseNumber__lte=addr.street.number, 
                          lastHouseNumber__gte=addr.street.number)
@@ -63,18 +62,16 @@ def get_location(location_str):
             return __get_interpolated_latlng(coords, r[0].length, percent)
         else:
             return None
-                                               
+
     elif len(streets) == 2:
-        addr1 = geoparser.streetAddress.parseString(streets[0])
-        addr2 = geoparser.streetAddress.parseString(streets[1])
-        if addr1.street.name > addr2.street.name:
-            addr2, addr1 = addr1, addr2
-        r = Intersection.objects.filter(name1__iexact=addr1.street.name, 
-                                        name2__iexact=addr2.street.name)
-        if addr1.street.type:
-            r.filter(suffix1=__normalize_suffix(addr1.street.type))
-        if addr2.street.type:
-            r.filter(suffix2=__normalize_suffix(addr2.street.type))            
+        if streets[0].name > streets[1].name:
+            streets[1], streets[0] = streets[0], streets[1]
+        r = Intersection.objects.filter(name1__iexact=streets[0].name, 
+                                        name2__iexact=streets[1].name)
+        if streets[0].suffix:
+            r.filter(suffix1=streets[0].suffix)
+        if streets[1].suffix:
+            r.filter(suffix2=streets[1].suffix)
         if len(r) > 0:
             return (r[0].lat, r[0].lng)
         return None

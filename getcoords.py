@@ -8,7 +8,6 @@ import string
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-import routez.geocoder.parser as geoparser
 import routez.geocoder.geocoder as geocoder
 
 if __name__ == '__main__':
