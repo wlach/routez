@@ -44,19 +44,17 @@ def __get_interpolated_latlng(coords, length, pct):
 def get_location(location_str):
     streets = geoparser.parse_address(location_str)
     if len(streets) == 1:
-        addr = geoparser.streetAddress.parseString(location_str)
-
-        r = Road.objects.filter(name__iexact=addr.street.name)        
-        if addr.street.type:
-            r = r.filter(suffix=addr.street.type)
-        if addr.street.number:
-            r = r.filter(firstHouseNumber__lte=addr.street.number, 
-                         lastHouseNumber__gte=addr.street.number)
+        r = Road.objects.filter(name__iexact=streets[0].name)
+        if streets[0].suffix:
+            r = r.filter(suffix=streets[0].suffix)
+        if streets[0].number:
+            r = r.filter(firstHouseNumber__lte=streets[0].number, 
+                         lastHouseNumber__gte=streets[0].number)
         if len(r) > 0:
             coords = pickle.loads(str(r[0].coords))
             number = 0.0
-            if addr.street.number:
-                number = float(addr.street.number)
+            if streets[0].number:
+                number = float(streets[0].number)
             percent = float(number - r[0].firstHouseNumber) / \
                 float(r[0].lastHouseNumber - r[0].firstHouseNumber)
             return __get_interpolated_latlng(coords, r[0].length, percent)
