@@ -40,6 +40,9 @@ def __get_interpolated_latlng(coords, length, pct):
             distance_travelled += seg_travel
 
         prevcoord = coord
+    
+    return (prevcoord[0], prevcoord[1])
+
 
 def get_location(location_str):
     streets = geoparser.parse_address(location_str)
