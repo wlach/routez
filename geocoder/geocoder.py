@@ -30,7 +30,8 @@ def __get_interpolated_latlng(coords, length, pct):
         if prevcoord:
             seg_travel = __latlng_dist(prevcoord[0], prevcoord[1],
                                      coord[0], coord[1])
-            if distance_travelled + seg_travel >= distance_to_travel:
+            if seg_travel > 0.0 and \
+                    distance_travelled + seg_travel >= distance_to_travel:
                 seg_pct = (distance_to_travel - distance_travelled) / \
                     seg_travel
                     
@@ -55,11 +56,11 @@ def get_location(location_str):
                          lastHouseNumber__gte=streets[0].number)
         if len(r) > 0:
             coords = pickle.loads(str(r[0].coords))
-            number = 0.0
+            percent = 0.0
             if streets[0].number:
                 number = float(streets[0].number)
-            percent = float(number - r[0].firstHouseNumber) / \
-                float(r[0].lastHouseNumber - r[0].firstHouseNumber)
+                percent = float(number - r[0].firstHouseNumber) / \
+                    float(r[0].lastHouseNumber - r[0].firstHouseNumber)
             return __get_interpolated_latlng(coords, r[0].length, percent)
         else:
             return None
