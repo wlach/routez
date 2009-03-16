@@ -7,17 +7,6 @@ import string
 from routez.geocoder.models import Road, Intersection
 import routez.geocoder.parser as geoparser
 
-__suffix_mapping = { "ave": "avenue",
-                   "av": "avenue",
-                   "aven": "avenue",
-                   "avenu": "avenue",
-                   "avn": "avenue",
-                   "avnue": "avenue",
-                   "st": "street",
-                   "streets": "street",
-                   "strt": "street"
-                   }                   
-
 def __latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
 
     if round(src_lat, 4) == round(dest_lat, 4) and \
@@ -51,14 +40,6 @@ def __get_interpolated_latlng(coords, length, pct):
             distance_travelled += seg_travel
 
         prevcoord = coord
-
-def __normalize_suffix(suffix):
-    tmpsuffix = string.lower(suffix)
-
-    if __suffix_mapping.get(tmpsuffix):
-        return __suffix_mapping[tmpsuffix]
-
-    return tmpsuffix
 
 def get_location(location_str):
     myre = re.compile("\W*and|&\W*", re.I)
