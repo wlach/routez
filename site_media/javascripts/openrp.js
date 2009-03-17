@@ -260,7 +260,7 @@ var submitCallback = function(o) {
     } else {                
         var origin_str = document.getElementById('routePlanStart').value.capitalize();
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
-
+        document.title = "Trip from " + origin_str + " to " + dest_str; 
         first_stop = "";
         for (var i = 0; i < actions.length; ++i) {
             if (actions[i].route_id >= 0) {
