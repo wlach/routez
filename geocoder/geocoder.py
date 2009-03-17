@@ -57,7 +57,7 @@ def get_location(location_str):
         if len(r) > 0:
             coords = pickle.loads(str(r[0].coords))
             percent = 0.0
-            if streets[0].number:
+            if streets[0].number and r[0].lastHouseNumber > r[0].firstHouseNumber:
                 number = float(streets[0].number)
                 percent = float(number - r[0].firstHouseNumber) / \
                     float(r[0].lastHouseNumber - r[0].firstHouseNumber)
