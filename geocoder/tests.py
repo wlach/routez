@@ -46,11 +46,17 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_single("Highfield Park Crescent", "Highfield Park", "", 
                           "crescent", "")
         self.check_single("laneroad", "laneroad", "", "", "")
-        
+        self.check_single("5000 bland street", "bland", "5000", "street", "")        
         
 
     def testIntersection(self):
         self.check_intersection("North & Agricola", "North", "", "", 
+                                "Agricola", "", "", "")
+        self.check_intersection("North &Agricola", "North", "", "", 
+                                "Agricola", "", "", "")
+        self.check_intersection("North& Agricola", "North", "", "", 
+                                "Agricola", "", "", "")
+        self.check_intersection("North&Agricola", "North", "", "", 
                                 "Agricola", "", "", "")
         self.check_intersection("North and Agricola", "North", "", "", 
                                 "Agricola", "", "", "")
@@ -61,10 +67,14 @@ class GeoParserTestCase(unittest.TestCase):
                                 "North", "", "street",
                                 "Agricola", "", "", 
                                 "Halifax")
-        # th was a problem before
+        # th was a problem before (th is a street suffix)
         self.check_intersection("Victoria & Thistle",
                                 "Victoria", "", "",
                                 "Thistle", "", "", "")
         self.check_intersection("victoria & thistle",
                                 "victoria", "", "",
                                 "thistle", "", "", "")
+        # and appears twice
+        self.check_intersection("Bland and Duffus",
+                                "Bland", "", "",
+                                "Duffus", "", "", "")

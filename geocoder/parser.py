@@ -3,7 +3,7 @@ from pyparsing import *
 import re
 import string
 
-__splitre = re.compile("\W*and|&\W*", re.I)
+__splitre = re.compile("\W*\ and\ |&\W*", re.I)
 
 suffix_mapping = { "ave": "avenue",
                    "av": "avenue",
@@ -55,7 +55,7 @@ region_ = Combine( White().suppress() + oneOf("Dartmouth Halifax",
                                               caseless=True))
 
 # join string
-and_ = Combine(White().suppress() + oneOf("and &", caseless=True))
+and_ = oneOf("and &", caseless=True)
 
 # street name 
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
@@ -97,6 +97,5 @@ def parse_address(location_str):
 
     elif len(location_strs) == 2:
         inters = intersection.parseString(location_str)
-
         return [Address(inters.street1), Address(inters.street2)]
     
