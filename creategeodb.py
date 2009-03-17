@@ -66,10 +66,11 @@ class GMLHandler(xml.sax.ContentHandler):
     def endDocument(self):
         intersections_inserted = {}
         for latlng in self.nodes.keys():
-            roadsegs = self.nodes[latlng]
+            roadsegs = self.nodes[latlng]["roadsegs"]
             
             if len(roadsegs) > 1:
-                (lat, lng) = latlng.split(",")
+                (lat, lng) = self.nodes[latlng]["latlng"]
+                
                 for i in range (0, len(roadsegs)):
                     for j in range (0, len(roadsegs)):
                         if i != j:
@@ -145,10 +146,11 @@ class GMLHandler(xml.sax.ContentHandler):
                 if lat > self.min_lat and lat < self.max_lat and \
                         lng > self.min_lng and lng < self.max_lng:
                     inRange = True
-                    key = str(round(lat,4))+","+str(round(lng,4))
+                    key = str(round(lat,3))+","+str(round(lng,3))
                     if not self.nodes.get(key):
-                        self.nodes[key] = []
-                    self.nodes[key].append(self.curRoadSegment)
+                        self.nodes[key] = { "latlng": (lat, lng),
+                                            "roadsegs": [] }
+                    self.nodes[key]["roadsegs"].append(self.curRoadSegment)
                 # updating road db
                 self.curRoadSegment.coords.append((lat, lng))
                 if prevcoord:
