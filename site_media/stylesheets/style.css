@@ -38,7 +38,7 @@ body#nav_blog ul.nav li.nav_blog a,
 body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; }
 
 /* Panels */
-#panels { padding: 0 10px; overflow: auto; }
+#panels { padding: 0 10px; overflow: hidden; }
 #panels p { font-size: 12px; color: #000000; }
 #panels p#intro { font-size: 14px; margin: 0 0 10px; }
 #panels div.panel { border: 1px solid #5A7F85; -moz-border-radius: 3px; -webkit-border-radius: 3px; margin: 0 0 10px; }
