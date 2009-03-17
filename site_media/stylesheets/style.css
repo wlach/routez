@@ -16,15 +16,15 @@ div.yui-layout-hd { display: none; }
 a { color: #5A7F85; }
 div.container { overflow: hidden; margin: 40px auto; width: 960px; }
 h2 { font-weight: bold; font-size: 22px; color: #000000; margin: 0 0 0.81em; line-height: 1.62em; }
-p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.62em; }
+p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.25em}
 
 /* Header */
 #header { background: #679297 url('../images/header_bg.gif') repeat-x left bottom; padding: 10px; height: 30px; margin: 0 0 10px; position: relative; }
-#header h1 { line-height: 1; float: left; margin: 0; font-size: 24px; font-weight: bold; color: #FFFFFF; }
-#header h1 a { line-height: 1; float: left; margin: 0; font-size: 24px; font-weight: bold; color: #FFFFFF; }
+#header h1 { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
+#header h1 a { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
 #header h1 a:hover { text-decoration: none; }
 #header h1 span { font-size: 18px; font-weight: normal; color: #ADBFC2; }
-#header p { float: left; line-height: 1; margin: 0 0 0 10px; font-size: 18px; color: #D6DFE1; position: relative; bottom: -5px;  }
+#header p { float: left; line-height: 1; margin: 0 0 0 10px; font-size: 18px; color: #D6DFE1; position: relative; bottom: -8px;  }
 
 /* Navigation */
 #header ul.nav { text-align: right; position: absolute; right: 10px; bottom: 0; margin: 0; padding: 0; }
