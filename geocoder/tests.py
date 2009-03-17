@@ -55,3 +55,10 @@ class GeoParserTestCase(unittest.TestCase):
                                 "North", "", "street",
                                 "Agricola", "", "", 
                                 "Halifax")
+        # th was a problem before
+        self.check_intersection("Victoria & Thistle",
+                                "Victoria", "", "",
+                                "Thistle", "", "", "")
+        self.check_intersection("victoria & thistle",
+                                "victoria", "", "",
+                                "thistle", "", "", "")

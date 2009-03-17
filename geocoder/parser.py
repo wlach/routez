@@ -23,10 +23,9 @@ number = ( Combine(Word(nums) +
                    Optional(oneOf(list(alphas))+FollowedBy(White()))) + \
             Optional(Optional("-") + "1/2")
          ).setParseAction(keepOriginalText, lambda t:t[0].strip())
-numberSuffix = oneOf("st th nd")
 
 # just a basic word of alpha characters, Maple, Main, etc.
-name = ~numberSuffix + Word(alphas)
+name = Word(alphas)
 
 # suffixs of streets - extend as desired
 suffix_ = Combine( oneOf(__all_suffixes,
@@ -40,8 +39,7 @@ and_ = oneOf("and &", caseless=True)
 
 # street name 
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
-                        Optional("1/2") + 
-                        Optional(numberSuffix), joinString=" ", adjacent=False ) 
+                        Optional("1/2"), joinString=" ", adjacent=False )
               | Combine(OneOrMore(~suffix_ + ~region_ + ~and_ + name), joinString=" ",adjacent=False) )
 
 # basic street address
