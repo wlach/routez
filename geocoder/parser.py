@@ -47,14 +47,15 @@ number = ( Combine(Word(nums) +
 name = Word(alphas)
 
 # suffixs of streets - extend as desired
-suffix_ = Combine( oneOf(__all_suffixes,
+suffix_ = Combine( White().suppress() + oneOf(__all_suffixes,
                         caseless=True) + Optional(".").suppress())
 
 # region
-region_ = oneOf("Dartmouth Halifax", caseless=True)
+region_ = Combine( White().suppress() + oneOf("Dartmouth Halifax", 
+                                              caseless=True))
 
 # join string
-and_ = oneOf("and &", caseless=True)
+and_ = Combine(White().suppress() + oneOf("and &", caseless=True))
 
 # street name 
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
