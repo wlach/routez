@@ -46,8 +46,8 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_single("Highfield Park Crescent", "Highfield Park", "", 
                           "crescent", "")
         self.check_single("laneroad", "laneroad", "", "", "")
-        self.check_single("5000 bland street", "bland", "5000", "street", "")        
-        
+        self.check_single("5000 bland street", "bland", "5000", "street", "")
+        self.check_single("victoria road", "victoria", "", "road", "")
 
     def testIntersection(self):
         self.check_intersection("North & Agricola", "North", "", "", 
