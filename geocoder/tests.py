@@ -42,7 +42,13 @@ class GeoParserTestCase(unittest.TestCase):
                           "avenue", "Halifax")
         self.check_single("6277 South Street", "South", "6277", 
                           "street", "")
+        #self.check_single("3rd Avenue", "3rd", "", "avenue", "")
+        self.check_single("Highfield Park Crescent", "Highfield Park", "", 
+                          "crescent", "")
+        self.check_single("laneroad", "laneroad", "", "", "")
         
+        
+
     def testIntersection(self):
         self.check_intersection("North & Agricola", "North", "", "", 
                                 "Agricola", "", "", "")

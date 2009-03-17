@@ -14,7 +14,7 @@ html[xmlns] .clearfix{display:block;}
 * html .clearfix{height:1%;}
 
 /* General */
-body{font-size:75%;color:#202020;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;}
+body{font-size:75%;color:#202020;font-family:arial,helvetica,clean,sans-serif;}
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 a.negative { color: #F93C1B; }

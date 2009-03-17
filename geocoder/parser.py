@@ -11,9 +11,28 @@ suffix_mapping = { "ave": "avenue",
                    "avenu": "avenue",
                    "avn": "avenue",
                    "avnue": "avenue",
+                   "boul": "boulevard",
+                   "blvd": "boulevard",
+                   "boulv": "boulevard",
+                   "crecent": "crescent",
+                   "cres": "crescent",
+                   "cresent": "crescent",
+                   "driv": "drive",
+                   "dr": "drive",
+                   "drives": "drive",
+                   "hwy": "highway",
+                   "highwy": "highway",
+                   "hiway": "highway",
+                   "hiwy": "highway",
+                   "la": "lane",
+                   "ln": "lane",
+                   "lanes": "lane",
+                   "rtry": "rotary",
                    "st": "street",
                    "streets": "street",
-                   "strt": "street"
+                   "strt": "street",
+                   "terr": "terrace",
+                   "ter": "terrace",
                    }
 
 __all_suffixes = string.join(suffix_mapping.keys() + list(set(suffix_mapping.values())), " ")
@@ -28,14 +47,15 @@ number = ( Combine(Word(nums) +
 name = Word(alphas)
 
 # suffixs of streets - extend as desired
-suffix_ = Combine( oneOf(__all_suffixes,
+suffix_ = Combine( White().suppress() + oneOf(__all_suffixes,
                         caseless=True) + Optional(".").suppress())
 
 # region
-region_ = oneOf("Dartmouth Halifax", caseless=True)
+region_ = Combine( White().suppress() + oneOf("Dartmouth Halifax", 
+                                              caseless=True))
 
 # join string
-and_ = oneOf("and &", caseless=True)
+and_ = Combine(White().suppress() + oneOf("and &", caseless=True))
 
 # street name 
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
