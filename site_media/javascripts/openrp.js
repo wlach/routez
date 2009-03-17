@@ -92,6 +92,19 @@ String.prototype.capitalize = function(){
     });
 };
 
+// Strip leading and trailing white-space
+// @http://bytes.com/groups/javascript/165013-how-javascript-trim-normalize-space-functions
+String.prototype.trim = function() {
+    return this.replace(/^\s*|\s*$/g, "");
+}
+
+// Replace repeated spaces, newlines and tabs with a single space
+// @http://bytes.com/groups/javascript/165013-how-javascript-trim-normalize-space-functions
+String.prototype.normalize_space = function() {
+    return this.replace(/^\s*|\s(?=\s)|\s*$/g, "");
+}
+
+
 function reset() {
     // reset everything, called on first load (if no trip) and in case
     // of error
@@ -258,9 +271,9 @@ var submitCallback = function(o) {
     if (actions.length == 0) {
         routePlan = "<p>Couldn't find a path!</p>";
     } else {                
-        var origin_str = document.getElementById('routePlanStart').value.capitalize();
+        var origin_str = document.getElementById('routePlanStart').value.capitalize().trim().normalize_space();
         var dest_str = document.getElementById('routePlanEnd').value.capitalize();
-
+        document.title = "Trip from " + origin_str + " to " + dest_str; 
         first_stop = "";
         for (var i = 0; i < actions.length; ++i) {
             if (actions[i].route_id >= 0) {
