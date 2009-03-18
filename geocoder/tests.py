@@ -58,6 +58,10 @@ class GeoParserTestCase(unittest.TestCase):
                                 "Agricola", "", "", "")
         self.check_intersection("North&Agricola", "North", "", "", 
                                 "Agricola", "", "", "")
+        self.check_intersection("North and agricola", 
+                                "North", "", "",
+                                "agricola", "", "", 
+                                "")
         self.check_intersection("North and Agricola", "North", "", "", 
                                 "Agricola", "", "", "")
         self.check_intersection("North Street and Agricola", 
@@ -78,3 +82,7 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_intersection("Bland and Duffus",
                                 "Bland", "", "",
                                 "Duffus", "", "", "")
+        
+# geocoder tests FIXME:
+# 110 wyse road (segment where start and end numbers the same)
+# North and agricola (first is less than the second, if all lower case)

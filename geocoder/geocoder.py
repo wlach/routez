@@ -66,7 +66,7 @@ def get_location(location_str):
             return None
 
     elif len(streets) == 2:
-        if streets[0].name > streets[1].name:
+        if streets[0].name.lower() > streets[1].name.lower():
             streets[1], streets[0] = streets[0], streets[1]
         r = Intersection.objects.filter(name1__iexact=streets[0].name, 
                                         name2__iexact=streets[1].name)
