@@ -3,11 +3,11 @@
   <head>
     <title>hbus.ca</title>
     <meta name = "viewport" content = "initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width"/>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ key }}" type="text/javascript"></script>
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/cookie/cookie-min.js"></script> 
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/history/history-min.js"></script> 
+    <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/connection/connection-min.js"></script> 
     <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/json/json-min.js"></script> 
     <script type="text/javascript" src="site_media/javascripts/openrp.js" type="text/javascript"></script>
     
@@ -15,9 +15,6 @@
     function load() {
         // hide the route plan when the page is first loaded
         document.getElementById('route-plan').style.display = 'none';
-        if (GBrowserIsCompatible()) {
-           geocoder = new GClientGeocoder();
-        }
 
         YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe"); 
         var routezBookmarkedState = YAHOO.util.History.getBookmarkedState("plan");
@@ -53,7 +50,7 @@
     }
   </style>
 
-  <body id="nav_home" onload="load();" onunload="GUnload()" class="yui-skin-sam">
+  <body id="nav_home" onload="load();" class="yui-skin-sam">
   <iframe id="yui-history-iframe" src="site_media/images/header_bg.gif"></iframe> 
   <input id="yui-history-field" type="hidden"></input> 
 
