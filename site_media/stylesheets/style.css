@@ -51,6 +51,7 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 5px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }
+#panels form p.error { color:#F00; }
 #panels form label { display: block; height: 16px; width: 16px; float: left; margin: 2px 0 0; text-indent: -9000px; }
 #panels form label.from { background: url('../images/label_from.png') no-repeat left top; }
 #panels form label.to { background: url('../images/label_to.png') no-repeat left top; }
