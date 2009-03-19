@@ -4,6 +4,7 @@ import re
 import string
 
 __splitre = re.compile("\W*\ and\ |&\W*", re.I)
+numre = re.compile("[0-9]+", re.I)
 
 suffix_mapping = { "ave": "avenue",
                    "av": "avenue",
@@ -78,10 +79,13 @@ intersection = (streetReferenceWithRegion.setResultsName("street1") + \
 
 class Address:
     def __init__(self, addr):
-        self.name = addr.name
+        self.name = addr.name            
         self.number = addr.number
+        match = numre.match(self.number)
+        if match:
+            self.number = match.group(0)
         self.region = addr.region
-        self.suffix = string.lower(addr.suffix)        
+        self.suffix = string.lower(addr.suffix)
         if suffix_mapping.get(self.suffix):
             self.suffix = suffix_mapping[self.suffix]
 

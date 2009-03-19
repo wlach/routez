@@ -1,7 +1,6 @@
 import cPickle as pickle
 import math
 import parser
-import re
 import string
 
 from routez.geocoder.models import Road, Intersection
@@ -33,8 +32,7 @@ def __get_interpolated_latlng(coords, length, pct):
             if seg_travel > 0.0 and \
                     distance_travelled + seg_travel >= distance_to_travel:
                 seg_pct = (distance_to_travel - distance_travelled) / \
-                    seg_travel
-                    
+                    seg_travel                   
                 new_lat = prevcoord[0] + ((coord[0] - prevcoord[0]) * seg_pct)
                 new_lng = prevcoord[1] + ((coord[1] - prevcoord[1]) * seg_pct)
                 return (new_lat, new_lng)
