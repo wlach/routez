@@ -91,12 +91,13 @@ def parse_address(location_str):
     location_str = location_str.replace(",", "")
 
     location_strs = __splitre.split(location_str)
-
-    if len(location_strs) == 1:
+    
+    if len(location_strs) == 1 and location_strs[0]:
         addr = streetAddress.parseString(location_str)
         return [Address(addr)]
 
-    elif len(location_strs) == 2:
+    elif len(location_strs) == 2 and location_strs[0] and location_strs[1]:
         inters = intersection.parseString(location_str)
-        return [Address(inters.street1), Address(inters.street2)]
+        return [Address(inters.street1), Address(inters.street2)]    
     
+    return []

@@ -48,6 +48,9 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_single("laneroad", "laneroad", "", "", "")
         self.check_single("5000 bland street", "bland", "5000", "street", "")
         self.check_single("victoria road", "victoria", "", "road", "")
+        # the null case
+        self.assertEquals(geoparser.parse_address(""), [])
+
 
     def testIntersection(self):
         self.check_intersection("North & Agricola", "North", "", "", 
@@ -82,6 +85,9 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_intersection("Bland and Duffus",
                                 "Bland", "", "",
                                 "Duffus", "", "", "")
+        # the null cases
+        self.assertEquals(geoparser.parse_address("&"), [])
+        self.assertEquals(geoparser.parse_address(" and "), [])
         
 # geocoder tests FIXME:
 # 110 wyse road (segment where start and end numbers the same)
