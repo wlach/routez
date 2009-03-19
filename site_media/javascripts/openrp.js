@@ -235,8 +235,12 @@ var submitCallback = function(o) {
 
     // clear any previous submit error notices
     document.getElementById('error-submit').style.display = 'none';
-
-    myresponse = YAHOO.lang.JSON.parse(o.responseText);
+    try { 
+        myresponse = YAHOO.lang.JSON.parse(o.responseText);
+    } 
+    catch (e) { 
+        submitCallbackError(o); 
+    } 
 
     // check for fails
     errors = myresponse['errors'];
