@@ -48,6 +48,8 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_single("laneroad", "laneroad", "", "", "")
         self.check_single("5000 bland street", "bland", "5000", "street", "")
         self.check_single("victoria road", "victoria", "", "road", "")
+        # numbers with letters should be normalized to just numbers
+        self.check_single("5000a bland street", "bland", "5000", "street", "")
         # the null case
         self.assertEquals(geoparser.parse_address(""), [])
 
