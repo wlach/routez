@@ -33,7 +33,7 @@ def human_time(secs = None):
 
 def main_page(request):
 
-    if request.META['HTTP_USER_AGENT'].find("iPhone") > 0:
+    if request.META.get('HTTP_USER_AGENT') and request.META['HTTP_USER_AGENT'].find("iPhone") > 0:
         return iphone(request)
 
     m = Map.objects.get(id=1)
