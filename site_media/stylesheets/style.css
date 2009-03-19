@@ -23,7 +23,8 @@ p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.25em}
 #header h1 { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
 #header h1 a { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
 #header h1 a:hover { text-decoration: none; }
-#header h1 span { font-size: 18px; font-weight: normal; color: #ADBFC2; }
+#header h1 span { font-size: 18px; font-weight: bold; color: #ADBFC2; }
+#header h1 span.beta { font-size: 18px; color: #FF5555; }
 #header p { float: left; line-height: 1; margin: 0 0 0 10px; font-size: 18px; color: #D6DFE1; position: relative; bottom: -8px;  }
 
 /* Navigation */
