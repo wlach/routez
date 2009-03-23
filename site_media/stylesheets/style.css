@@ -36,6 +36,7 @@ p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.25em}
 body#nav_home ul.nav li.nav_home a,
 body#nav_about ul.nav li.nav_about a,
 body#nav_blog ul.nav li.nav_blog a,
+body#nav_help ul.nav li.nav_help a,
 body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; }
 
 /* Panels */

@@ -55,6 +55,10 @@ def about(request):
     return render_to_response('about.html', 
                               { 'analytics_key': settings.ANALYTICS_KEY })
 
+def help(request):
+    return render_to_response('help.html', 
+                              { 'analytics_key': settings.ANALYTICS_KEY })
+
 def privacy(request):
     return render_to_response('privacy.html',
                               { 'analytics_key': settings.ANALYTICS_KEY })
