@@ -105,6 +105,7 @@ def routeplan(request):
     actions_desc = []
     route_shortnames = []
     last_action = None
+    walking_time = 0
     for action in trippath.get_actions():
         # order is always: get off (if applicable), board (if applicable), 
         # then move
@@ -140,6 +141,8 @@ def routeplan(request):
             shape = None
             if len(shapes):
                 shape = simplejson.loads(shapes[0].polyline)
+        else:
+            walking_time += (action.end_time - action.start_time)
         action_time = human_time(daysecs + action.start_time);
         actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                               'lat': ts.lat, 
@@ -162,7 +165,8 @@ def routeplan(request):
         'start': { "lat": start_latlng[0], "lng": start_latlng[1] },
         'end': { "lat": end_latlng[0], "lng": end_latlng[1] },
         'actions': actions_desc, 
-                  'departure_time' : human_time(daysecs + today_secs) }
+        'departure_time' : human_time(daysecs + today_secs),
+        'walking_time': walking_time }
         
     return HttpResponse(simplejson.dumps(trip_plan), 
                         mimetype="application/json")

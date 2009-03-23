@@ -290,7 +290,7 @@ var submitCallback = function(o) {
             firstStop = dest_str;
 
         routePlan += "<ol>";
-        routePlan += "<li class='depart'><strong>" + myresponse['departure_time'] + ":</strong> ";
+        routePlan += "<li class='depart'>";
         routePlan += "Start at " + origin_str + ".</li>";
         routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
         routePlan += "Walk to " + firstStop + ".";
@@ -322,12 +322,19 @@ var submitCallback = function(o) {
             } 
             
             if (i==(actions.length-1)) {
-                routePlan += "<li class='arrive'><strong>" + actions[i].time + ":</strong> ";
-                routePlan += "Arrive at " + dest_str + ".";
+                routePlan += "<li class='arrive'>";
+                routePlan += "Arrive at " + dest_str + " at <strong>" + actions[i].time + "</strong>.";
             }
         }
 
         routePlan += "</ol>";
+    }
+
+    // show a warning if there's too much walking time
+    if (myresponse['walking_time'] > 20 * 60) {
+        document.getElementById('longwalk').style.display = 'block';
+    } else {
+        document.getElementById('longwalk').style.display = 'hidden';
     }
 
     // show the route plan (and options), hide the about box
@@ -372,8 +379,8 @@ function submitRoutePlan() {
 
     // clear errors
     document.getElementById('error-from').style.display = 'none';
-    document.getElementById('routePlanStart').className = 'text';
     document.getElementById('error-to').style.display = 'none';
+    document.getElementById('routePlanStart').className = 'text';
     document.getElementById('routePlanEnd').className = 'text';
 
     // let user know something exciting is about to happen!
