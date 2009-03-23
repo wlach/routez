@@ -290,7 +290,7 @@ var submitCallback = function(o) {
             firstStop = dest_str;
 
         routePlan += "<ol>";
-        routePlan += "<li class='depart'><strong>" + myresponse['departure_time'] + ":</strong> ";
+        routePlan += "<li class='depart'>";
         routePlan += "Start at " + origin_str + ".</li>";
         routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
         routePlan += "Walk to " + firstStop + ".";
