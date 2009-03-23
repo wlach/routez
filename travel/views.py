@@ -40,20 +40,24 @@ def main_page(request):
     return render_to_response('index.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.CMAPS_API_KEY })
+         'key': settings.CMAPS_API_KEY,
+         'analytics_key': settings.ANALYTICS_KEY })
 
 def iphone(request):
     m = Map.objects.get(id=1)
     return render_to_response('iphone.html', 
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
-         'key': settings.CMAPS_API_KEY })
+         'key': settings.CMAPS_API_KEY,
+         'analytics_key': settings.ANALYTICS_KEY })
 
 def about(request):
-    return render_to_response('about.html')
+    return render_to_response('about.html', 
+                              { 'analytics_key': settings.ANALYTICS_KEY })
 
 def privacy(request):
-    return render_to_response('privacy.html')
+    return render_to_response('privacy.html',
+                              { 'analytics_key': settings.ANALYTICS_KEY })
 
 def routeplan(request):
     start = request.GET['start']
