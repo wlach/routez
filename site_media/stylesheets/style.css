@@ -91,6 +91,8 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #route-plan ol li.arrive { background-image: url('../images/label_to.png');}
 #route-plan p { margin: 0 0 10px; }
 #route-plan p.feedback { color: #808080; margin: 0; }
+#route-plan p.warning { color: #FF5555; }
+#route-plan a { color: #22F; }
 
 /* Map */
 #map { width: 100%; height: 100%; }
