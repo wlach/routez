@@ -1,7 +1,11 @@
 <div class="panel">
   <h2>Plan a trip</h2>
   <div class="content">
+{% if analytics_key %}
+    <form id="routePlan" onSubmit="pageTracker._trackPageview('/json/routeplan'); submitRoutePlan(); return false;">
+{% else %}
     <form id="routePlan" onSubmit="submitRoutePlan(); return false;">
+{% endif %}
       <table class="location-input">
 	<tr>
 	  <td class="location-cell">
