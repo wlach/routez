@@ -68,22 +68,8 @@
 
   </div>
 
-  <script>
-    (function() {
-      var Dom = YAHOO.util.Dom,
-          Event = YAHOO.util.Event;
+  {% include 'layout-standard.html' %}
 
-      Event.onDOMReady(function() {
-        var layout = new YAHOO.widget.Layout({
-          units: [
-            { position: 'top', body: 'header', gutter: '0', height: 60 },
-            { position: 'center', body: 'content', gutter: '0' }
-          ]
-        });
-        layout.render();
-      }); 
-    })();
-  </script>
 </body>
 
 </html>

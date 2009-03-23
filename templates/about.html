@@ -8,6 +8,13 @@
   <link href="site_media/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
   <link href="site_media/stylesheets/style.css" rel="stylesheet" type="text/css" />
 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
+
+
   <style type="text/css">
     v\:* {
     behavior:url(#default#VML);
@@ -21,7 +28,7 @@
   {% include 'header.html' %}
   {% include 'analytics.html' %}
 
-  <div class="container">
+  <div class="container" id="content">
 
     <h2>Motivation</h2>
     <p>The aim of hbus.ca is to make bus travel in Halifax and the surrounding regions less painful. Metro Transit provides reasonably
@@ -56,6 +63,8 @@
     {% include 'footer.html' %}
 
   </div>
+
+  {% include 'layout-standard.html' %}
 
 </body>
 
