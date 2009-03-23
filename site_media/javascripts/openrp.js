@@ -293,7 +293,7 @@ var submitCallback = function(o) {
         routePlan += "<li class='depart'>";
         routePlan += "Start at " + origin_str + ".</li>";
         routePlan += "<li class='walk'><strong>" + actions[0].time + ":</strong> ";
-        routePlan += "Walk to " + firstStop + ".";
+        routePlan += "Begin walking to " + firstStop + ".";
         if (!map) {
             showMapLink(firstStopLatlng);
         }
