@@ -46,7 +46,7 @@ number = ( Combine(Word(nums) +
          ).setParseAction(keepOriginalText, lambda t:t[0].strip())
 
 # just a basic word of alpha characters, Maple, Main, etc.
-name = Word(alphas)
+name = Combine( Word(alphas) + Optional(Combine(oneOf("'").suppress() + "s")) )
 
 # suffixs of streets - extend as desired
 suffix_ = Combine( White().suppress() + oneOf(__all_suffixes, caseless=True) + 
