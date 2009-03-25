@@ -87,6 +87,12 @@ class GeoParserTestCase(unittest.TestCase):
         self.check_intersection("Bland and Duffus",
                                 "Bland", "", "",
                                 "Duffus", "", "", "")
+
+        # la is a suffix
+        self.check_intersection("Albro Lake Road and Wyse Road",
+                                "Albro Lake", "", "road",
+                                "Wyse", "", "road", "")
+
         # the null cases
         self.assertEquals(geoparser.parse_address("&"), [])
         self.assertEquals(geoparser.parse_address(" and "), [])

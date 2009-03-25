@@ -49,15 +49,16 @@ number = ( Combine(Word(nums) +
 name = Word(alphas)
 
 # suffixs of streets - extend as desired
-suffix_ = Combine( White().suppress() + oneOf(__all_suffixes,
-                        caseless=True) + Optional(".").suppress())
+suffix_ = Combine( White().suppress() + oneOf(__all_suffixes, caseless=True) + 
+                   Optional(".").suppress() + FollowedBy(Or([White().suppress(), 
+                                                  LineEnd()])))
 
 # region
 region_ = Combine( White().suppress() + oneOf("Dartmouth Halifax", 
                                               caseless=True))
 
 # join string
-and_ = oneOf("and &", caseless=True)
+and_ = Or([ Combine( White().suppress() + oneOf("and", caseless=True) + White().suppress()), oneOf("&")])
 
 # street name 
 streetName = (Combine( Optional(oneOf("N S E W")) + number + 
