@@ -30,5 +30,5 @@ def stoptime(request, stop_code, secs):
         routes.append({ "short_name": route.short_name, "long_name": route.long_name,
                         "times": times })
 
-    return HttpResponse(simplejson.dumps([ { 'routes': routes } ]), 
+    return HttpResponse(simplejson.dumps({ 'routes': routes }), 
                         mimetype="application/json")
