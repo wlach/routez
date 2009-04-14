@@ -330,11 +330,14 @@ var submitCallback = function(o) {
         routePlan += "</ol>";
     }
 
-    // show a warning if there's too much walking time
-    if (myresponse['walking_time'] > (20 * 60)) {
-        document.getElementById('longwalk').style.display = 'block';
-    } else {
-        document.getElementById('longwalk').style.display = 'none';
+    // show a warning if there's too much walking time (only on non-mobile
+    // version)
+    if (map) {
+        if (myresponse['walking_time'] > (20 * 60)) {
+            document.getElementById('longwalk').style.display = 'block';
+        } else {
+            document.getElementById('longwalk').style.display = 'none';
+        }
     }
 
     // show the route plan (and options), hide the about box

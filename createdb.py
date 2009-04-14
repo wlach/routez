@@ -50,8 +50,8 @@ if __name__ == '__main__':
         r2.save()
 
     for s in schedule.GetStopList():
-        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], name=s.stop_name, 
-                  lat=s.stop_lat, lng=s.stop_lon)
+        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_code,
+                  name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
         s2.save()
 
     (_min_lat, _min_lon, _max_lat, _max_lon) = schedule.GetStopBoundingBox()
