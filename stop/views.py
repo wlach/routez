@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.conf import settings
 
 import datetime
@@ -7,8 +7,13 @@ import simplejson
 
 from routez.travel.models import Route, Stop, Map, Shape
 
-def stoptime(request, stop_code, secs):
-    stop = Stop.objects.filter(stop_code=stop_code)[0]
+def stoptimes_for_stop(request, stop_code, secs):
+    stop = Stop.objects.filter(stop_code=stop_code)
+    if not len(stop):
+        return HttpResponseNotFound(simplejson.dumps(
+                { 'errors': ["Stop not found"] }), mimetype="application/json")
+
+    stop = stop[0]
     import routez
     graph = routez.travel.graph
     today = datetime.date.today()
@@ -24,11 +29,13 @@ def stoptime(request, stop_code, secs):
     for route_id in route_ids:
         thops = ts.find_triphops(int(secs), int(route_id), service_period, 3)
         times = []
-        for thop in thops:
-            times.append(thop.start_time)
-        route = Route.objects.filter(route_id=route_id)[0]
-        routes.append({ "short_name": route.short_name, "long_name": route.long_name,
-                        "times": times })
+        if len(thops):
+            for thop in thops:
+                times.append(thop.start_time)
+            route = Route.objects.filter(route_id=route_id)[0]
+            routes.append({ "short_name": route.short_name, "long_name": route.long_name,
+                            "times": times })
 
     return HttpResponse(simplejson.dumps({ 'routes': routes }), 
                         mimetype="application/json")
+

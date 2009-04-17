@@ -13,7 +13,8 @@ urlpatterns = patterns('',
     (r'^help$', 'routez.travel.views.help'),
     (r'^privacy$', 'routez.travel.views.privacy'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
-    (r'^stop/(\d{4})/(\d+)$', 'routez.stop.views.stoptime'),
+    (r'^stoptimes_for_stop/(\d{4})/(\d+)$', 
+     'routez.stop.views.stoptimes_for_stop'),
 
     # Uncomment this for admin:
     #(r'^admin/(.*)', admin.site.root),
