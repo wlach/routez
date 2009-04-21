@@ -43,6 +43,12 @@ def stoptimes_for_stop(request, stop_code, secs):
 
 def stoptimes_in_range(request, location, secs):
     latlng = geocoder.get_location(location)
+    if not latlng:
+        return HttpResponseNotFound(simplejson.dumps(
+                { 'errors': ["Location not found"] }), 
+                                    mimetype="application/json")
+
+
     import routez
     graph = routez.travel.graph
 
