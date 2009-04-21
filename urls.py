@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
     (r'^stoptimes_for_stop/(\d{4})/(\d+)$', 
      'routez.stop.views.stoptimes_for_stop'),
-    (r'^stoptimes_in_range/(\w+)/(\d+)$',
+    (r'^stoptimes_in_range/([^/]+)/(\d+)$',
      'routez.stop.views.stoptimes_in_range')
 
     # Uncomment this for admin:
