@@ -6,7 +6,8 @@ import datetime
 import simplejson
 import time
 
-from routez.travel.models import Route, Stop, Map, Shape
+from routez.travel.models import Route, Map, Shape
+from routez.stop.models import Stop
 import routez.geocoder.geocoder as geocoder
 
 class TripPlan:

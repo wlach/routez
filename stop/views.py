@@ -5,7 +5,8 @@ from django.conf import settings
 import datetime
 import simplejson
 
-from routez.travel.models import Route, Stop, Map, Shape
+from routez.travel.models import Route, Map, Shape
+from routez.stop.models import Stop
 import routez.geocoder.geocoder as geocoder
 from libroutez.tripgraph import TripStop
 

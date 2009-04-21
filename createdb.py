@@ -15,7 +15,8 @@ import yaml
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-from routez.travel.models import Route, Stop, Map, Shape
+from routez.travel.models import Route, Map, Shape
+from routez.stop.models import Stop
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

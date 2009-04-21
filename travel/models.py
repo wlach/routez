@@ -11,13 +11,6 @@ class Route(models.Model):
     short_name = models.CharField(max_length=5)
     long_name = models.CharField(max_length=80)
 
-class Stop(models.Model):
-    stop_id = models.CharField(max_length=20)
-    stop_code = models.CharField(max_length=20)
-    name = models.CharField(max_length=80)
-    lat = models.FloatField()
-    lng = models.FloatField()
-
 class Shape(models.Model):
     src_id = models.CharField(max_length=20)
     dest_id = models.CharField(max_length=20)
