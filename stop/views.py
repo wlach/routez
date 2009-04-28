@@ -39,7 +39,7 @@ def stoptimes_for_stop(request, stop_code, secs):
             routes.append({ "short_name": route.short_name, "long_name": route.long_name,
                             "times": times })
 
-    return HttpResponse(simplejson.dumps({ 'routes': routes }), 
+    return HttpResponse(simplejson.dumps([ {'name': stop.name, 'code': stop.stop_code, 'routes': routes } ]), 
                         mimetype="application/json")
 
 def stoptimes_in_range(request, location, secs):
