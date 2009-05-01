@@ -100,13 +100,13 @@ def stoptimes_in_range(request, location, secs):
                     times.append(thop.start_time)
                 route = Route.objects.filter(route_id=route_id)[0]
                 routejson = { 
-                    "route_short_name": route.short_name,
-                    "route_long_name": route.long_name,
+                    "short_name": route.short_name,
+                    "long_name": route.long_name,
                     "times": times }
                 routesjson.append(routejson)
         stopsjson.append({ 
-                    "stop_name": stop.name,
-                    "stop_code": stop.stop_code,
+                    "name": stop.name,
+                    "code": stop.stop_code,
                     "routes": routesjson })
 
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
