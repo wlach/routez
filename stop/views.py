@@ -10,6 +10,23 @@ from routez.stop.models import Stop
 import routez.geocoder.geocoder as geocoder
 from libroutez.tripgraph import TripStop
 
+# fixme: this function is a disaster. put a latlng function in libroutez
+# for goodness sakes!
+import math
+def latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
+    if round(src_lat, 4) == round(dest_lat, 4) and \
+            round(src_lng, 4) == round(dest_lng, 4):
+        return 0.0
+
+    theta = src_lng - dest_lng
+    src_lat_radians = math.radians(src_lat)
+    dest_lat_radians = math.radians(dest_lat)
+    dist = math.sin(src_lat_radians) * math.sin(dest_lat_radians) + \
+        math.cos(src_lat_radians) * math.cos(dest_lat_radians) * \
+        math.cos(math.radians(theta))
+    dist = math.degrees(math.acos(dist)) * (60.0 * 1.1515 * 1.609344 * 1000.0)
+    return dist
+
 def stoptimes_for_stop(request, stop_code, secs):
     stop = Stop.objects.filter(stop_code=stop_code)
     if not len(stop):
@@ -72,8 +89,10 @@ def stoptimes_in_range(request, location, secs):
     # FIXME: is this filtering better done on the client end of things? or 
     # should it be an optional parameter?
     routehash = {}
+    distance_to_stop_hash = {}
     for ts in tstops:
-        distance_to_stop = (latlng[0] - ts.lat)**2 + (latlng[1] - ts.lng)**2
+        distance_to_stop = latlng_dist(latlng[0], latlng[1], ts.lat, ts.lng)
+        distance_to_stop_hash[ts.id] = distance_to_stop
         for route_id in ts.get_routes(service_period):
             if not routehash.get(route_id) or \
                     routehash[route_id][0] > distance_to_stop:
@@ -107,6 +126,7 @@ def stoptimes_in_range(request, location, secs):
         stopsjson.append({ 
                     "name": stop.name,
                     "code": stop.stop_code,
+                    "distance": distance_to_stop_hash[id],
                     "routes": routesjson })
 
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
