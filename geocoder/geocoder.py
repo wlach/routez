@@ -1,10 +1,13 @@
 import cPickle as pickle
 import math
 import parser
+import re
 import string
 
 from routez.geocoder.models import Road, Intersection
 import routez.geocoder.parser as geoparser
+
+latlngre = re.compile("^(-?[0-9]+(\.[0-9]+)?)\ *,\ *(-?[0-9]+(\.[0-9]+)?)$")
 
 def __latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
 
@@ -44,12 +47,18 @@ def __get_interpolated_latlng(coords, length, pct):
 
 
 def get_location(location_str):
+    match = latlngre.match(location_str)
+    if match:
+        return (float(match.group(1)), float(match.group(3)))
+
     streets = geoparser.parse_address(location_str)
     if len(streets) == 1:
         r = Road.objects.filter(name__iexact=streets[0].name)
         if streets[0].suffix:
             r = r.filter(suffix=streets[0].suffix)
         if streets[0].number:
+            # the actual geocoder doesn't understand "a", so just grab
+            # the numeric portion of any street
             r = r.filter(firstHouseNumber__lte=streets[0].number, 
                          lastHouseNumber__gte=streets[0].number)
         if len(r) > 0:
