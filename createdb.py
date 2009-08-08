@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 # to backtrack, when two stops lie between an intersection
                 # (because they're not connected to each other, only the
                 # way intersections). 
-                trippath = graph.find_path(0, "", True,
+                trippath = graph.find_path(0, True,
                                            stop1.stop_lat, stop1.stop_lon, 
                                            stop2.stop_lat, stop2.stop_lon)
                 if trippath:

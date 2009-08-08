@@ -90,18 +90,12 @@ def routeplan(request):
                 0, 0, 0, 0, 0, -1))
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
-    service_period = 'weekday'
-    if now.weekday() == 5:
-        service_period = 'saturday'
-    elif now.weekday() == 6:
-        service_period = 'sunday'
 
     # Use the TripGraph loaded in __init__.py, so we don't load it per request
     import routez
     graph = routez.travel.graph
-    trippath = graph.find_path(today_secs, service_period, False,
-                               start_latlng[0], start_latlng[1], end_latlng[0], 
-                               end_latlng[1])
+    trippath = graph.find_path(time.mktime(start_time), False, start_latlng[0], start_latlng[1], 
+                               end_latlng[0], end_latlng[1])
 
     actions_desc = []
     route_shortnames = []
@@ -113,7 +107,7 @@ def routeplan(request):
         if last_action and last_action.route_id != action.route_id:
             if last_action.route_id != -1:
                 stop = Stop.objects.filter(stop_id=last_action.dest_id)[0]
-                action_time = human_time(daysecs + last_action.end_time)
+                action_time = human_time(last_action.end_time)
                 actions_desc.append({ 'type':'alight', 
                                     'lat': stop.lat, 
                                     'lng': stop.lng, 
@@ -122,7 +116,7 @@ def routeplan(request):
 
         if not last_action or last_action.route_id != action.route_id:
             if action.route_id >= 0:
-                action_time = human_time(daysecs + action.start_time)
+                action_time = human_time(action.start_time)
                 route = Route.objects.filter(route_id=action.route_id)[0]
                 stop = Stop.objects.filter(stop_id=action.src_id)[0]
                 actions_desc.append({ 'type':'board', 
@@ -144,7 +138,7 @@ def routeplan(request):
                 shape = simplejson.loads(shapes[0].polyline)
         else:
             walking_time += (action.end_time - action.start_time)
-        action_time = human_time(daysecs + action.start_time);
+        action_time = human_time(action.start_time);
         actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                               'lat': ts.lat, 
                               'lng': ts.lng,
@@ -155,7 +149,7 @@ def routeplan(request):
 
     # if we had a path at all, append the last getting off action here
     if last_action:
-        action_time = human_time(daysecs + last_action.end_time)
+        action_time = human_time(last_action.end_time)
         actions_desc.append({ 'type': 'arrive', 
                               'lat': end_latlng[0],
                               'lng': end_latlng[1],
