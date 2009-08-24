@@ -46,9 +46,22 @@ if __name__ == '__main__':
 
     # import it all into the db again
     for r in schedule.GetRouteList():
-        r2 = Route(route_id=mapping['Routes'][r.route_id], 
-                   short_name=r.route_short_name, long_name=r.route_long_name)
-        r2.save()
+        if mapping['Routes'].has_key(r.route_id):
+            r2 = Route(route_id=mapping['Routes'][r.route_id], 
+                       short_name=r.route_short_name, long_name=r.route_long_name)
+            r2.save()
+        else:
+            # perverse case where there's a route with no trips
+            short_name = "<no short name>"
+            long_name = "<long name>"
+            if r.route_short_name:
+                short_name = str(r.route_short_name)
+            if r.route_long_name:
+                long_name = str(r.route_long_name)
+            # FIXME: why does this fail???
+            print "route with no mapping. probably no trips assc. with it."
+            #print "WARNING: Route %s (%s) has no mapping... probably means it "
+            #"has no trips associated with it." % (short_name, long_name)
 
     for s in schedule.GetStopList():
         s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_code,
