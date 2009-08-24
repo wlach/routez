@@ -47,7 +47,8 @@ if __name__ == '__main__':
     # import it all into the db again
     for r in schedule.GetRouteList():
         r2 = Route(route_id=mapping['Routes'][r.route_id], 
-                   short_name=r.route_short_name, long_name=r.route_long_name)
+                   short_name=r.route_short_name, long_name=r.route_long_name,
+                   type=r.route_type)
         r2.save()
 
     for s in schedule.GetStopList():
