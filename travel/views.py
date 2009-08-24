@@ -125,6 +125,7 @@ def routeplan(request):
                                       'stopname':stop.name,
                                       'time': action_time,
                                       'route_id': action.route_id,
+                                      'route_type': route.type,
                                       'route_shortname': route.short_name,
                                       'route_longname': route.long_name }) 
 
