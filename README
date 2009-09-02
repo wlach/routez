@@ -8,11 +8,9 @@ planning functionality.
 
 1. Download and install the following packages:
  - Google Transit Data Feed (http://code.google.com/p/googletransitdatafeed/)
-   - As of this writing you need what's in SVN, as it has a fix that I made
-   to actually handle interpolated stops correctly. The next version after
-   1.1.9 should have my fix.
+   - Any version after 1.2.0 should work.
  - libroutez
-   - Checkout from http://github.com/wlach/libroutez
+   - Get from http://github.com/wlach/libroutez
  - Python ParseDateTime (http://code-bear.com/code/parsedatetime/)
    - I used version 0.8.6.
  - Django (http://www.djangoproject.com/)
@@ -31,7 +29,7 @@ You may need to set PYTHONPATH to $HOME/lib/python first.
 
 2. Download the Halifax Transit Feed Distribution:
 
-http://github.com/wlach/halifax-transit-feed
+   http://github.com/wlach/halifax-transit-feed
 
 Instructions on building the feed are contained within the README. It's mostly
 just a matter of typing 'make', once everything's set up.
@@ -46,8 +44,8 @@ I put up a semi-recent set at:
 
 Something like:
 
- - creategraph.py /path/to/hfxfeed.zip /path/to/osmfile.osm mygraph.routez \
-   mygraph-mapping.yml
+ - creategraph.py --osm=/path/to/osmfile.osm /path/to/hfxfeed.zip \
+ mygraph.routez mygraph-mapping.yml
 
 (note this assumes libroutez installed in creategraph.py in your $PATH)
 
@@ -60,7 +58,8 @@ and libroutez mapping files.
 6. Configure it.
 
  - In settings.py, set GRAPH_FILE to the location of the graph file.
- - Put your Google Maps API key in the file gmap_api_key
+ - Put your Cloudmade API key in the file 'cmap_api_key'
+ - (optional) Put your google analytics key in the file 'analytics_api_key'
 
 7. Run it!
 
