@@ -1,17 +1,12 @@
 == Near term ==
 
-- Pick low-hanging fruit to optimize libroutez.
-- Improve web interface.
-- Make libroutez return multiple possible routes
-- Use a kd-tree to speed up finding closest stop to a latlng pair.
+- De-entangle application from Halifax/hbus.ca. Should split into routez
+  (the application that provides route information, trip planning, etc.)
+  and a website/javascript layer on top of that...
 
 == Medium term ==
 
+- Make libroutez return multiple possible routes
+- Use a kd-tree to speed up finding closest stop to a latlng pair.
 - Add better heuristics to make libroutez consider less options
-- Clean up libroutez, make into a proper library.
-- De-entangle application from Halifax (not much work required).
-
-== Blue sky ==
-
-- Make maps visualization use OpenStreetMap instead of Google Maps.
 
