@@ -7,8 +7,9 @@ struct Address
     std::string street;
     int number;
 
-    enum TypeSuffix {
-        AVENUE = 0,
+    enum Suffix {
+        UNKNOWN_SUFFIX = 0,
+        AVENUE,
         BOULEVARD,
         CRESCENT,
         DRIVE,
@@ -19,9 +20,19 @@ struct Address
         ROW,
         STREET,
         TERRACE,
-    };
+    } suffix;
 
-    TypeSuffix suffix;
+    enum Direction {
+        UNKNOWN_DIRECTION = 0,
+        NORTH, 
+        NORTHEAST, 
+        EAST,
+        SOUTHEAST,
+        SOUTH,
+        SOUTHWEST,
+        WEST,
+        NORTHWEST,
+    } direction;
 };
 
 #endif
