@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "address.h"
+
+%%{
+    machine addrparser;
+    action getStartStr {
+    	   sp = p; 
+	   printf("sp=%p\n", sp);
+    }
+    action endNumber {
+    	   std::string num_str;
+	   num_str.assign(sp, (p-sp));
+	   addr.number = atoi(num_str.c_str());
+    }	  
+    action endName {
+    	   addr.street.assign(sp, (p-sp));
+    }
+    action endSuffix {
+    	   std::string suffix_str;
+	   suffix_str.assign(sp, (p-sp));
+	   addr.suffix = get_typesuffix(suffix_str);
+	   printf("suffix str: %s\n", suffix_str.c_str());
+    }
+    action getEndStr {
+    	   char * s = (char *)malloc(sizeof(char)*(p-sp)); 
+	   strncpy(s, sp, (p-sp)); 
+	   printf("sp: %p ep: %p s: %s\n", sp, p, s);
+    }
+
+    streetNumber = (digit+ >getStartStr %endNumber);
+    streetName = alpha+ >getStartStr %endName;
+    suffix = (@SUFFIX_NAMES_RL@) >getStartStr %endSuffix;
+    main := streetNumber alpha? space+ streetName (space+ suffix)? 0;
+}%%
+
+%% write data;
+
+int main( int argc, char **argv )
+{
+    int cs, res = 0;
+    if ( argc > 1 ) {
+        Address addr;
+	char *sp = NULL;
+	char *ep = NULL;
+
+        char *p = argv[1];
+        char *pe = p + strlen( p ) + 1;
+	char *eof = NULL;
+        %% write init;
+        %% write exec;
+
+	printf("address num %d street %s suffixId: %d\n", addr.number, addr.street.c_str(), addr.suffix);
+    }
+    printf("result = %d\n", res );
+    return 0;
+}
