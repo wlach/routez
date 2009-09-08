@@ -13,10 +13,11 @@
     	   std::string num_str;
 	   num_str.assign(sp, (p-sp));
 	   addr.number = atoi(num_str.c_str());
-    }	  
+    }
     action endName {
     	   addr.street.assign(sp, (p-sp));
     }
+    @SUFFIX_SUBEXPRESSIONS@
     action endSuffix {
     	   std::string suffix_str;
 	   suffix_str.assign(sp, (p-sp));
@@ -31,7 +32,7 @@
 
     streetNumber = (digit+ >getStartStr %endNumber);
     streetName = alpha+ >getStartStr %endName;
-    suffix = (@SUFFIX_NAMES_RL@) >getStartStr %endSuffix;
+    suffix = @MAIN_SUFFIX_EXPRESSION@
     main := streetNumber alpha? space+ streetName (space+ suffix)? 0;
 }%%
 

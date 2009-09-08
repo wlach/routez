@@ -1,4 +1,0 @@
-#include "address.h"
-
-extern const char * suffix_names[] = { @SUFFIX_NAMES_C@, NULL };
-extern const Address::TypeSuffix suffix_mapping[] = { @SUFFIX_VALUES_C@ };

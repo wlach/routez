@@ -19,10 +19,7 @@ geoparser.rl: geoparser.rl.in suffix-subst.pl
 geoparser.cc: geoparser.rl
 	ragel geoparser.rl -o $@
 
-address_suffixes.cc: address_suffixes.cc.in suffix-subst.pl
-	perl suffix-subst.pl < $< > $@
-
-GEOPARSER_OBJS=geoparser.o address.o address_suffixes.o 
+GEOPARSER_OBJS=geoparser.o 
 
 geoparser: $(GEOPARSER_OBJS)
 	g++ $(GEOPARSER_OBJS) $(LDFLAGS) -o $@

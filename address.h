@@ -24,6 +24,4 @@ struct Address
     TypeSuffix suffix;
 };
 
-Address::TypeSuffix get_typesuffix(const std::string &s);
-
 #endif
