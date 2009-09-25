@@ -1,0 +1,66 @@
+#include "address.h"
+
+#include <strings.h>
+#include <boost/regex.hpp>
+
+using namespace boost;
+using namespace std;
+
+static const int NUMBER_INDEX = 1;
+static const int STREET_INDEX = 2;
+static const int SUFFIX_INDEX = 3;
+static const int DIRECTION_INDEX = 4;
+//static const int REGION_INDEX = 5;
+
+static const Address::Direction get_direction(const std::string &str)
+{
+    @DIRECTION_LOGIC@
+
+    return Address::UNKNOWN_DIRECTION;
+}
+
+
+static const Address::Suffix get_suffix(const std::string &str)
+{
+    @SUFFIX_LOGIC@
+
+    return Address::UNKNOWN_SUFFIX;
+}
+
+
+const Address Address::parse_address(const std::string &str)
+{
+    regex e("(?:([0-9]+)(?:[a-z])?(?: +))?" // number
+            "([a-z]+(?: [a-z]+)*?)" // street name
+            "(?: +(@SUFFIX_EXPRESSION@))?" // suffix
+            "(?: +(@DIRECTION_EXPRESSION@))?" // direction
+            "(?:[, ] *([a-z]+))?", // region
+            regex::icase);
+    
+    Address addr;
+
+    cmatch what;
+    if (regex_match(str.c_str(), what, e)) {
+        for (int i=1; i<what.size(); i++) {
+            if (what[i].second > what[i].first) 
+            {
+                string s;
+                s.assign(what[i].first, what[i].second);
+                
+                if (i == NUMBER_INDEX)
+                    addr.number = atoi(s.c_str());
+                else if (i == STREET_INDEX)
+                    addr.street = s;
+                else if (i == SUFFIX_INDEX) 
+                    addr.suffix = get_suffix(s);
+                else if (i == DIRECTION_INDEX) 
+                    addr.direction = get_direction(s);
+
+                printf("match: '%s'\n", s.c_str());
+            }        
+        }
+    }
+
+    return addr;
+}
+

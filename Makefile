@@ -9,21 +9,14 @@ default: geoparser
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
 	@rm -f $*.d.tmp
 
-geoparser.pdf: geoparser.rl
-	ragel -Vp -o geoparser.dot geoparser.rl
-	dot -Tpdf -o geoparser.pdf geoparser.dot 
+address.cc: address.cc.in gen-address-cc.pl
+	perl gen-address-cc.pl < $< > $@
 
-geoparser.rl: geoparser.rl.in suffix-subst.pl
-	perl suffix-subst.pl < $< > $@
-
-geoparser.cc: geoparser.rl
-	ragel geoparser.rl -o $@
-
-GEOPARSER_OBJS=geoparser.o 
+GEOPARSER_OBJS=geoparser.o address.o
+LDFLAGS=-lboost_regex
 
 geoparser: $(GEOPARSER_OBJS)
 	g++ $(GEOPARSER_OBJS) $(LDFLAGS) -o $@
 
 clean:
-	rm -f *.so *.d *.o *~ geoparser.dot geoparser.pdf address_suffixes.cc \
-	geoparser.rl geoparser
+	rm -f *.so *.d *.o *~ address.cc geoparser
