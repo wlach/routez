@@ -11,8 +11,6 @@ struct Address
         direction = Address::UNKNOWN_DIRECTION;
     }
     
-    static const Address parse_address(const std::string &str);
-
     std::string street;
     int number;
 
@@ -44,5 +42,6 @@ struct Address
     } direction;
 };
 
+Address * parse_address(const std::string &str);
 
 #endif
