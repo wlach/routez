@@ -9,7 +9,7 @@ default: geoparser
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
 	@rm -f $*.d.tmp
 
-address.cc: address.cc.in gen-address-cc.pl
+address.cc: address.cc.in address.h gen-address-cc.pl
 	perl gen-address-cc.pl < $< > $@
 
 GEOPARSER_OBJS=geoparser.o address.o
@@ -20,3 +20,5 @@ geoparser: $(GEOPARSER_OBJS)
 
 clean:
 	rm -f *.so *.d *.o *~ address.cc geoparser
+
+-include $(GEOPARSER_OBJS:.o=.d)
