@@ -12,11 +12,9 @@ default: geoparser
 address.cc: address.cc.in address.h gen-address-cc.pl
 	perl gen-address-cc.pl < $< > $@
 
-GEOPARSER_OBJS=geoparser.o address.o
-LDFLAGS=-lboost_regex
-
-geoparser: $(GEOPARSER_OBJS)
-	g++ $(GEOPARSER_OBJS) $(LDFLAGS) -o $@
+GEOCODE_OBJS=geocoder.o address.o geocode.o
+geocode: $(GEOCODE_OBJS)
+	g++ $(GEOCODE_OBJS) $(LDFLAGS) -o $@
 
 clean:
 	rm -f *.so *.d *.o *~ address.cc geoparser

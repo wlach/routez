@@ -7,6 +7,7 @@ struct Address
 {
     Address()
     {
+        number = 0;
         suffix = Address::UNKNOWN_SUFFIX;
         direction = Address::UNKNOWN_DIRECTION;
     }

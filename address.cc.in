@@ -34,8 +34,8 @@ Address * parse_address(const std::string &str)
     regex e("(?:([0-9]+)(?:[a-z])?(?: +))?" // number
             "([a-z]+(?: [a-z]+)*?)" // street name
             "(?: +(@SUFFIX_EXPRESSION@))?" // suffix
-            "(?: +(@DIRECTION_EXPRESSION@))?" // direction
-            "(?:[, ] *([a-z]+))?", // region
+            "(?: +(@DIRECTION_EXPRESSION@))?", // direction
+            // "(?:[, ] *([a-z]+))?", // FIXME: region (need to select from list)
             regex::icase);
     
     cmatch what;
