@@ -50,6 +50,7 @@ class GMLHandler(xml.sax.ContentHandler):
         self.min_lng = min_lng
         self.max_lat = max_lat
         self.max_lng = max_lng
+        self.placenames = set()
         self.nodes = {}
 
         self.inRoadSegment = False
@@ -64,6 +65,8 @@ class GMLHandler(xml.sax.ContentHandler):
         pass
 
     def endDocument(self):
+        cursor = conn.cursor()
+
         intersections_inserted = {}
         for latlng in self.nodes.keys():
             roadsegs = self.nodes[latlng]["roadsegs"]
@@ -87,6 +90,11 @@ class GMLHandler(xml.sax.ContentHandler):
                                         # FIXME: this will eventually insert into an intersections table
                                         pass
                                         intersections_inserted[intersection_key] = 1
+
+        print "Writing placenames"
+        for placename in self.placenames:
+            print "Inserting placename %s" % placename
+            cursor.execute("insert into placename values (\"%s\");" % placename)
         
     def startElement(self, name, attrs):
         if name=='nrn:RoadSegment':
@@ -118,7 +126,6 @@ class GMLHandler(xml.sax.ContentHandler):
                     if self.curRoadSegment.left['firstNumber'] > 0 and \
                             self.curRoadSegment.left['lastNumber'] > 0:
                         self.curRoadSegment.insert_into_db(self.curRoadSegment.left, cursor)
-                conn.commit()
 
         elif name == 'gml:lineStringProperty':
             self.inRoadLineString = False
@@ -136,8 +143,12 @@ class GMLHandler(xml.sax.ContentHandler):
             self.curRoadSegment.right['firstNumber'] = int(self.cdata)
         elif name=="nrn:right_LastHouseNumber":
             self.curRoadSegment.right['lastNumber'] = int(self.cdata)
+        elif name=="nrn:left_OfficialPlaceName":
+            self.curRoadSegment.left['placeName'] = self.cdata
+            self.placenames.add(string.lower(self.cdata))
         elif name=="nrn:right_OfficialPlaceName":
-            self.curRoadSegment.placeName = self.cdata
+            self.curRoadSegment.right['placeName'] = self.cdata
+            self.placenames.add(string.lower(self.cdata))
         elif name=='gml:coordinates' and self.inRoadLineString:
             prevcoord = None
             self.curRoadSegment.length = 0.0
@@ -166,19 +177,22 @@ class GMLHandler(xml.sax.ContentHandler):
         self.cdata += chars
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 7:
         print "Usage: %s <gml file> <min lat> <min lng> <max lat> <max lng> <sqlite db>" % \
             sys.argv[0]
         exit(1)
 
     conn = sqlite3.connect(sys.argv[6])
     cursor = conn.cursor()
+    cursor.execute("create table placename (name text)")
     cursor.execute("create table road (name text, suffix text, firstHouseNumber integer, "
                    "lastHouseNumber integer, numberingTypeEven boolean, length real, coords blob)")
     conn.commit()
 
+    print "Parsing geodb and writing road segments"
     xml.sax.parse(sys.argv[1], GMLHandler(float(sys.argv[2]), 
                                           float(sys.argv[3]),
                                           float(sys.argv[4]),
                                           float(sys.argv[5]), conn))
+    conn.commit()
     conn.close()

@@ -12,8 +12,9 @@ struct Address
         direction = Address::UNKNOWN_DIRECTION;
     }
     
-    std::string street;
     int number;
+    std::string street;
+    std::string region;
 
     enum Suffix {
         UNKNOWN_SUFFIX = 0,
@@ -30,6 +31,8 @@ struct Address
         TERRACE,
     } suffix;
 
+    static Suffix get_suffix(const std::string &str);
+
     enum Direction {
         UNKNOWN_DIRECTION = 0,
         NORTH, 
@@ -41,8 +44,8 @@ struct Address
         WEST,
         NORTHWEST,
     } direction;
-};
 
-Address * parse_address(const std::string &str);
+    static Direction get_direction(const std::string &str);
+};
 
 #endif

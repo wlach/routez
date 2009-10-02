@@ -1,12 +1,13 @@
+#include "geocoder.h"
+#include "address.h"
+
 #include <stdlib.h>
 #include <assert.h>
 #include <sqlite3.h>
 #include <math.h>
-#include <vector>
-#include "geocoder.h"
-#include "address.h"
 #include <sstream>
 
+using namespace boost;
 using namespace std;
 
 
@@ -91,6 +92,8 @@ GeoCoder::GeoCoder(const char *dbname)
         sqlite3_close(db);
         assert(0 && "Couldn't initialize geocoder!!!!");
     }
+
+    parser = shared_ptr<GeoParser>(new GeoParser(db));
 }
 
 
@@ -109,7 +112,7 @@ static int sqlite_cb(void *userdata, int argc, char **argv, char **azColName)
     float length = atof(argv[5]);
     long num_points = *(reinterpret_cast<long *>(&argv[6][0]));
 
-    float *latlng_array = (reinterpret_cast<float *>(&argv[6][sizeof(long)]));    
+    float *latlng_array = (reinterpret_cast<float *>(&argv[6][sizeof(long)]));
   
     addr_tuple->first = interpolated_latlng(latlng_array, num_points, length, percent);
 
@@ -119,13 +122,13 @@ static int sqlite_cb(void *userdata, int argc, char **argv, char **azColName)
 
 pair<float, float> GeoCoder::get_latlng(const char *str)
 {    
-    Address *addr = parse_address(str);
+    Address *addr = parser->parse_address(str);
 
     if (addr && !addr->street.empty())
     {        
         pair<pair<float, float>, int> addr_tuple(pair<float, float>(0.0f, 0.0f), addr->number);
 
-        std::stringstream sqlstr;
+        stringstream sqlstr;
         sqlstr << "select * from road where "; 
         sqlstr << "name like '" << addr->street << "' ";
         if (addr->number) 

@@ -1,4 +1,6 @@
 *.d
 *.o
 address.cc
-geoparser
+geoparser.cc
+geocode
+

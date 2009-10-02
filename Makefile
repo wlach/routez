@@ -1,4 +1,4 @@
-default: geoparser
+default: geocode
 
 %.o: %.cc 
 	g++ $< -c -o $@ $(CXXFLAGS) -I./include -g
@@ -9,10 +9,14 @@ default: geoparser
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
 	@rm -f $*.d.tmp
 
-address.cc: address.cc.in address.h gen-address-cc.pl
+geoparser.cc: geoparser.cc.in gen-address-cc.pl
 	perl gen-address-cc.pl < $< > $@
 
-GEOCODE_OBJS=geocoder.o address.o geocode.o
+address.cc: address.cc.in gen-address-cc.pl
+	perl gen-address-cc.pl < $< > $@
+
+LDFLAGS=-lsqlite3 -lboost_regex
+GEOCODE_OBJS=geocoder.o geoparser.o address.o geocode.o
 geocode: $(GEOCODE_OBJS)
 	g++ $(GEOCODE_OBJS) $(LDFLAGS) -o $@
 
