@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     if (argc < 3)
     {
         printf("USAGE: %s <geodb> <expression>\n", argv[0]);
+        return 1;
     }
 
     GeoCoder g(argv[1]);
