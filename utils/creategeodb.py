@@ -93,7 +93,6 @@ class GMLHandler(xml.sax.ContentHandler):
 
         print "Writing placenames"
         for placename in self.placenames:
-            print "Inserting placename %s" % placename
             cursor.execute("insert into placename values (\"%s\");" % placename)
         
     def startElement(self, name, attrs):
