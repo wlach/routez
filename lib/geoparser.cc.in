@@ -8,6 +8,12 @@ using namespace boost;
 using namespace std;
 
 
+static const char * base_regex_str = "(?:([0-9]+)(?:[a-z])?(?: +))?" // number
+    "([a-z]+(?: [a-z]+)*?)" // street name
+    "(?: +(@SUFFIX_EXPRESSION@))?" // suffix
+    "(?: +(@DIRECTION_EXPRESSION@))?"; // direction
+
+
 static int placename_cb(void *userdata, int argc, char **argv, char **azColName)
 {
     vector<string> *all_placenames = (vector<string> *)userdata;
@@ -36,10 +42,8 @@ GeoParser::GeoParser(sqlite3 *db)
     }
 
     stringstream regex_str;
-    regex_str << "(?:([0-9]+)(?:[a-z])?(?: +))?"; // number
-    regex_str << "([a-z]+(?: [a-z]+)*?)"; // street name
-    regex_str << "(?: +(@SUFFIX_EXPRESSION@))?"; // suffix
-    regex_str << "(?: +(@DIRECTION_EXPRESSION@))?"; // direction
+    regex_str << base_regex_str;
+
     regex_str << "(?:[, ] *("; // region begin
     for (vector<string>::iterator i = all_placenames.begin(); 
          i != all_placenames.end(); i++)
@@ -49,7 +53,26 @@ GeoParser::GeoParser(sqlite3 *db)
         regex_str << (*i);
     }
     regex_str << "))?"; // region end
-    printf("regex_str: %s\n", regex_str.str().c_str());
+
+    //printf("regex_str: %s\n", regex_str.str().c_str());
+
+    address_re = new regex(regex_str.str(), regex::icase);
+}
+
+
+GeoParser::GeoParser(const std::vector<std::string> &region_names)
+{
+    stringstream regex_str;
+    regex_str << base_regex_str;
+
+    regex_str << "(?:[, ] *("; // region begin
+    for (std::vector<std::string>::const_iterator i = region_names.begin();
+         i != region_names.end(); i++)
+    {
+    }
+    regex_str << "))?"; // region end
+
+    //printf("regex_str: %s\n", regex_str.str().c_str());
 
     address_re = new regex(regex_str.str(), regex::icase);
 }

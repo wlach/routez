@@ -1,8 +1,8 @@
 default: tests/geocode
 
 %.o: %.cc 
-	g++ $< -c -o $@ $(CXXFLAGS) -I./include -g
-	@g++ $< -MM $(CXXFLAGS) -I./include > $*.d
+	g++ $< -c -o $@ $(CXXFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp -g
+	@g++ $< -MM $(CXXFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp > $*.d
 	@mv -f $*.d $*.d.tmp
 	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
@@ -17,10 +17,20 @@ lib/address.cc: lib/address.cc.in gen-address-cc.pl
 
 CPPFLAGS=-I./include
 LDFLAGS=-lsqlite3 -lboost_regex
-GEOCODE_OBJS=$(patsubst %,lib/%,geocoder.o geoparser.o address.o) tests/geocode.o
+GEOCODER_OBJS=$(patsubst %,lib/%,geocoder.o geoparser.o address.o)
+GEOCODE_OBJS= $(GEOCODER_OBJS) tests/geocode.o
 tests/geocode: $(GEOCODE_OBJS) 
 	echo $(GEOCODE_OBJS) 
 	g++ $(GEOCODE_OBJS) $(LDFLAGS) -o $@
+
+TEST_OBJS=t/geoparser.t.o
+WVTEST_OBJS=$(patsubst %,wvtest/cpp/%, wvtest.o wvtestmain.o)
+t/all.t: $(TEST_OBJS) $(WVTEST_OBJS) $(GEOCODER_OBJS)
+	g++ $(TEST_OBJS) $(WVTEST_OBJS) $(GEOCODER_OBJS) $(LDFLAGS) -o $@ -fPIC -g
+
+test: t/all.t
+	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck wvtest/wvtestrun t/all.t
+
 
 clean:
 	rm -f *.so *.d lib/*.o lib/*.d lib/address.cc lib/geoparser.cc \
