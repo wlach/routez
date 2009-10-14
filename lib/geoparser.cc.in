@@ -78,6 +78,12 @@ GeoParser::GeoParser(const std::vector<std::string> &region_names)
 }
 
 
+GeoParser::~GeoParser()
+{
+    delete address_re;
+}
+
+
 static const int NUMBER_INDEX = 1;
 static const int STREET_INDEX = 2;
 static const int SUFFIX_INDEX = 3;

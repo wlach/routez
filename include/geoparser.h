@@ -11,6 +11,7 @@ class GeoParser
     //GeoParser(const char *dbname);
     GeoParser(sqlite3 *db);
     GeoParser(const std::vector<std::string> &region_names);
+    ~GeoParser();
 
     Address * parse_address(const std::string &str);
 
