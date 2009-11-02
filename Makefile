@@ -37,3 +37,4 @@ clean:
 	utils/*.o utils/*.d utils/geocode
 
 -include $(GEOPARSER_OBJS:.o=.d)
+-include $(TEST_OBJS:.o=.d)
