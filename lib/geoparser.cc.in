@@ -7,11 +7,18 @@
 using namespace boost;
 using namespace std;
 
+static string NUM_REGEX = "(?:([0-9]+)(?:[a-z])?(?: +))?";
+static string STREETNAME_REGEX = "([a-z]+(?: [a-z]+)*?)";
+static string SUFFIX_REGEX = "(?: +(@SUFFIX_EXPRESSION@))?";
+static string DIR_REGEX = "(?: +(@DIRECTION_EXPRESSION@))?";
+static string AND_REGEX = "(?: +and +| *& *)";
 
-static const char * base_regex_str = "(?:([0-9]+)(?:[a-z])?(?: +))?" // number
-    "([a-z]+(?: [a-z]+)*?)" // street name
-    "(?: +(@SUFFIX_EXPRESSION@))?" // suffix
-    "(?: +(@DIRECTION_EXPRESSION@))?"; // direction
+
+static string base_street_regex_str = NUM_REGEX + STREETNAME_REGEX + 
+    SUFFIX_REGEX + DIR_REGEX;
+static string base_intersection_regex_str = STREETNAME_REGEX + 
+    SUFFIX_REGEX + DIR_REGEX + AND_REGEX + STREETNAME_REGEX + SUFFIX_REGEX + 
+    DIR_REGEX;
 
 
 static int placename_cb(void *userdata, int argc, char **argv, char **azColName)
@@ -24,15 +31,35 @@ static int placename_cb(void *userdata, int argc, char **argv, char **azColName)
 }
 
 
+static regex * create_re_with_region(string &base_re, vector<string> placenames) 
+{
+    stringstream regex_str;
+
+    regex_str << base_re;
+    regex_str << "(?:[, ] *("; // region begin
+    for (vector<string>::iterator i = placenames.begin(); 
+         i != placenames.end(); i++)
+    {
+        if (i != placenames.begin())
+            regex_str << "|";
+        regex_str << (*i);
+    }
+    regex_str << "))?"; // region end
+
+    //printf("regex_str: %s\n", regex_str.str().c_str());
+    
+    return new regex(regex_str.str(), regex::icase);
+}
+
+
 GeoParser::GeoParser(sqlite3 *db)
 {
-    std::string placename_re;
-    vector<string> all_placenames;
-
+    string placename_re;
+    vector<string> placenames;
 
     char *zErrMsg = 0;
     int rc = sqlite3_exec(db, "select * from placename", placename_cb, 
-                          &all_placenames, &zErrMsg);
+                          &placenames, &zErrMsg);
     if (rc != SQLITE_OK)
     {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -41,43 +68,17 @@ GeoParser::GeoParser(sqlite3 *db)
         assert(0 && "Couldn't get list of place names!");
     }
 
-    stringstream regex_str;
-    regex_str << base_regex_str;
-
-    regex_str << "(?:[, ] *("; // region begin
-    for (vector<string>::iterator i = all_placenames.begin(); 
-         i != all_placenames.end(); i++)
-    {
-        if (i != all_placenames.begin())
-            regex_str << "|";
-        regex_str << (*i);
-    }
-    regex_str << "))?"; // region end
-
-    //printf("regex_str: %s\n", regex_str.str().c_str());
-
-    address_re = new regex(regex_str.str(), regex::icase);
+    address_re = create_re_with_region(base_street_regex_str, placenames);
+    intersection_re = create_re_with_region(base_intersection_regex_str, 
+                                            placenames);
 }
 
 
-GeoParser::GeoParser(const std::vector<std::string> &region_names)
+GeoParser::GeoParser(const vector<string> &placenames)
 {
-    stringstream regex_str;
-    regex_str << base_regex_str;
-
-    regex_str << "(?:[, ] *("; // region begin
-    for (std::vector<std::string>::const_iterator i = region_names.begin();
-         i != region_names.end(); i++)
-    {
-        if (i != region_names.begin())
-            regex_str << "|";
-        regex_str << (*i);
-    }
-    regex_str << "))?"; // region end
-
-    //printf("regex_str: %s\n", regex_str.str().c_str());
-
-    address_re = new regex(regex_str.str(), regex::icase);
+    address_re = create_re_with_region(base_street_regex_str, placenames);
+    intersection_re = create_re_with_region(base_intersection_regex_str, 
+                                            placenames);
 }
 
 
@@ -87,33 +88,79 @@ GeoParser::~GeoParser()
 }
 
 
-static const int NUMBER_INDEX = 1;
-static const int STREET_INDEX = 2;
-static const int SUFFIX_INDEX = 3;
-static const int DIRECTION_INDEX = 4;
-static const int REGION_INDEX = 5;
+static const int ADDRESS_NUMBER_INDEX = 0;
+static const int ADDRESS_STREET_INDEX = 1;
+static const int ADDRESS_SUFFIX_INDEX = 2;
+static const int ADDRESS_DIRECTION_INDEX = 3;
+static const int ADDRESS_REGION_INDEX = 4;
 
-Address * GeoParser::parse_address(const std::string &str)
+static const int INTERSECTION_STREET_INDEX = 0;
+static const int INTERSECTION_SUFFIX_INDEX = 1;
+static const int INTERSECTION_DIRECTION_INDEX = 2;
+static const int INTERSECTION_REGION_INDEX = 6;
+
+Address * GeoParser::parse_address(const string &str)
 {    
-    cmatch what;
-    if (regex_match(str.c_str(), what, (*address_re))) {
-        Address *addr = new Address;
+    // yes, this code is totally gross
 
-        for (int i=1; i<what.size(); i++) {
+    cmatch what;
+
+    // try to find an intersection match first, then fall back to address 
+    // level matching
+    if (regex_match(str.c_str(), what, (*intersection_re))) 
+    {
+        Address *addr = new Address;
+        addr->cross_street = new Address;
+
+        for (int i=1; i<what.size(); i++) 
+        {
             if (what[i].second > what[i].first) 
             {
                 string s;
                 s.assign(what[i].first, what[i].second);
-                
-                if (i == NUMBER_INDEX)
+                Address * curaddr = addr;
+                int index = i - 1;
+                if (index > INTERSECTION_DIRECTION_INDEX && 
+                    index < INTERSECTION_REGION_INDEX)
+                {
+                    curaddr = curaddr->cross_street;
+                    index -= 3;
+                }
+    
+                if (index == INTERSECTION_STREET_INDEX)
+                    curaddr->street = s;
+                else if (index == INTERSECTION_SUFFIX_INDEX) 
+                    curaddr->suffix = Address::get_suffix(s);
+                else if (index == INTERSECTION_DIRECTION_INDEX) 
+                    curaddr->direction = Address::get_direction(s);
+                else if (index == INTERSECTION_REGION_INDEX) 
+                    curaddr->region = s;
+            }
+        }
+
+        return addr;
+    }
+    else if (regex_match(str.c_str(), what, (*address_re))) 
+    {
+        Address *addr = new Address;
+
+        for (int i=1; i<what.size(); i++) 
+        {
+            if (what[i].second > what[i].first) 
+            {
+                string s;
+                s.assign(what[i].first, what[i].second);
+                int index = i - 1;
+
+                if (index == ADDRESS_NUMBER_INDEX)
                     addr->number = atoi(s.c_str());
-                else if (i == STREET_INDEX)
+                else if (index == ADDRESS_STREET_INDEX)
                     addr->street = s;
-                else if (i == SUFFIX_INDEX) 
+                else if (index == ADDRESS_SUFFIX_INDEX) 
                     addr->suffix = Address::get_suffix(s);
-                else if (i == DIRECTION_INDEX) 
+                else if (index == ADDRESS_DIRECTION_INDEX) 
                     addr->direction = Address::get_direction(s);
-                else if (i == REGION_INDEX) 
+                else if (index == ADDRESS_REGION_INDEX) 
                     addr->region = s;
             }
         }

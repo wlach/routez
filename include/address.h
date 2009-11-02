@@ -8,13 +8,23 @@ struct Address
     Address()
     {
         number = 0;
+        cross_street = NULL;
         suffix = Address::UNKNOWN_SUFFIX;
-        direction = Address::UNKNOWN_DIRECTION;
+        direction = Address::UNKNOWN_DIRECTION;        
     }
     
+    ~Address() 
+    {
+        delete cross_street;
+    }
+
     int number;
     std::string street;
     std::string region;
+
+    Address *cross_street;
+
+    bool is_intersection() { return cross_street; }
 
     enum Suffix {
         UNKNOWN_SUFFIX = 0,

@@ -97,10 +97,22 @@ GeoCoder::GeoCoder(const char *dbname)
 }
 
 
-static int sqlite_cb(void *userdata, int argc, char **argv, char **azColName)
+static int sqlite_intersection_cb(void *userdata, int argc, char **argv, 
+                                  char **azColName)
+{
+    pair<float, float> *latlng = (pair<float, float> *)userdata;
+    latlng->first = atof(argv[0]);
+    latlng->second = atof(argv[1]);
+
+    return 0;
+}
+
+
+static int sqlite_address_cb(void *userdata, int argc, char **argv, 
+                             char **azColName)
 {
     pair<pair<float, float>, int> * addr_tuple = 
-        static_cast<pair<pair<float, float>, int> *>(userdata);
+        (pair<pair<float, float>, int> *)userdata;
     
     int first_number = atol(argv[2]);
     int last_number = atol(argv[3]);
@@ -124,6 +136,42 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
 {    
     Address *addr = parser->parse_address(str);
 
+    if (addr && addr->is_intersection())
+    {
+        pair<float, float> latlng(0.0f, 0.0f);
+
+        // sql db assumes first road name in intersection is  less than
+        // (case insensitive) than the second. we swap them to satisfy this
+        // condition
+        Address *addr1 = addr, *addr2 = addr->cross_street;
+        if (strcasecmp(addr->street.c_str(), 
+                       addr->cross_street->street.c_str()) > 0)
+        {
+            addr1 = addr->cross_street; addr2 = addr;
+        }
+
+        stringstream sqlstr;
+        sqlstr << "select lat,lng from intersection where "; 
+        sqlstr << "name1 like '" << addr1->street << "' ";
+        sqlstr << " and name2 like '" << addr2->street << "'";
+        sqlstr << " limit 1";
+
+        char *zErrMsg = 0;
+        printf("SQL: %s\n", sqlstr.str().c_str());
+        int rc = sqlite3_exec(db, sqlstr.str().c_str(), sqlite_intersection_cb, 
+                              &latlng, &zErrMsg);
+        if (rc != SQLITE_OK)
+        {
+            fprintf(stderr, "SQL error: %s\n", zErrMsg);
+            sqlite3_free(zErrMsg);
+            
+            // we silently fail in this case... maybe it would be better to 
+            // just assert?
+        }
+
+        return latlng;
+    }
+
     if (addr && !addr->street.empty())
     {        
         pair<pair<float, float>, int> addr_tuple(pair<float, float>(0.0f, 0.0f), addr->number);
@@ -136,13 +184,14 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
             sqlstr << " and firstHouseNumber <= '" << addr->number << "'";
             sqlstr << " and lastHouseNumber >= '" << addr->number << "'";
         }
-        sqlstr << "limit 1";
+        sqlstr << " limit 1";
 
         addr_tuple.first.first = 0.0f;
 
         char *zErrMsg = 0;
         printf("SQL: %s\n", sqlstr.str().c_str());
-        int rc = sqlite3_exec(db, sqlstr.str().c_str(), sqlite_cb, &addr_tuple, &zErrMsg);
+        int rc = sqlite3_exec(db, sqlstr.str().c_str(), sqlite_address_cb, 
+                              &addr_tuple, &zErrMsg);
         if (rc != SQLITE_OK)
         {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);

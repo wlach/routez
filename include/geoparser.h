@@ -18,4 +18,5 @@ class GeoParser
 
   private:
     boost::regex * address_re;
+    boost::regex * intersection_re;
 };

@@ -87,8 +87,10 @@ class GMLHandler(xml.sax.ContentHandler):
                                     
                                     intersection_key = name1+roadseg1['suffix']+","+name2+roadseg2['suffix']
                                     if not intersections_inserted.get(intersection_key):
-                                        # FIXME: this will eventually insert into an intersections table
-                                        pass
+                                        cursor.execute("insert into intersection " \
+                                            "values ('%s', '%s', '%s', '%s', '%s', " \
+                                            "'%s');" %  (name1, roadseg1['suffix'], 
+                                                         name2, roadseg2['suffix'], lat, lng))
                                         intersections_inserted[intersection_key] = 1
 
         print "Writing placenames"
@@ -186,6 +188,7 @@ if __name__ == '__main__':
     cursor.execute("create table placename (name text)")
     cursor.execute("create table road (name text, suffix text, firstHouseNumber integer, "
                    "lastHouseNumber integer, numberingTypeEven boolean, length real, coords blob)")
+    cursor.execute("create table intersection (name1 text, suffix1 text, name2 text, suffix2 text, lat real, lng real)")
     conn.commit()
 
     print "Parsing geodb and writing road segments"
