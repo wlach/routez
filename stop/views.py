@@ -160,7 +160,7 @@ def stoptimes_in_range(request, location):
                     "type": route.type,
                     "times": times }
                 routesjson.append(routejson)
-        stopsjson.append({ 
+                stopsjson.append({ 
                     "name": stop.name,
                     "code": stop.stop_code,
                     "distance": distance_to_stop_hash[id],
