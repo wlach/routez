@@ -44,6 +44,7 @@ def get_route_ids_for_stop(graph, stop_id, secs):
 def find_triphops_for_stop(graph, stop_id, route_id, secs, num):
     t = time.localtime(float(secs))
     elapsed_daysecs = t.tm_sec + (t.tm_min * 60) + (t.tm_hour * 60 * 60)
+    daystart_secs = int(secs - elapsed_daysecs)
 
     ts = graph.get_tripstop(stop_id)
 
@@ -53,8 +54,8 @@ def find_triphops_for_stop(graph, stop_id, route_id, secs, num):
         triphops = ts.find_triphops(elapsed_daysecs + sptuple[1], route_id,
                                     sptuple[0], num)
         for triphop in triphops:
-            triphop.start_time -= sptuple[1]
-            triphop.end_time -= sptuple[1]
+            triphop.start_time += (daystart_secs - sptuple[1])
+            triphop.end_time += (daystart_secs - sptuple[1])
             all_triphops.append(triphop)
 
     all_triphops.sort(lambda x, y: x.start_time-y.start_time)
@@ -63,7 +64,13 @@ def find_triphops_for_stop(graph, stop_id, route_id, secs, num):
 
     return all_triphops
 
-def stoptimes_for_stop(request, stop_code, secs):
+def stoptimes_for_stop(request, stop_code):
+    starttime = request.GET.get('time')
+    if not starttime:
+        starttime = time.time()
+    else:
+        starttime = int(starttime) # cast to integer
+
     stop = Stop.objects.filter(stop_code=stop_code)
     if not len(stop):
         return HttpResponseNotFound(simplejson.dumps(
@@ -73,11 +80,11 @@ def stoptimes_for_stop(request, stop_code, secs):
     import routez
     graph = routez.travel.graph
 
-    route_ids = get_route_ids_for_stop(graph, int(stop.stop_id), secs)
+    route_ids = get_route_ids_for_stop(graph, int(stop.stop_id), starttime)
     routes = []
     for route_id in route_ids:
         thops = find_triphops_for_stop(graph, int(stop.stop_id), route_id,
-                                       secs, 3)
+                                       starttime, 3)
         times = []
         if len(thops):
             for thop in thops:
@@ -94,7 +101,13 @@ def stoptimes_for_stop(request, stop_code, secs):
                                            }),
                         mimetype="application/json")
 
-def stoptimes_in_range(request, location, secs):
+def stoptimes_in_range(request, location):
+    starttime = request.GET.get('time')
+    if not starttime:
+        starttime = time.time()
+    else:
+        starttime = int(starttime) # cast to integer
+
     latlng = geocoder.get_location(location)
     if not latlng:
         return HttpResponseNotFound(simplejson.dumps(
@@ -111,15 +124,13 @@ def stoptimes_in_range(request, location, secs):
 
     # filter twice, once to get all the routes we're interested in, then
     # create a hash of stops containing only the routes that we care about
-    # FIXME: is this filtering better done on the client end of things? or 
-    # should it be an optional parameter?
     routehash = {}
     distance_to_stop_hash = {}
     for ts in tstops:
         distance_to_stop = latlng_dist(latlng[0], latlng[1], ts.lat, ts.lng)
         distance_to_stop_hash[ts.id] = distance_to_stop
 
-        for route_id in get_route_ids_for_stop(graph, ts.id, secs):
+        for route_id in get_route_ids_for_stop(graph, ts.id, starttime):
             if not routehash.get(route_id) or \
                     routehash[route_id][0] > distance_to_stop:
                 routehash[route_id] = (distance_to_stop, ts)
@@ -136,7 +147,7 @@ def stoptimes_in_range(request, location, secs):
         stop = Stop.objects.filter(stop_id=id)[0]
         routesjson = []
         for route_id in stophash[id]:
-            thops = find_triphops_for_stop(graph, id, route_id, secs, 3)
+            thops = find_triphops_for_stop(graph, id, route_id, starttime, 3)
 
             if len(thops):
                 times = []
