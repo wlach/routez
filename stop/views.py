@@ -145,7 +145,7 @@ def stoptimes_in_range(request, location):
     stopsjson = []
     for id in stophash:
         stop = Stop.objects.filter(stop_id=id)[0]
-        routesjson = []
+        routedicts = []
         for route_id in stophash[id]:
             thops = find_triphops_for_stop(graph, id, route_id, starttime, 3)
 
@@ -154,17 +154,18 @@ def stoptimes_in_range(request, location):
                 for thop in thops:
                     times.append(thop.start_time)
                 route = Route.objects.filter(route_id=route_id)[0]
-                routejson = { 
+                routedict = {
                     "short_name": route.short_name,
                     "long_name": route.long_name,
                     "type": route.type,
                     "times": times }
-                routesjson.append(routejson)
-                stopsjson.append({ 
+                routedicts.append(routedict)
+        if len(routedicts) > 0:
+            stopsjson.append({
                     "name": stop.name,
                     "code": stop.stop_code,
                     "distance": distance_to_stop_hash[id],
-                    "routes": routesjson })
+                    "routes": routedicts })
 
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
                         mimetype="application/json")
