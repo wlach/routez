@@ -1,0 +1,105 @@
+/* Accent Colour: #5A7F85 */
+
+/* YUI Reset */
+div.yui-layout-hd { display: none; }
+.yui-layout-scroll div.yui-layout-bd { overflow: auto; }
+
+/* Hide the YUI history iframe */
+#yui-history-iframe {
+  position:absolute;
+  top:0; left:0;
+  width:1px; height:1px;
+  visibility:hidden;
+}
+
+/* General */
+a { color: #5A7F85; }
+div.container { overflow: hidden; margin: 40px auto; width: 960px; }
+h2 { font-weight: bold; font-size: 22px; color: #000000; margin: 0 0 0.81em; line-height: 1.62em; }
+p { font-size: 14px; color: #404040; margin: 0 0 0.81em; line-height: 1.25em}
+
+/* Header */
+#header { background: #679297 url('../images/header_bg.gif') repeat-x left bottom; padding: 10px; height: 30px; margin: 0 0 10px; position: relative; }
+#header h1 { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
+#header h1 a { line-height: 1; float: left; margin: 0; font-size: 28px; font-weight: bold; color: #FFFFFF; }
+#header h1 a:hover { text-decoration: none; }
+#header h1 span { font-size: 18px; font-weight: bold; color: #ADBFC2; }
+#header h1 span.beta { font-size: 18px; color: #FF5555; }
+#header p { float: left; line-height: 1; margin: 0 0 0 10px; font-size: 18px; color: #D6DFE1; position: relative; bottom: -8px;  }
+
+/* Navigation */
+#header ul.nav { text-align: right; position: absolute; right: 10px; bottom: 0; margin: 0; padding: 0; }
+#header ul.nav li { display: block; float: left; list-style: none; margin: 0 0 0 5px; padding: 0; }
+#header ul.nav li a { line-height: 1; display: block; background: #ADBFC2; font-weight: bold; padding: 5px 10px; margin: 0; font-size: 12px; color: #404040; text-decoration: none; -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; }
+#header ul.nav li a:hover { background: #D6DFE1; }
+#header ul.nav li.active,
+body#nav_home ul.nav li.nav_home a,
+body#nav_about ul.nav li.nav_about a,
+body#nav_blog ul.nav li.nav_blog a,
+body#nav_help ul.nav li.nav_help a,
+body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; }
+
+/* Panels */
+#panels { padding: 0 10px; overflow: hidden; }
+#panels p { font-size: 12px; color: #000000; }
+#panels p#intro { font-size: 14px; margin: 0 0 10px; }
+#panels div.panel { border: 1px solid #5A7F85; -moz-border-radius: 3px; -webkit-border-radius: 3px; margin: 0 0 10px; }
+#panels div.panel h2 { line-height: 1; background: #E4EAEB; padding: 5px 10px; margin: 0; font-weight: bold; font-size: 12px; }
+#panels div.content { padding: 10px; }
+
+/* Plan a Trip */
+#panels form { }
+#panels form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 5px; }
+#panels form div.submit { margin: 0; padding: 0 0 0 21px; }
+#panels form div.submit { margin: 0; padding: 0 0 0 21px; }
+#panels form p.error { color:#F00; }
+#panels form a.help { color:#22F; }
+#panels form label { display: block; height: 16px; width: 16px; float: left; margin: 2px 0 0; text-indent: -9000px; }
+#panels form label.from { background: url('../images/label_from.png') no-repeat left top; }
+#panels form label.to { background: url('../images/label_to.png') no-repeat left top; }
+#panels form label.time { background: url('../images/label_time.png') no-repeat left top; }
+#panels form span { float: left; margin: 0 0 0 5px; display: block; }
+#panels form span label { line-height: 1; background: none; font-size: 11px; color: #808080; text-indent: 0; height: auto; width: auto; float: none; margin: 2px 0 0 0; }
+#panels form input.text { height: 20px; padding: 2px 0 0; background: #FFFFFF; border-width: 1px; border-style: solid; border-color: #727272 #B4B4B4 #DADADA #B4B4B4; -moz-border-radius: 2px; -webkit-border-radius: 2px; width: 179px; }
+#panels form input.text_error { border-color: #BB0000 #EE0000 #FF0000 #EE0000; }
+#panels form a.reverse { height: 16px; width: 16px; background: url('../images/link_reverse.png') no-repeat left top; }
+#panels form table.location-input { width:230px; overflow: hidden; padding: 0; margin: 0; }
+#panels form td.location-cell { width:210px; overflow: hidden;}
+#panels form td.rev-cell { width:16px; vertical-align: middle; overflow: hidden;}
+
+/* Alternate Routes */
+#route-plan-options { display: none; }
+#route-plan-options ul { margin: 0; padding: 0; overflow: hidden; }
+#route-plan-options ul li { list-style: none; }
+#route-plan-options ul.options li { padding: 10px; margin: 0; border-bottom: 1px dotted #808080; }
+#route-plan-options ul.options li.hover { background: #F2F5F5; }
+#route-plan-options ul.directions li { border: none; font-size: 11px; padding: 0; margin: 0 3px 3px 0; font-weight: bold; display: block; float: left; height: 16px; width: 26px; line-height: 16px; }
+#route-plan-options ul.directions li.bus { background: url('../images/icon_bus_with_number.png') no-repeat top left; padding-left: 16px; }
+#route-plan-options ul.directions li.ferry { background: url('../images/icon_ferry_with_text.png') no-repeat top left; padding-left: 16px; }
+#route-plan-options ul.directions li.walk { background: url('../images/icon_walk.png') no-repeat top left; width: 16px; }
+#route-plan-options span.time_range { font-weight: bold; }
+#route-plan-options span.time { color: #808080; }
+#route-plan-options span.walking_time { display: block; color: #808080; }
+
+/* Directions */
+#route-plan { display: none; }
+#route-plan ol { margin: 0; padding: 0; }
+#route-plan ol li { margin: 0 0 10px; padding: 0 0 10px 24px; list-style: none; background-position: top left; background-repeat: no-repeat; border-bottom: 1px dotted #808080; }
+#route-plan ol li.depart { background-image: url('../images/label_from.png');}
+#route-plan ol li.walk { background-image: url('../images/icon_walk.png'); }
+#route-plan ol li.board { background-image: url('../images/icon_bus.png'); }
+#route-plan ol li.alight { background-image: url('../images/icon_walk.png'); }
+#route-plan ol li.arrive { background-image: url('../images/label_to.png');}
+#route-plan p { margin: 0 0 10px; }
+#route-plan p.feedback { color: #808080; margin: 0; }
+#route-plan p.warning { color: #FF5555; }
+#route-plan a { color: #22F; }
+
+/* Map */
+#map { width: 100%; height: 100%; }
+#map div.tooltip { white-space: nowrap; padding: 2px; color: #000000; font-weight: bold; font-size: 12px; }
+
+/* Footer */
+#footer p { margin: 0 0 10px; }
+#footer p.nav { color: #C0C0C0; }
+#footer p.legal { color: #808080; }

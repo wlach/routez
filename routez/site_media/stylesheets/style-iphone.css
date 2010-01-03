@@ -1,0 +1,6 @@
+/* Custom overrides for optimal display of routez on iphone */
+#panels div.panel h2 { font-size: 14px; }
+#panels form table.location-input { width: 100%; }
+#panels form input.text { height: 20px; font-size: 14px; width:220px; }
+#panels form input.button { font-size: 14px; }
+body { font-size:90%; }

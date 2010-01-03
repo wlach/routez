@@ -1,0 +1,37 @@
+form * { font-size: 100%; font-family: sans-serif; font-size: 12px; }
+
+/* Field Containers */
+form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 10px; }
+
+/* Labels and Inlining */
+form label { line-height: 1; font-weight: bold; display: block; color: #000000; margin: 0 0 0.5em; white-space: nowrap; }
+form span label { font-size: 84%; color: #404040; font-weight: normal; margin: 0.3em 0 0 0; }
+form span { float: left; margin: 0; display: block; }
+form span.full { width: 100%; margin: 0; padding: 0 0 0.5em; }
+
+/* Fields */
+form input.text,
+form textarea,
+form select { background: #FFFFFF; border-width: 1px; border-style: solid; border-color: #727272 #B4B4B4 #DADADA #B4B4B4; -moz-border-radius: 2px; -webkit-border-radius: 2px; }
+form input.text { height: 16px; padding: 2px 0 0; overflow: hidden; }
+form textarea { padding: 2px 0; }
+form select { height: 20px; padding: 2px 0; }
+form ul { margin: 0; padding: 0; }
+form ul li { list-style: none; margin: 0; padding: 0; white-space: nowrap; }
+form ul.inline li { display: inline; margin: 0 1em 0 0; }
+form ul label { display: inline; font-weight: normal; }
+form ul input { margin: 0.3em; }
+
+/* Field Widths */
+form span.full input.text,
+form span.full textarea,
+form span.full select { width: 100%; margin: 0; }
+form input.full,
+form select.full { width: 100%; }
+form input.large,
+form select.large { width: 75%; }
+form input.medium,
+form select.medium { width: 50%; }
+form input.small,
+form select.small { width: 25%; }
+

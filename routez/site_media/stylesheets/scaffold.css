@@ -1,0 +1,25 @@
+/* CSS Reset */
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,code,del,dfn,em,img,q,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
+body{overflow:auto;}
+table{border-collapse:collapse;border-spacing:0;width:100%;}
+td{text-align:left;font-weight:normal;}
+a{outline:none;}
+a img{border:none;}
+img { -ms-interpolation-mode: bicubic; }
+
+/* Clearfix */
+.clearfix:after{content:".";display:block;clear:both;visibility:hidden;line-height:0;height:0;}
+.clearfix{display:inline-block;}
+html[xmlns] .clearfix{display:block;}
+* html .clearfix{height:1%;}
+
+/* General */
+body{font-size:75%;color:#202020;font-family:arial,helvetica,clean,sans-serif;}
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+a.negative { color: #F93C1B; }
+a.underline_some { text-decoration: none; }
+a.underline_some span { text-decoration: underline; }
+a.underline_some:hover span { text-decoration: none; }
+img.icon { position: relative; top: 3px; }
+p { margin: 0 0 1.62em; font-size: 12px; }

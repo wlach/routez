@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <title>Help</title>
+  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>.
+  <link href="site_media/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
+  <link href="site_media/stylesheets/style.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>
+  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
+
+
+  <style type="text/css">
+    v\:* {
+    behavior:url(#default#VML);
+    }
+  </style>
+
+</head>
+
+<body id="nav_help">
+
+  {% include 'header.html' %}
+  {% include 'analytics.html' %}
+
+  <div class="container" id="content">
+
+    <p>This page is meant to help users encountering some common problems.</p>
+
+    <a name="location"></a>
+    <h2>Having trouble entering origin / destination</h2>
+    <p>In order to plan a route for you, hbus needs to be able to map the
+      location you specify into a latitude/longitude pair (this process is 
+      called geocoding).</p>
+    <p>At this time, the functionality is very much in development. 
+      We don't understand any location other than a specific address
+      (e.g. 5000 North Street, North &amp; Agricola). In particular, we do 
+      <b>not</b> understand landmarks (e.g. Scotia Square).</p>
+    <p>The good news? This will soon be fixed. We plan to add a comprehensive
+      set of landmarks from the <a href="http://openstreetmap.org">OpenStreetMap</a> 
+      dataset, as well as dynamic keyboard autocompletion of location. It's 
+      going to be awesome.</p>
+    <p>If you are entering an address that you think should work and 
+      doesn't, please let us know at our 
+      <a href="http://hbus.uservoice.com">feedback page</a>.</p>
+    <a name="walking"/></a>
+    <h2>My route has too much walking!</h2>
+    <p>If the route you're planning is off the main Halifax peninsula, this
+      is almost certainly due to lack of route and stop data. Unlike transit
+      operators such as TriMet in Portland, Oregon, or SFMTA in San Francisco, 
+      Metro Transit does not release a comprehensive set of route information 
+      to the public. To fill in the gaps, we've been manually entering in
+      Go Time information gathered with a handheld GPS and a bike. Currently 
+      only the 1, 2, 3, 4, 5, 6, 7, 9, 10, 14, 17, 18, 20, 21, 
+      23, 41, 42, 52, 58, 80, and 81 are covered (service off the main Halifax peninsula 
+      may be limited to time point stops). The effort involved in this is great
+      and, without assistance from Metro Transit, we will not have complete
+      coverage of the transit system any time soon (though it should get 
+      better over time). If you like, you can tell us which routes or stops 
+      you'd like to see on our <a href="http://hbus.uservoice.com">feedback 
+	page</a>.
+    </p>
+    <p><a href="http://code.google.com/p/googletransitdatafeed/wiki/PublicFeeds">Over 20 transit providers</a> in North America have released their
+      route data to the public with only positive results. Wouldn't it be great
+      if Metro Transit were to join them?</p>
+
+    {% include 'footer.html' %}
+
+  </div>
+
+  {% include 'layout-standard.html' %}
+
+</body>
+
+</html>

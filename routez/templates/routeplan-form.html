@@ -1,0 +1,53 @@
+<div class="panel">
+  <h2>Plan a trip</h2>
+  <div class="content">
+{% if analytics_key %}
+    <form id="routePlan" onSubmit="pageTracker._trackPageview('/json/routeplan'); submitRoutePlan(); return false;">
+{% else %}
+    <form id="routePlan" onSubmit="submitRoutePlan(); return false;">
+{% endif %}
+      <table class="location-input">
+	<tr>
+	  <td class="location-cell">
+	    <div>
+              <label class="from" for="routePlanStart">From</label>
+              <span>
+		<input class="text" type="text" id="routePlanStart" 
+		       onFocus="javascript:locationInputFocused('start');"/>
+		<label>Ex.: North and Agricola</label>
+              </span>
+	    </div>
+	    <div>
+              <label class="to" for="routePlanEnd">To</label>
+              <span>
+		<input class="text" type="text" id="routePlanEnd" 
+		       onFocus="javascript:locationInputFocused('end');"/>
+		<label>Ex.: 1496 Lower Water</label>
+              </span>
+	    </div>
+	  </td>
+	  <td class="rev-cell">	    
+	    <a href="javascript:reverseDirections()" title="Reverse Directions">
+	      <img src="site_media/images/link_reverse.png"></a>
+	  </td>
+	</tr>
+      </table>
+
+      <div>
+        <label class="time" for="time">Time:</label>
+        <span>
+	  <input class="text" type="text" id="time" class="textfield" value="now" onFocus="select();"/>
+	  <label>Ex.: Saturday at 5pm</label>
+        </span>
+      </div>
+      <div class="submit">
+	<p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
+	<p class="error" id="error-to" style="display:none;">Didn't understand "to" location. <a href="help#location" class="help">Get help</a>.</p>
+	<p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
+        <div class="submit-buttons">
+	  <input value="Plan!" class="button" type="submit" id="plan-button"/>
+	</div>
+      </div>
+    </form>
+  </div>
+</div>

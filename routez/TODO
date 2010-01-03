@@ -1,0 +1,12 @@
+== Near term ==
+
+- De-entangle application from Halifax/hbus.ca. Should split into routez
+  (the application that provides route information, trip planning, etc.)
+  and a website/javascript layer on top of that...
+
+== Medium term ==
+
+- Make libroutez return multiple possible routes
+- Use a kd-tree to speed up finding closest stop to a latlng pair.
+- Add better heuristics to make libroutez consider less options
+

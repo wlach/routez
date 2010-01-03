@@ -1,0 +1,181 @@
+
+
+/*body, select, ol, ul, td {
+  background: #ffffff;
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size:   13px;
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
+}
+*/
+/*#header {
+    margin: 0;
+    padding: 0;
+    height: 60px;
+    border-bottom: 2px solid #bbf;
+}
+
+#header-logo {
+    left: 10px;
+    top: 10px;
+    position: absolute;
+}
+*/
+/*#content {
+  margin:0 auto;  
+  margin-top: 10px;
+  padding-bottom: 48px;
+  width: 1000px;
+}
+*/
+/*#map-wrapper {
+    padding: 25px;
+    float: left;
+}
+   
+#map {
+    width: 600px;
+    height: 400px;
+    border: 1px solid #aaa;
+}
+*/
+#sidebar-wrapper {
+  width: 300px;
+  float: right;
+  padding: 20px;
+}
+
+#sidebar {
+    width: 300px;
+}
+
+.sidebar-box {
+    margin-bottom: 2em;
+}
+
+.sidebar-box .title {
+    position: relative;
+    padding: 0.25em;
+    background: #eef;
+    border-top: 1px solid #ccf;
+    border-left: 1px solid #ccf;
+    border-right: 1px solid #aaf;
+    border-bottom: 1px solid #bbf;
+}
+
+.sidebar-box .content-element {
+    position: relative;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.sidebar-box .contents {
+    position: relative;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+    border-left: 1px solid #ccf;
+    border-right: 1px solid #aaf;
+    border-bottom: 1px solid #aaf;
+}
+
+.sidebar-box .contents .label {
+    padding:0.2em;
+    float: left;
+    width: 3em;
+    margin-right: 0.5em;
+    height: 25px;
+    text-align: right;
+    margin-top:0.3em; 
+}
+
+/*.sidebar-box .contents .textfield {
+    border: 1px solid #aaf;
+}
+
+.sidebar-box .contents .buttons {
+    text-align: right;
+    width: 250px;
+    margin-left: 20px;
+}
+
+.sidebar-box .contents .button {
+    height:25px;
+}
+
+.sidebar-box .contents .textfield {
+    margin: 3px;
+    height:25px;
+}
+
+
+.sidebar-box .contents .example {
+      position: relative;
+      left: 55px;
+      top: -5px;
+      width: 200px;
+      font-size: 10px;
+      color: #a0a0a0;
+      margin-top: .5em;
+      margin-bottom: .3em; 
+}
+*/
+#reverse-directions {
+    font-size:20px; 
+    border: 0pt none; 
+    position: absolute; 
+    top:25px; 
+    left: 260px;
+}
+
+#reverse-directions .reverse { 
+    text-decoration: none;
+    color: #00a;
+}
+
+
+.sidebar-box .contents .error {
+    float:left;
+    font-size: 10px;
+    color: #f00;
+    margin-top: 0em;
+    margin-bottom: 0em; 
+    display: none;
+}
+
+/*#footer {
+    clear: both;
+    padding: 10px;
+}
+
+h1 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+h2 {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+h3 {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+*/
+/*.tooltip {
+  white-space: nowrap;
+  padding: 2px;
+  color: black;
+  font-weight: bold;
+  font-size: 12px;
+  background-color: white;
+  filter:alpha(opacity=60); 
+  -moz-opacity: 0.6; 
+}
+*/
+.shortName {
+  font-size: bigger;
+  font-weight: bold;
+}
