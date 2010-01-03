@@ -48,7 +48,8 @@ if __name__ == '__main__':
     for r in schedule.GetRouteList():
         if mapping['Routes'].has_key(r.route_id):
             r2 = Route(route_id=mapping['Routes'][r.route_id], 
-                       short_name=r.route_short_name, long_name=r.route_long_name)
+                       short_name=r.route_short_name, long_name=r.route_long_name,
+                       type=r.route_type)
             r2.save()
         else:
             # perverse case where there's a route with no trips
