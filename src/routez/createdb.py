@@ -114,7 +114,9 @@ if __name__ == '__main__':
                                   polyline=simplejson.dumps(points[0:-1]))
                         s.save()
                 else:
-                    print "WARNING: Couldn't compute path from %s to %s."
-                    "This probably means your street graph isn't properly "
-                    "connected."
+                    print "WARNING: Couldn't compute path from %s to %s." \
+                    "This probably means your street graph isn't properly " \
+                    "connected. This is normal if you haven't defined an OSM file " \
+                    "for the graph. Otherwise you should worry about the connectedness of " \
+                    "your OSM data." % (prevstopid, stopid)
             prevstopid = stopid
