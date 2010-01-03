@@ -1,6 +1,11 @@
 .installed.cfg
 bin
+develop-eggs
 downloads
 eggs
 parts
+setup.py
+src/routez.egg-info
+src/routez/settings.py
+templates/django-libroutez.in
 var
