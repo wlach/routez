@@ -1,4 +1,6 @@
 .installed.cfg
 bin
+downloads
 eggs
 parts
+var
