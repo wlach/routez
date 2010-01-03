@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH="${buildout:directory}/parts/libroutez/lib"
+export DYLD_LIBRARY_PATH="${buildout:directory}/parts/libroutez/lib"
+
+${buildout:directory}/bin/python
