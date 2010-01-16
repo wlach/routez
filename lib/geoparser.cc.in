@@ -7,7 +7,7 @@
 using namespace boost;
 using namespace std;
 
-static string NUM_REGEX = "(?:([0-9]+)(?:[a-z])?(?: +))?";
+static string NUM_REGEX = "(?:([0-9]+)(?:[a-z])?(?: +)(?!@SUFFIX_EXPRESSION@))?";
 static string STREETNAME_REGEX = "([0-9]+(?:st|nd|rd|th)?|(?:[a-z]+(?: [a-z]+)*?))";
 static string SUFFIX_REGEX = "(?: +(@SUFFIX_EXPRESSION@))?";
 static string DIR_REGEX = "(?: +(@DIRECTION_EXPRESSION@))?";

@@ -61,8 +61,14 @@ WVTEST_MAIN("basic address parsing")
                                Address::AVENUE, ""));
     WVPASS(test_parser_address(g, "5th street, halifax", "5th", 0, Address::UNKNOWN_DIRECTION, 
                                Address::STREET, "halifax"));
-    //WVPASS(test_parser_address(g, "55 avenue, halifax", "55", 0, Address::UNKNOWN_DIRECTION, 
-    //                           Address::AVENUE, "halifax"));
+    WVPASS(test_parser_address(g, "55 avenue, halifax", "55", 0, Address::UNKNOWN_DIRECTION, 
+                               Address::AVENUE, "halifax"));
+    WVPASS(test_parser_address(g, "55 avenue nw, halifax", "55", 0, Address::NORTHWEST, 
+                               Address::AVENUE, "halifax"));
+    WVPASS(test_parser_address(g, "55 55 avenue, halifax", "55", 55, Address::UNKNOWN_DIRECTION, 
+                               Address::AVENUE, "halifax"));
+    WVPASS(test_parser_address(g, "55 55 avenue nw, halifax", "55", 55, Address::NORTHWEST, 
+                               Address::AVENUE, "halifax"));
 
     // FIXME: strip punctuation out of user strings
     //    WVPASS(test_parser_address(g, "pursell's cove road", "pursells cove", "", Address::ROAD, 
