@@ -47,9 +47,6 @@ WVTEST_MAIN("basic address parsing")
                        Address::UNKNOWN_DIRECTION, Address::AVENUE, "Halifax"));
     WVPASS(test_parser_address(g, "6277 South Street", "South", 6277, 
                        Address::UNKNOWN_DIRECTION, Address::STREET, ""));
-    // FIXME: Currently fails
-    //WVPASS(test_parser_address(g, "3rd Avenue", "3rd", 0, Address::UNKNOWN_DIRECTION, 
-    //Address::AVENUE, ""));
     WVPASS(test_parser_address(g, "Highfield Park Crescent", "Highfield Park", 0, 
                        Address::UNKNOWN_DIRECTION, Address::CRESCENT, ""));
     WVPASS(test_parser_address(g, "laneroad", "laneroad", 0, Address::UNKNOWN_DIRECTION, 
@@ -58,6 +55,15 @@ WVTEST_MAIN("basic address parsing")
                        Address::UNKNOWN_DIRECTION, Address::STREET, ""));
     WVPASS(test_parser_address(g, "victoria road", "victoria", 0, 
                        Address::UNKNOWN_DIRECTION, Address::ROAD, ""));
+
+    // street names that start with numbers
+    WVPASS(test_parser_address(g, "3rd Avenue", "3rd", 0, Address::UNKNOWN_DIRECTION, 
+                               Address::AVENUE, ""));
+    WVPASS(test_parser_address(g, "5th street, halifax", "5th", 0, Address::UNKNOWN_DIRECTION, 
+                               Address::STREET, "halifax"));
+    //WVPASS(test_parser_address(g, "55 avenue, halifax", "55", 0, Address::UNKNOWN_DIRECTION, 
+    //                           Address::AVENUE, "halifax"));
+
     // FIXME: strip punctuation out of user strings
     //    WVPASS(test_parser_address(g, "pursell's cove road", "pursells cove", "", Address::ROAD, 
     //            "");
