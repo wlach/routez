@@ -122,9 +122,9 @@ static int sqlite_address_cb(void *userdata, int argc, char **argv,
             (float)(last_number - (float)first_number));
 
     float length = atof(argv[5]);
-    long num_points = *(reinterpret_cast<long *>(&argv[6][0]));
+    long num_points = *(reinterpret_cast<long *>(&argv[7][0]));
 
-    float *latlng_array = (reinterpret_cast<float *>(&argv[6][sizeof(long)]));
+    float *latlng_array = (reinterpret_cast<float *>(&argv[7][sizeof(long)]));
   
     addr_tuple->first = interpolated_latlng(latlng_array, num_points, length, percent);
 
@@ -158,6 +158,7 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
 
         char *zErrMsg = 0;
         printf("SQL: %s\n", sqlstr.str().c_str());
+        
         int rc = sqlite3_exec(db, sqlstr.str().c_str(), sqlite_intersection_cb, 
                               &latlng, &zErrMsg);
         if (rc != SQLITE_OK)
@@ -181,15 +182,18 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
         sqlstr << "name like '" << addr->street << "' ";
 
         if (addr->suffix)
-            sqlstr << "and suffixType==" << addr->suffix << "";
+            sqlstr << "and suffixType==" << addr->suffix << " ";
+
+        if (addr->direction)
+            sqlstr << "and direction==" << addr->direction << " ";
 
         if (addr->number) 
         {
-            sqlstr << " and firstHouseNumber <= '" << addr->number << "'";
-            sqlstr << " and lastHouseNumber >= '" << addr->number << "'";
+            sqlstr << "and firstHouseNumber <= '" << addr->number << "' ";
+            sqlstr << "and lastHouseNumber >= '" << addr->number << "' ";
         }
-
-        sqlstr << " limit 1";
+        
+        sqlstr << "limit 1";
 
         addr_tuple.first.first = 0.0f;
 

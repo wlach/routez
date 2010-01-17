@@ -37,13 +37,19 @@ if __name__ == '__main__':
         print "Usage: %s <python file> <sqlite db>" % sys.argv[0]
         exit(1)
     
-    os.unlink(sys.argv[2])
+    try:
+        os.unlink(sys.argv[2])
+    except OSError:
+        pass
+
     conn = sqlite3.connect(sys.argv[2])
 
     cursor = conn.cursor()
     cursor.execute("create table placename (name text)")
-    cursor.execute("create table road (name text, firstHouseNumber integer, "
-                   "lastHouseNumber integer, numberingTypeEven boolean, suffixType integer, length real, coords blob)")
+    cursor.execute("create table road (name text, firstHouseNumber integer, "\
+                       "lastHouseNumber integer, numberingTypeEven boolean, " \
+                       "suffixType integer, direction integer, length real, " \
+                       "coords blob)")
     cursor.execute("create table intersection (name1 text, suffix1 text, name2 text, suffix2 text, lat real, lng real)")
     conn.commit()
 
@@ -78,16 +84,18 @@ if __name__ == '__main__':
 
                         prevcoord = coord
                     
-                    suffix_type = 0
+                    suffix_type = 0 # unknown
+                    direction = 0 # unknown
                     if mappings.suffix_dict.get(side['suffix'].lower()):
                         suffix_type = mappings.suffix_dict[side['suffix'].lower()]
+                    if side.get('direction') and mappings.direction_dict.get(side['direction'].lower()):
+                        direction = mappings.direction_dict[side['direction'].lower()]
 
-                    cursor.execute("insert into road values ('%s', '%s', '%s', '%s', "
-                                   "'%s', '%s', ?);" % (side['name'].replace("'", "''"), 
-                                                        side['firstNumber'], side['lastNumber'],
-                                                        even, suffix_type, length),
+                    cursor.execute("insert into road values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', ?);" % (
+                            side['name'].replace("'", "''"), 
+                            side['firstNumber'], side['lastNumber'],
+                            even, suffix_type, direction, length),
                                    [sqlite3.Binary(coords_buf)])
-
                     placenames.add(side['placeName'])
 
         line = f.readline()

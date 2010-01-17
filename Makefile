@@ -24,8 +24,7 @@ CPPFLAGS=-I./include
 LDFLAGS=-lsqlite3 -lboost_regex
 GEOCODER_OBJS=$(patsubst %,lib/%,geocoder.o geoparser.o address.o)
 GEOCODE_OBJS= $(GEOCODER_OBJS) tests/geocode.o
-tests/geocode: $(GEOCODE_OBJS) 
-	echo $(GEOCODE_OBJS) 
+tests/geocode: $(GEOCODE_OBJS)
 	g++ $(GEOCODE_OBJS) $(LDFLAGS) -o $@
 
 TEST_OBJS=t/geoparser.t.o

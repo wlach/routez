@@ -77,19 +77,19 @@ my @direction_mappings = (
     { enum => "Address::NORTH",
       names => [ "n", "north" ] },
     { enum => "Address::NORTHEAST",
-      names => [ "ne", "northeast", "north east" ] },
+      names => [ "ne", "northeast", "north east", "north-east" ] },
     { enum => "Address::EAST",
       names => [ "e", "east" ] },
     { enum => "Address::SOUTHEAST",
-      names => [ "se", "southeast", "south east" ] },
+      names => [ "se", "southeast", "south east", "south-east" ] },
     { enum => "Address::SOUTH",
       names => [ "s", "south" ] }, 
     { enum => "Address::SOUTHWEST",
-      names => [ "sw", "southwest", "south west" ] },
+      names => [ "sw", "southwest", "south west", "south-west" ] },
     { enum => "Address::WEST",
       names => [ "w", "west" ] }, 
     { enum => "Address::NORTHWEST",
-      names => [ "nw", "northwest", "north west" ] },
+      names => [ "nw", "northwest", "north west", "north-west" ] },
     );
 
 sub read_mappings {
