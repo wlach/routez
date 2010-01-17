@@ -2,6 +2,7 @@
 
 import math
 import os
+import re
 import sqlite3
 import string
 import struct
@@ -33,13 +34,13 @@ class RoadSegment:
         even = 0
         if (side['firstNumber'] % 2 == 0):
             even = 1
-
+        
         coords_buf = struct.pack("l", len(self.coords),)
         for coord in self.coords:
             coords_buf += struct.pack("ff", coord[0], coord[1],)
         
         cursor.execute("insert into road values " \
-        "('%s', '%s', '%s', '%s', '%s', '%s', ?);" % (side['name'], side['suffix'], 
+        "('%s', '%s', '%s', '%s', '%s', '%s', ?);" % (side['name'].replace("'", "''"), side['suffix'], 
                                                       side['firstNumber'], side['lastNumber'],
                                                       even, self.length),
                                                       [sqlite3.Binary(coords_buf)])
@@ -79,19 +80,21 @@ class GMLHandler(xml.sax.ContentHandler):
                         if i != j:
                             roadseg1 = roadsegs[i].right
                             roadseg2 = roadsegs[j].right
-                            name1 = roadseg1['name']
-                            name2 = roadseg2['name']
-                            if name1 > name2:
-                                name1, name2 = name2, name1
-                                if name1 and name2 and name1 != name2:
+                            name1 = roadseg1.get('name')
+                            name2 = roadseg2.get('name')
+                            if name1 and name2 and name1 != name2:
+                                if name1 > name2:
+                                    roadseg1, roadseg2 = roadseg2, roadseg1
                                     
-                                    intersection_key = name1+roadseg1['suffix']+","+name2+roadseg2['suffix']
-                                    if not intersections_inserted.get(intersection_key):
-                                        cursor.execute("insert into intersection " \
-                                            "values ('%s', '%s', '%s', '%s', '%s', " \
-                                            "'%s');" %  (name1, roadseg1['suffix'], 
-                                                         name2, roadseg2['suffix'], lat, lng))
-                                        intersections_inserted[intersection_key] = 1
+                                intersection_key = name1+roadseg1['suffix']+","+name2+roadseg2['suffix']
+                                if not intersections_inserted.get(intersection_key):
+                                    cursor.execute("insert into intersection " \
+                                                       "values ('%s', '%s', '%s', '%s', '%s', '%s');" % 
+                                                   (name1.replace("'", "''"), 
+                                                    roadseg1['suffix'].replace("'", "''"), 
+                                                    name2.replace("'", "''"), 
+                                                    roadseg2['suffix'].replace("'", "''"), lat, lng))
+                                    intersections_inserted[intersection_key] = 1
 
         print "Writing placenames"
         for placename in self.placenames:
@@ -107,8 +110,12 @@ class GMLHandler(xml.sax.ContentHandler):
 
     def endElement(self,name):
         def setNameAndSuffix(hash):
-            hash['name'] = string.join(self.cdata.split(" ")[0:-1], " ")
-            hash['suffix'] = string.lower(self.cdata.split(" ")[-1])
+            match = re.search('([A-z0-9\']+(?:\ [A-z\']+)*)\ ([A-z]+)(?:\ \ ([A-Z][A-Z]))?', self.cdata)
+            if match:
+                (name, suffix, direction) = (match.group(1), match.group(2), match.group(3))
+                hash['name'] = name
+                hash['suffix'] = suffix
+                hash['direction'] = direction
 
         if name=='nrn:RoadSegment':
             self.inRoadSegment = False
@@ -119,11 +126,11 @@ class GMLHandler(xml.sax.ContentHandler):
                     inRange = True
             if inRange:
                 cursor = conn.cursor()
-                if self.curRoadSegment.right['name'] != "Unknown":
+                if self.curRoadSegment.right.get('name') and self.curRoadSegment.right['name'] != "Unknown":
                     if self.curRoadSegment.right['firstNumber'] > 0 and \
                             self.curRoadSegment.right['lastNumber'] > 0:
                         self.curRoadSegment.insert_into_db(self.curRoadSegment.right, cursor)
-                if self.curRoadSegment.left['name'] != "Unknown":
+                if self.curRoadSegment.left.get('name') and self.curRoadSegment.left['name'] != "Unknown":
                     if self.curRoadSegment.left['firstNumber'] > 0 and \
                             self.curRoadSegment.left['lastNumber'] > 0:
                         self.curRoadSegment.insert_into_db(self.curRoadSegment.left, cursor)
