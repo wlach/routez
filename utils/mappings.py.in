@@ -1,0 +1,2 @@
+suffix_dict = @SUFFIX_DICT@
+direction_dict = @DIRECTION_DICT@

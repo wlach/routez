@@ -5,3 +5,5 @@ address.cc
 geocode
 geoparser.cc
 t/all.t
+utils/mappings.py
+utils/mappings.pyc

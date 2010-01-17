@@ -95,23 +95,24 @@ my @direction_mappings = (
 sub read_mappings {
     my $mappings = pop (@_);
 
-    my $expression; my $logic;
+    my $expr; my $logic; my $dict = "{ ";
 
-    my $first_mapping = 1;
+    my $i = 0;
     foreach my $mapping (@$mappings) {
+
 	my $names = $mapping->{names};
-	if (!$first_mapping) {
+	if ($i > 0) {
 	    $logic .= "else ";
-	    $expression .= "|";
-	} else {
-	    $first_mapping = 0;
-	}
+	    $expr .= "|";
+	} 
 	
-	$expression .= join("|", @$names);
+	$expr .= join("|", @$names);
 	$logic .= "if (";
 	
 	my $first_suffix = 1;
 	foreach my $suffix (@$names) {
+	    $dict .= "'$suffix': " . ($i+1) . ", ";
+
 	    if (!$first_suffix) {
 		$logic .= " || ";
 	    } else {
@@ -120,21 +121,25 @@ sub read_mappings {
 	    
 	    $logic .= "!strcasecmp(str.c_str(), \"$suffix\")";
 	}
+	
 	$logic .= ")\nreturn $mapping->{enum};\n";   
+	$i++;
     }
 
-    return ($expression, $logic);
+    $dict .= " }";
+
+    return ($expr, $logic, $dict);
 }
 
-my ($suffix_expression, $suffix_logic) = read_mappings(\@suffix_mappings);
-my ($direction_expression, $direction_logic) = read_mappings(\@direction_mappings);
-
-print "/* This file has been generated with the help of suffix-subst.pl. */\n";
+my ($suffix_expr, $suffix_logic, $suffix_dict) = read_mappings(\@suffix_mappings);
+my ($direction_expr, $direction_logic, $direction_dict) = read_mappings(\@direction_mappings);
 
 while (<STDIN>) {    
-    s/\@SUFFIX_EXPRESSION\@/$suffix_expression/;
+    s/\@SUFFIX_EXPR\@/$suffix_expr/;
     s/\@SUFFIX_LOGIC\@/$suffix_logic/;
-    s/\@DIRECTION_EXPRESSION\@/$direction_expression/;
+    s/\@DIRECTION_EXPR\@/$direction_expr/;
     s/\@DIRECTION_LOGIC\@/$direction_logic/;
+    s/\@SUFFIX_DICT\@/$suffix_dict/;
+    s/\@DIRECTION_DICT\@/$direction_dict/;
     print $_;
 }

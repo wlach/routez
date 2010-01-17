@@ -9,6 +9,8 @@ import struct
 import sys
 import xml.sax
 
+import mappings
+
 def latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
 
     if round(src_lat, 4) == round(dest_lat, 4) and \
@@ -39,10 +41,14 @@ class RoadSegment:
         for coord in self.coords:
             coords_buf += struct.pack("ff", coord[0], coord[1],)
         
+        suffix_type = 0
+        if mappings.suffix_dict.get(side['suffix'].lower()):
+            suffix_type = mappings.suffix_dict[side['suffix'].lower()]
+
         cursor.execute("insert into road values " \
-        "('%s', '%s', '%s', '%s', '%s', '%s', ?);" % (side['name'].replace("'", "''"), side['suffix'], 
+        "('%s', '%s', '%s', '%s', '%s', '%s', ?);" % (side['name'].replace("'", "''"), 
                                                       side['firstNumber'], side['lastNumber'],
-                                                      even, self.length),
+                                                      even, suffix_type, self.length),
                                                       [sqlite3.Binary(coords_buf)])
       
 class GMLHandler(xml.sax.ContentHandler):
@@ -193,8 +199,8 @@ if __name__ == '__main__':
     conn = sqlite3.connect(sys.argv[6])
     cursor = conn.cursor()
     cursor.execute("create table placename (name text)")
-    cursor.execute("create table road (name text, suffix text, firstHouseNumber integer, "
-                   "lastHouseNumber integer, numberingTypeEven boolean, length real, coords blob)")
+    cursor.execute("create table road (name text, firstHouseNumber integer, "
+                   "lastHouseNumber integer, numberingTypeEven boolean, suffixType integer, length real, coords blob)")
     cursor.execute("create table intersection (name1 text, suffix1 text, name2 text, suffix2 text, lat real, lng real)")
     conn.commit()
 

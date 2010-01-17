@@ -1,4 +1,4 @@
-default: tests/geocode
+default: tests/geocode utils/creategeodb.py
 
 %.o: %.cc 
 	g++ $< -c -o $@ $(CXXFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp -g
@@ -9,11 +9,16 @@ default: tests/geocode
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
 	@rm -f $*.d.tmp
 
-lib/geoparser.cc: lib/geoparser.cc.in gen-address-cc.pl
-	perl gen-address-cc.pl < $< > $@
+lib/geoparser.cc: lib/geoparser.cc.in gen-address.pl
+	perl gen-address.pl < $< > $@
 
-lib/address.cc: lib/address.cc.in gen-address-cc.pl
-	perl gen-address-cc.pl < $< > $@
+lib/address.cc: lib/address.cc.in gen-address.pl
+	perl gen-address.pl < $< > $@
+
+utils/mappings.py: utils/mappings.py.in gen-address.pl
+	perl gen-address.pl < $< > $@
+
+utils/creategeodb.py: utils/mappings.py
 
 CPPFLAGS=-I./include
 LDFLAGS=-lsqlite3 -lboost_regex

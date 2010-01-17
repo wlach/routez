@@ -179,11 +179,16 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
         stringstream sqlstr;
         sqlstr << "select * from road where "; 
         sqlstr << "name like '" << addr->street << "' ";
+
+        if (addr->suffix)
+            sqlstr << "and suffixType==" << addr->suffix << "";
+
         if (addr->number) 
         {
             sqlstr << " and firstHouseNumber <= '" << addr->number << "'";
             sqlstr << " and lastHouseNumber >= '" << addr->number << "'";
         }
+
         sqlstr << " limit 1";
 
         addr_tuple.first.first = 0.0f;
