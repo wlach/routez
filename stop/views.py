@@ -73,8 +73,8 @@ def stoptimes_for_stop(request, stop_code):
 
     stop = Stop.objects.filter(stop_code=stop_code)
     if not len(stop):
-        return HttpResponseNotFound(simplejson.dumps(
-                { 'errors': ["Stop not found"] }), mimetype="application/json")
+        return HttpResponse(simplejson.dumps(
+                { "stops": [ ] }), mimetype="application/json")
 
     stop = stop[0]
     import routez
