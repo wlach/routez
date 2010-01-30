@@ -70,6 +70,11 @@ WVTEST_MAIN("basic address parsing")
     WVPASS(test_parser_address(g, "55 55 avenue nw, halifax", "55", 55, Address::NORTHWEST, 
                                Address::AVENUE, "halifax"));
 
+    // where we have a suffix-like expression after the number, but we're not 
+    // a street whose name is the number
+    //WVPASS(test_parser_address(g, "55 lake major road, halifax", "lake major", 55, Address::UNKNOWN_DIRECTION, 
+    //                           Address::ROAD, "halifax"));
+
     // FIXME: strip punctuation out of user strings
     //    WVPASS(test_parser_address(g, "pursell's cove road", "pursells cove", "", Address::ROAD, 
     //            "");
