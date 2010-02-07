@@ -122,9 +122,9 @@ static int sqlite_address_cb(void *userdata, int argc, char **argv,
             (float)(last_number - (float)first_number));
 
     float length = atof(argv[5]);
-    long num_points = *(reinterpret_cast<long *>(&argv[7][0]));
+    long num_points = *(reinterpret_cast<long *>(&argv[8][0]));
 
-    float *latlng_array = (reinterpret_cast<float *>(&argv[7][sizeof(long)]));
+    float *latlng_array = (reinterpret_cast<float *>(&argv[8][sizeof(long)]));
   
     addr_tuple->first = interpolated_latlng(latlng_array, num_points, length, percent);
 
@@ -193,6 +193,11 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
             sqlstr << "and lastHouseNumber >= '" << addr->number << "' ";
         }
         
+        if (addr->region.size())
+        {
+            sqlstr << "and placeName like '" << addr->region << "' ";
+        }
+
         sqlstr << "limit 1";
 
         addr_tuple.first.first = 0.0f;

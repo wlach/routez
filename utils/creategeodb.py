@@ -49,8 +49,8 @@ if __name__ == '__main__':
     cursor.execute("create table road (name text, firstHouseNumber integer, "\
                        "lastHouseNumber integer, numberingTypeEven boolean, " \
                        "suffixType integer, direction integer, length real, " \
-                       "coords blob)")
-    cursor.execute("create table intersection (name1 text, suffix1 text, name2 text, suffix2 text, lat real, lng real)")
+                       "placeName text, coords blob)")
+    cursor.execute("create table intersection (name1 text, suffix1 text, name2 text, suffix2 text, placeName text, lat real, lng real)")
     conn.commit()
 
     nodes = {} # keep track of all nodes to parse intersections later
@@ -91,10 +91,10 @@ if __name__ == '__main__':
                     if side.get('direction') and mappings.direction_dict.get(side['direction'].lower()):
                         direction = mappings.direction_dict[side['direction'].lower()]
 
-                    cursor.execute("insert into road values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', ?);" % (
+                    cursor.execute("insert into road values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', ?);" % (
                             side['name'].replace("'", "''"), 
                             side['firstNumber'], side['lastNumber'],
-                            even, suffix_type, direction, length),
+                            even, suffix_type, direction, length, side['placeName']),
                                    [sqlite3.Binary(coords_buf)])
                     placenames.add(side['placeName'])
 
@@ -122,11 +122,12 @@ if __name__ == '__main__':
                             intersection_key = name1+roadseg1['suffix']+","+name2+roadseg2['suffix']
                             if not intersections_inserted.get(intersection_key):
                                 cursor.execute("insert into intersection " \
-                                                   "values ('%s', '%s', '%s', '%s', '%s', '%s');" % 
+                                                   "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s');" % 
                                                (name1.replace("'", "''"), 
                                                 roadseg1['suffix'].replace("'", "''"), 
                                                 name2.replace("'", "''"), 
-                                                roadseg2['suffix'].replace("'", "''"), lat, lng))
+                                                roadseg2['suffix'].replace("'", "''"), 
+                                                roadseg1['placeName'], lat, lng))
                                 intersections_inserted[intersection_key] = 1
 
     print "Writing placenames"
