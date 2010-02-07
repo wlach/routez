@@ -80,7 +80,7 @@ if __name__ == '__main__':
                         if not nodes.get(key):
                             nodes[key] = { "latlng": (coord[0], coord[1]),
                                            "roadsegs": [] }
-                            nodes[key]["roadsegs"].append(side)
+                        nodes[key]["roadsegs"].append(side)
 
                         prevcoord = coord
                     
@@ -111,8 +111,8 @@ if __name__ == '__main__':
             for i in range (0, len(roadsegs)):
                 for j in range (0, len(roadsegs)):
                     if i != j:
-                        roadseg1 = roadsegs[i].right
-                        roadseg2 = roadsegs[j].right
+                        roadseg1 = roadsegs[i]
+                        roadseg2 = roadsegs[j]
                         name1 = roadseg1.get('name')
                         name2 = roadseg2.get('name')
                         if name1 and name2 and name1 != name2:
