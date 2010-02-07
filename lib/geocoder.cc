@@ -114,17 +114,17 @@ static int sqlite_address_cb(void *userdata, int argc, char **argv,
     pair<pair<float, float>, int> * addr_tuple = 
         (pair<pair<float, float>, int> *)userdata;
     
-    int first_number = atol(argv[2]);
-    int last_number = atol(argv[3]);
+    int first_number = atol(argv[0]);
+    int last_number = atol(argv[1]);
     float percent = 0.5;
     if (addr_tuple->second)
         percent = ((float)(addr_tuple->second - first_number)) / (
             (float)(last_number - (float)first_number));
 
-    float length = atof(argv[5]);
-    long num_points = *(reinterpret_cast<long *>(&argv[8][0]));
+    float length = atof(argv[2]);
+    long num_points = *(reinterpret_cast<long *>(&argv[3][0]));
 
-    float *latlng_array = (reinterpret_cast<float *>(&argv[8][sizeof(long)]));
+    float *latlng_array = (reinterpret_cast<float *>(&argv[3][sizeof(long)]));
   
     addr_tuple->first = interpolated_latlng(latlng_array, num_points, length, percent);
 
@@ -178,7 +178,8 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
         pair<pair<float, float>, int> addr_tuple(pair<float, float>(0.0f, 0.0f), addr->number);
 
         stringstream sqlstr;
-        sqlstr << "select * from road where "; 
+        sqlstr << "select firstHouseNumber, lastHouseNumber, length, coords "
+        "from road where "; 
         sqlstr << "name like '" << addr->street << "' ";
 
         if (addr->suffix)
