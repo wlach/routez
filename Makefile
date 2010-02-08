@@ -1,4 +1,18 @@
+-include config.mk
+
 default: tests/geocode utils/creategeodb.py
+
+# Always always compile with fPIC
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+
+# Various things we need
+CXXFLAGS+=-I./include
+LDFLAGS+=-lsqlite3 -lboost_regex
+
+config.mk:
+	@echo "Please run ./configure. Stop."
+	@exit 1
 
 %.o: %.cc 
 	g++ $< -c -o $@ $(CXXFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp -g
@@ -20,8 +34,6 @@ utils/mappings.py: utils/mappings.py.in gen-address.pl
 
 utils/creategeodb.py: utils/mappings.py
 
-CPPFLAGS=-I./include
-LDFLAGS=-lsqlite3 -lboost_regex
 GEOCODER_OBJS=$(patsubst %,lib/%,geocoder.o geoparser.o address.o)
 GEOCODE_OBJS= $(GEOCODER_OBJS) tests/geocode.o
 tests/geocode: $(GEOCODE_OBJS)
