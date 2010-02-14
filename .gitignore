@@ -3,6 +3,7 @@ bin
 develop-eggs
 downloads
 eggs
+local.cfg
 parts
 setup.py
 src/routez.egg-info
