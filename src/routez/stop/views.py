@@ -97,6 +97,8 @@ def stoptimes_for_stop(request, stop_code):
 
     return HttpResponse(simplejson.dumps({ "stops": [ {'name': stop.name, 
                                                        'code': stop.stop_code,
+                                                       "lat": stop.lat,
+                                                       "lng": stop.lng,
                                                        'routes': routes } ]
                                            }),
                         mimetype="application/json")
@@ -164,6 +166,8 @@ def stoptimes_in_range(request, location):
             stopsjson.append({ 
                     "name": stop.name,
                     "code": stop.stop_code,
+                    "lat": stop.lat,
+                    "lng": stop.lng,
                     "distance": distance_to_stop_hash[id],
                     "routes": routedicts })
             
