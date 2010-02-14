@@ -14,13 +14,6 @@ MANAGERS = ADMINS
 
 # Cloudmade Maps and Google Analytics API keys
 
-def get_key_file(keyfile):
-    file_key = ""
-    path = PROJECT_PATH + "/" + keyfile
-    if os.path.isfile(path):
-        file_key = open(path).read().strip()
-    return file_key
-
 CMAPS_API_KEY = '${routez_settings:cmaps_api_key}'
 ANALYTICS_KEY = '${routez_settings:analytics_key}'
 
