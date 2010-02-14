@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <map>
 #include <math.h>
+#include <stdlib.h>
 
 using namespace std;
 using namespace tr1;
@@ -51,6 +52,7 @@ static double distance(double src_lat, double src_lng, double dest_lat,
 
 TripGraph::TripGraph()
 {
+    set_timezone("UTC");
 }
 
 
@@ -64,6 +66,13 @@ void TripGraph::load(string fname)
         return;
     }
 
+    uint32_t timezone_len;
+    assert(fread(&timezone_len, sizeof(uint32_t), 1, fp) == 1);
+    char tz[timezone_len+1];
+    assert(fread(tz, sizeof(char), timezone_len, fp) == timezone_len);
+    tz[timezone_len] = '\0';
+    set_timezone(tz);
+    
     uint32_t num_service_periods;
     if (fread(&num_service_periods, sizeof(uint32_t), 1, fp) != 1)
     {
@@ -105,6 +114,12 @@ void TripGraph::save(string fname)
         return;
     }
 
+    // write timezone
+    uint32_t timezone_len = timezone.size();
+    assert(fwrite(&timezone_len, sizeof(uint32_t), 1, fp) == 1);
+    assert(fwrite(timezone.c_str(), sizeof(char), timezone_len, fp) == 
+           timezone_len);
+
     // write service periods
     uint32_t num_service_periods = splist.size();
     assert(fwrite(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
@@ -122,6 +137,14 @@ void TripGraph::save(string fname)
     }
 
     fclose(fp);
+}
+
+
+void TripGraph::set_timezone(std::string _timezone)
+{
+    timezone = _timezone;
+    setenv("TZ", timezone.c_str(), 1);
+    tzset();
 }
 
 
@@ -387,8 +410,6 @@ TripPath * TripGraph::find_path(double start, bool walkonly,
 
     uncompleted_paths.push(start_path);
 
-    TripPath *best_completed_path;
-
     int num_paths_considered = 0;
 
     while (uncompleted_paths.size() > 0)
@@ -457,7 +478,9 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                                last_route_id);
     }
 #endif
-    double elapsed_daysecs = (uint64_t)path->time % SECS_IN_DAY;
+    time_t mysecs = (time_t)path->time;
+    struct tm * tm = localtime(&mysecs);
+    double elapsed_daysecs = tm->tm_sec + (60*tm->tm_min) + (60*60*tm->tm_hour);
     double daystart = path->time - elapsed_daysecs;
 
     // Figure out service period based on start time, then figure out
