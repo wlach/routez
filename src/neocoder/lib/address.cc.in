@@ -1,0 +1,25 @@
+#include "address.h"
+
+#include <strings.h>
+#include <boost/regex.hpp>
+
+using namespace boost;
+using namespace std;
+
+
+Address::Direction Address::get_direction(const string &str)
+{
+    @DIRECTION_LOGIC@
+
+    return Address::UNKNOWN_DIRECTION;
+}
+
+
+Address::Suffix Address::get_suffix(const string &str)
+{
+    @SUFFIX_LOGIC@
+
+    return Address::UNKNOWN_SUFFIX;
+}
+
+
