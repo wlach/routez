@@ -72,8 +72,8 @@ def routeplan(request):
     
     import routez
     geocoder = routez.travel.geocoder
-    start_latlng = geocoder.get_latlng(start)
-    end_latlng = geocoder.get_latlng(end)
+    start_latlng = geocoder.get_latlng(str(start))
+    end_latlng = geocoder.get_latlng(str(end))
 
     if not start_latlng:
         errors.append("start_latlng_decode")
