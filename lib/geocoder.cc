@@ -10,6 +10,8 @@
 using namespace boost;
 using namespace std;
 
+static string LATLNG_REGEX = "^(-?[0-9]+(?:\\.[0-9]+)?)\\ *,\\ *(-?[0-9]+(?:\\.[0-9]+)?)$";
+
 
 static inline double radians(double degrees)
 {
@@ -94,6 +96,7 @@ GeoCoder::GeoCoder(const char *dbname)
     }
 
     parser = shared_ptr<GeoParser>(new GeoParser(db));
+    latlng_re = shared_ptr<regex>(new regex(LATLNG_REGEX));
 }
 
 
@@ -134,6 +137,17 @@ static int sqlite_address_cb(void *userdata, int argc, char **argv,
 
 pair<float, float> GeoCoder::get_latlng(const char *str)
 {    
+    // before anything else, see if we're being passed a latlng pair. if so, 
+    // just pass it through
+    cmatch what;
+
+    if (regex_match(str, what, (*latlng_re))) 
+    {
+        string lat, lng;
+        lat.assign(what[1].first, what[1].second);
+        lng.assign(what[2].first, what[2].second);
+        return pair<float, float>(atof(lat.c_str()), atof(lng.c_str()));
+    }
     Address *addr = parser->parse_address(str);
 
     if (addr && addr->is_intersection())
