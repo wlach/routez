@@ -8,7 +8,6 @@ import time
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
-import routez.geocoder.geocoder as geocoder
 
 class TripPlan:
     def __init__(self, departure_time, actions):
@@ -70,8 +69,11 @@ def routeplan(request):
     time_str = request.GET.get('time', "")
 
     errors = []
-    start_latlng = geocoder.get_location(start)
-    end_latlng = geocoder.get_location(end)
+    
+    import routez
+    geocoder = routez.travel.geocoder
+    start_latlng = geocoder.get_latlng(start)
+    end_latlng = geocoder.get_latlng(end)
 
     if not start_latlng:
         errors.append("start_latlng_decode")
@@ -91,8 +93,6 @@ def routeplan(request):
     now = datetime.datetime.fromtimestamp(time.mktime(start_time))
     today_secs = (now.hour * 60 * 60) + (now.minute * 60) + (now.second)
 
-    # Use the TripGraph loaded in __init__.py, so we don't load it per request
-    import routez
     graph = routez.travel.graph
     trippath = graph.find_path(time.mktime(start_time), False, start_latlng[0], start_latlng[1], 
                                end_latlng[0], end_latlng[1])

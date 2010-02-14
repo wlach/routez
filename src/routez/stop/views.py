@@ -8,7 +8,6 @@ import time
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
-import routez.geocoder.geocoder as geocoder
 from libroutez.tripgraph import TripStop
 
 # fixme: this function is a disaster. put a latlng function in libroutez
@@ -77,6 +76,7 @@ def stoptimes_for_stop(request, stop_code):
                 { "stops": [ ] }), mimetype="application/json")
 
     stop = stop[0]
+
     import routez
     graph = routez.travel.graph
 
@@ -108,17 +108,17 @@ def stoptimes_in_range(request, location):
     else:
         starttime = int(starttime) # cast to integer
 
-    latlng = geocoder.get_location(location)
+    import routez
+
+    geocoder = routez.travel.geocoder
+    latlng = geocoder.get_latlng(str(location))
     if not latlng:
         return HttpResponseNotFound(simplejson.dumps(
                 { 'errors': ["Location not found"] }), 
                                     mimetype="application/json")
 
-
-    import routez
-    graph = routez.travel.graph
-
     # checking 500 meters. FIXME: make configurable
+    graph = routez.travel.graph
     tstops = graph.find_tripstops_in_range(latlng[0], latlng[1], TripStop.GTFS,
                                            500)
 
@@ -154,18 +154,18 @@ def stoptimes_in_range(request, location):
                 for thop in thops:
                     times.append(thop.start_time)
                 route = Route.objects.filter(route_id=route_id)[0]
-                routedict = {
+                routedict = { 
                     "short_name": route.short_name,
                     "long_name": route.long_name,
                     "type": route.type,
                     "times": times }
                 routedicts.append(routedict)
         if len(routedicts) > 0:
-            stopsjson.append({
+            stopsjson.append({ 
                     "name": stop.name,
                     "code": stop.stop_code,
                     "distance": distance_to_stop_hash[id],
                     "routes": routedicts })
-
+            
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
                         mimetype="application/json")
