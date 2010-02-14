@@ -70,6 +70,9 @@ test: t/all.t
 
 clean:
 	rm -f *.so *.d lib/*.o lib/*.d lib/address.cc lib/geoparser.cc \
+	python/neocoder/*.d python/neocoder/*.o \
+	python/neocoder/_geocoder.so python/neocoder/*.py \
+	python/neocoder/*.pyc python/neocoder/*.cc \
 	utils/*.o utils/*.d utils/geocode libneocoder.so
 
 -include $(GEOPARSER_OBJS:.o=.d)
