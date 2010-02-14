@@ -103,9 +103,8 @@ GeoCoder::GeoCoder(const char *dbname)
 static int sqlite_intersection_cb(void *userdata, int argc, char **argv, 
                                   char **azColName)
 {
-    pair<float, float> *latlng = (pair<float, float> *)userdata;
-    latlng->first = atof(argv[0]);
-    latlng->second = atof(argv[1]);
+    pair<float, float> **latlng = (pair<float, float> **)userdata;
+    (*latlng) = new pair<float, float>(atof(argv[0]), atof(argv[1]));
 
     return 0;
 }
@@ -114,8 +113,8 @@ static int sqlite_intersection_cb(void *userdata, int argc, char **argv,
 static int sqlite_address_cb(void *userdata, int argc, char **argv, 
                              char **azColName)
 {
-    pair<pair<float, float>, int> * addr_tuple = 
-        (pair<pair<float, float>, int> *)userdata;
+    pair<pair<float, float> *, int> * addr_tuple = 
+        (pair<pair<float, float> *, int> *)userdata;
     
     int first_number = atol(argv[0]);
     int last_number = atol(argv[1]);
@@ -129,13 +128,16 @@ static int sqlite_address_cb(void *userdata, int argc, char **argv,
 
     float *latlng_array = (reinterpret_cast<float *>(&argv[3][sizeof(long)]));
   
-    addr_tuple->first = interpolated_latlng(latlng_array, num_points, length, percent);
+    addr_tuple->first = new pair<float,float>(interpolated_latlng(latlng_array, 
+                                                                  num_points, 
+                                                                  length, 
+                                                                  percent));
 
     return 0;
 }
 
 
-pair<float, float> GeoCoder::get_latlng(const char *str)
+pair<float, float> * GeoCoder::get_latlng(const char *str)
 {    
     // before anything else, see if we're being passed a latlng pair. if so, 
     // just pass it through
@@ -146,13 +148,13 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
         string lat, lng;
         lat.assign(what[1].first, what[1].second);
         lng.assign(what[2].first, what[2].second);
-        return pair<float, float>(atof(lat.c_str()), atof(lng.c_str()));
+        return new pair<float, float>(atof(lat.c_str()), atof(lng.c_str()));
     }
     Address *addr = parser->parse_address(str);
 
     if (addr && addr->is_intersection())
     {
-        pair<float, float> latlng(0.0f, 0.0f);
+        pair<float, float> *latlng = NULL;
 
         // sql db assumes first road name in intersection is  less than
         // (case insensitive) than the second. we swap them to satisfy this
@@ -189,7 +191,7 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
 
     if (addr && !addr->street.empty())
     {        
-        pair<pair<float, float>, int> addr_tuple(pair<float, float>(0.0f, 0.0f), addr->number);
+        pair<pair<float, float> *, int> addr_tuple(NULL, addr->number);
 
         stringstream sqlstr;
         sqlstr << "select firstHouseNumber, lastHouseNumber, length, coords "
@@ -215,8 +217,6 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
 
         sqlstr << "limit 1";
 
-        addr_tuple.first.first = 0.0f;
-
         char *zErrMsg = 0;
         printf("SQL: %s\n", sqlstr.str().c_str());
         int rc = sqlite3_exec(db, sqlstr.str().c_str(), sqlite_address_cb, 
@@ -233,5 +233,5 @@ pair<float, float> GeoCoder::get_latlng(const char *str)
         return addr_tuple.first;
     }
 
-    return pair<float, float>(0.0f, 0.0f);
+    return NULL;
 }

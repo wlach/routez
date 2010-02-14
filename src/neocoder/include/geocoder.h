@@ -10,7 +10,7 @@ class GeoCoder
 {
   public:
     GeoCoder(const char *dbname);
-    std::pair<float, float> get_latlng(const char *str);
+    std::pair<float, float> * get_latlng(const char *str);
 
   private:
     boost::shared_ptr<boost::regex> latlng_re;
