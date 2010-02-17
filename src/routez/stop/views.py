@@ -8,6 +8,7 @@ import time
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
+from routez.trip.models import Trip
 from libroutez.tripgraph import TripStop
 
 # fixme: this function is a disaster. put a latlng function in libroutez
@@ -124,51 +125,48 @@ def stoptimes_in_range(request, location):
     tstops = graph.find_tripstops_in_range(latlng[0], latlng[1], TripStop.GTFS,
                                            500)
 
-    # filter twice, once to get all the routes we're interested in, then
-    # create a hash of stops containing only the routes that we care about
-    routehash = {}
-    distance_to_stop_hash = {}
+    # filter twice, once to get all the stops we're interested in, then
+    # remove any duplicate trips at stops that are further away
+    stoplist = []
     for ts in tstops:
         distance_to_stop = latlng_dist(latlng[0], latlng[1], ts.lat, ts.lng)
-        distance_to_stop_hash[ts.id] = distance_to_stop
-
-        for route_id in get_route_ids_for_stop(graph, ts.id, starttime):
-            if not routehash.get(route_id) or \
-                    routehash[route_id][0] > distance_to_stop:
-                routehash[route_id] = (distance_to_stop, ts)
-
-    stophash = {}
-    for route_id in routehash:
-        ts = routehash[route_id][1]
-        if not stophash.get(ts.id):
-            stophash[ts.id] = []
-        stophash[ts.id].append(route_id)
+        route_ids = get_route_ids_for_stop(graph, int(ts.id), starttime)
+        stoplist.append([ ts.id, distance_to_stop, route_ids ])
+    stoplist.sort(lambda x, y: cmp(x[1], y[1]))
 
     stopsjson = []
-    for id in stophash:
-        stop = Stop.objects.filter(stop_id=id)[0]
+    thophash = set()
+    for stop in stoplist:
         routedicts = []
-        for route_id in stophash[id]:
-            thops = find_triphops_for_stop(graph, id, route_id, starttime, 3)
+        for route_id in stop[2]:
+            thops = find_triphops_for_stop(graph, stop[0], route_id, starttime, 3)
 
             if len(thops):
-                times = []
-                for thop in thops:
-                    times.append(thop.start_time)
-                route = Route.objects.filter(route_id=route_id)[0]
-                routedict = { 
-                    "short_name": route.short_name,
-                    "long_name": route.long_name,
-                    "type": route.type,
-                    "times": times }
-                routedicts.append(routedict)
+                thopkey = "%s" % thops[0].trip_id
+                if thopkey not in thophash:
+                    thophash.add(thopkey)
+                    times = []
+                    headsigns = []
+                    for thop in thops:
+                        times.append(thop.start_time)
+                        headsigns.append(Trip.objects.filter(trip_id=thop.trip_id)[0].headsign)
+                    route = Route.objects.filter(route_id=route_id)[0]
+                    routedict = { 
+                        "short_name": route.short_name,
+                        "long_name": route.long_name,
+                        "headsigns": headsigns,
+                        "type": route.type,
+                        "times": times }
+                    routedicts.append(routedict)
         if len(routedicts) > 0:
+            dbstop = Stop.objects.filter(stop_id=stop[0])[0]
+
             stopsjson.append({ 
-                    "name": stop.name,
-                    "code": stop.stop_code,
-                    "lat": stop.lat,
-                    "lng": stop.lng,
-                    "distance": distance_to_stop_hash[id],
+                    "name": dbstop.name,
+                    "code": dbstop.stop_code,
+                    "lat": dbstop.lat,
+                    "lng": dbstop.lng,
+                    "distance": stop[0],
                     "routes": routedicts })
             
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 

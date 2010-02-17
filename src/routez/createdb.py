@@ -17,6 +17,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
+from routez.trip.models import Trip
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -43,6 +44,7 @@ if __name__ == '__main__':
     Stop.objects.all().delete()
     Map.objects.all().delete()
     Shape.objects.all().delete()
+    Trip.objects.all().delete()
 
     # import it all into the db again
     for r in schedule.GetRouteList():
@@ -69,6 +71,11 @@ if __name__ == '__main__':
         s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_code,
                   name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
         s2.save()
+
+    print "Importing trips!"
+    for t in schedule.GetTripList():
+        t2 = Trip(trip_id=mapping['Trips'][t.trip_id], headsign=t.trip_headsign)
+        t2.save()
 
     (_min_lat, _min_lon, _max_lat, _max_lon) = schedule.GetStopBoundingBox()
     m = Map(min_lat=_min_lat, min_lng=_min_lon, max_lat=_max_lat, max_lng=_max_lon)
