@@ -14,8 +14,11 @@ int main(int argc, char *argv[])
 
     GeoCoder g(argv[1]);
 
-    pair<float, float> latlng = g.get_latlng(argv[2]);
-    printf("%f, %f\n", latlng.first, latlng.second);
+    pair<float, float> *latlng = g.get_latlng(argv[2]);
+    if (latlng)
+        printf("%f, %f\n", latlng->first, latlng->second);
+    else
+        printf("Couldn't geocode location.\n");
 
     return 0;
 }
