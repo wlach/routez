@@ -87,13 +87,16 @@ def stoptimes_for_stop(request, stop_code):
         thops = find_triphops_for_stop(graph, int(stop.stop_id), route_id,
                                        starttime, 3)
         times = []
+        trips = []
         if len(thops):
             for thop in thops:
                 times.append(thop.start_time)
+                trips.append({ "headsign": Trip.objects.filter(trip_id=thop.trip_id)[0].headsign, "time": thop.start_time })
             route = Route.objects.filter(route_id=route_id)[0]
             routes.append({ "short_name": route.short_name,
                             "long_name": route.long_name,
                             "type": route.type,
+                            "trips": trips,
                             "times": times })
 
     return HttpResponse(simplejson.dumps({ "stops": [ {'name': stop.name, 
@@ -146,15 +149,15 @@ def stoptimes_in_range(request, location):
                 if thopkey not in thophash:
                     thophash.add(thopkey)
                     times = []
-                    headsigns = []
+                    trips = []
                     for thop in thops:
                         times.append(thop.start_time)
-                        headsigns.append(Trip.objects.filter(trip_id=thop.trip_id)[0].headsign)
+                        trips.append({ "headsign": Trip.objects.filter(trip_id=thop.trip_id)[0].headsign, "time": thop.start_time })
                     route = Route.objects.filter(route_id=route_id)[0]
                     routedict = { 
                         "short_name": route.short_name,
                         "long_name": route.long_name,
-                        "headsigns": headsigns,
+                        "trips": trips,
                         "type": route.type,
                         "times": times }
                     routedicts.append(routedict)
