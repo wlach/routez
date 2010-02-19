@@ -1,0 +1,12 @@
+#!/bin/sh
+
+PIDFILE="${development:var-directory}/routez.pid"
+SOCKET="${development:var-directory}/fcgi.sock"
+
+# kill current fcgi process if it exists
+if [ -f $PIDFILE ]; then
+    kill `cat -- $PIDFILE`
+    rm -f -- $PIDFILE
+fi
+
+${buildout:directory}/bin/django-libroutez runfcgi daemonize=true socket=$SOCKET pidfile=$PIDFILE method=threaded umask=000
