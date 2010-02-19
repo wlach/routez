@@ -68,7 +68,7 @@ if __name__ == '__main__':
             #"has no trips associated with it." % (short_name, long_name)
 
     for s in schedule.GetStopList():
-        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_code,
+        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_id,
                   name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
         s2.save()
 
