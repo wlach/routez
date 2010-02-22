@@ -147,9 +147,16 @@ def stoptimes_in_range(request, location):
             thops = find_triphops_for_stop(graph, stop[0], route_id, starttime, 3)
 
             if len(thops):
-                thopkey = "%s" % thops[0].trip_id
-                if thopkey not in thophash:
-                    thophash.add(thopkey)
+                # if ANY trip ids are duplicated between stops, omit (we don't
+                # want to return ANY duplicate information, even if it means
+                # we omit some information which is slightly different)
+                unique_tripstop = True
+                for thop in thops:
+                    if thop.trip_id in thophash:
+                        unique_tripstop = False
+                    else:
+                        thophash.add(thop.trip_id)
+                if unique_tripstop:
                     times = []
                     trips = []
                     for thop in thops:
