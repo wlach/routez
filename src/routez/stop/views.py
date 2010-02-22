@@ -131,8 +131,10 @@ def stoptimes_in_range(request, location):
     # filter twice, once to get all the stops we're interested in, then
     # remove any duplicate trips at stops that are further away
     stoplist = []
+    distance_to_stop_hash = {}
     for ts in tstops:
         distance_to_stop = latlng_dist(latlng[0], latlng[1], ts.lat, ts.lng)
+        distance_to_stop_hash[ts.id] = distance_to_stop
         route_ids = get_route_ids_for_stop(graph, int(ts.id), starttime)
         stoplist.append([ ts.id, distance_to_stop, route_ids ])
     stoplist.sort(lambda x, y: cmp(x[1], y[1]))
@@ -169,7 +171,7 @@ def stoptimes_in_range(request, location):
                     "code": dbstop.stop_code,
                     "lat": dbstop.lat,
                     "lng": dbstop.lng,
-                    "distance": stop[0],
+                    "distance": distance_to_stop_hash[stop[0]],
                     "routes": routedicts })
             
     return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
