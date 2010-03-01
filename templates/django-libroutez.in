@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export LD_LIBRARY_PATH="${libroutez:location}/lib:${neocoder:location}/lib"
-export DYLD_LIBRARY_PATH="${libroutez:location}/lib:${neocoder:location}/lib"
-
-${buildout:directory}/bin/django $@
