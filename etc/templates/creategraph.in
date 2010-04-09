@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH="${buildout:directory}/develop-eggs/rtree:${libroutez:location}/lib:${neocoder:location}/lib"
+export DYLD_LIBRARY_PATH="${buildout:directory}/develop-eggs/rtree:${libroutez:location}/lib:${neocoder:location}/lib"
+
+exec ${buildout:directory}/bin/python ${buildout:directory}/src/libroutez/utils/creategraph.py $@
