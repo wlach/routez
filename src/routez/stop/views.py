@@ -8,7 +8,7 @@ import time
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
-from routez.trip.models import Trip
+from routez.trip.models import Trip, StopHeadsign
 from libroutez.tripgraph import TripStop
 
 # fixme: this function is a disaster. put a latlng function in libroutez
@@ -91,7 +91,13 @@ def stoptimes_for_stop(request, stop_code):
         if len(thops):
             for thop in thops:
                 times.append(thop.start_time)
-                trips.append({ "headsign": Trip.objects.filter(trip_id=thop.trip_id)[0].headsign, "time": thop.start_time })
+                if thop.headsign_id >= 0:
+                    headsign = StopHeadsign.objects.filter(
+                        id=thop.headsign_id)[0].headsign
+                else:
+                    headsign = Trip.objects.filter(
+                        trip_id=thop.trip_id)[0].headsign
+                trips.append({ "headsign": headsign, "time": thop.start_time })
             route = Route.objects.filter(route_id=route_id)[0]
             routes.append({ "short_name": route.short_name,
                             "long_name": route.long_name,
@@ -161,7 +167,14 @@ def stoptimes_in_range(request, location):
                     trips = []
                     for thop in thops:
                         times.append(thop.start_time)
-                        trips.append({ "headsign": Trip.objects.filter(trip_id=thop.trip_id)[0].headsign, "time": thop.start_time })
+                        if thop.headsign_id >= 0:
+                            headsign = StopHeadsign.objects.filter(
+                                id=thop.headsign_id)[0].headsign
+                        else:
+                            headsign = Trip.objects.filter(
+                                trip_id=thop.trip_id)[0].headsign
+
+                        trips.append({ "headsign": headsign, "time": thop.start_time })
                     route = Route.objects.filter(route_id=route_id)[0]
                     routedict = { 
                         "short_name": route.short_name,

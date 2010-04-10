@@ -19,7 +19,7 @@ from django.db import transaction
 
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
-from routez.trip.models import Trip
+from routez.trip.models import Trip, StopHeadsign
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     Map.objects.all().delete()
     Shape.objects.all().delete()
     Trip.objects.all().delete()
+    StopHeadsign.objects.all().delete()
 
     # import it all into the db again
     for r in schedule.GetRouteList():
@@ -133,6 +134,10 @@ if __name__ == '__main__':
                     "for the graph. Otherwise you should worry about the connectedness of " \
                     "your OSM data." % (prevstopid, stopid)
             prevstopid = stopid
+
+    for headsign in mapping['Headsigns'].keys():
+        h = StopHeadsign(id=mapping['Headsigns'][headsign], headsign=headsign)
+        h.save()
 
     transaction.commit()
     transaction.leave_transaction_management()
