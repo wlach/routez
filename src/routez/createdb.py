@@ -15,6 +15,8 @@ import yaml
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
+from django.db import transaction
+
 from routez.travel.models import Route, Map, Shape
 from routez.stop.models import Stop
 from routez.trip.models import Trip
@@ -39,6 +41,9 @@ if __name__ == '__main__':
 
     print "Exporting schedule as database"
     
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+
     # zap any existing info
     Route.objects.all().delete()
     Stop.objects.all().delete()
@@ -128,3 +133,7 @@ if __name__ == '__main__':
                     "for the graph. Otherwise you should worry about the connectedness of " \
                     "your OSM data." % (prevstopid, stopid)
             prevstopid = stopid
+
+    transaction.commit()
+    transaction.leave_transaction_management()
+
