@@ -11,7 +11,7 @@ CXXFLAGS += -fPIC
 
 # Various things we need
 CXXFLAGS+=-I./include
-LDFLAGS+=-lsqlite3 -lboost_regex
+LDFLAGS+=-lsqlite3 -lpcrecpp
 
 # libneocoder should be a shared library 
 ifeq (${OS},MACOS)

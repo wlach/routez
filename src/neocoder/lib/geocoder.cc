@@ -7,8 +7,8 @@
 #include <math.h>
 #include <sstream>
 
-using namespace boost;
 using namespace std;
+using namespace std::tr1;
 
 static string LATLNG_REGEX = "^(-?[0-9]+(?:\\.[0-9]+)?)\\ *,\\ *(-?[0-9]+(?:\\.[0-9]+)?)$";
 
@@ -84,7 +84,8 @@ static pair<float, float> interpolated_latlng(float * latlng_array, int num_poin
 
 
 
-GeoCoder::GeoCoder(const char *dbname)
+GeoCoder::GeoCoder(const char *dbname) :
+  latlng_re(LATLNG_REGEX, PCRE_CASELESS)
 {
     db = NULL;
     int rc = sqlite3_open(dbname, &db);
@@ -96,7 +97,6 @@ GeoCoder::GeoCoder(const char *dbname)
     }
 
     parser = shared_ptr<GeoParser>(new GeoParser(db));
-    latlng_re = shared_ptr<regex>(new regex(LATLNG_REGEX));
 }
 
 
@@ -141,13 +141,10 @@ pair<float, float> * GeoCoder::get_latlng(const char *str)
 {    
     // before anything else, see if we're being passed a latlng pair. if so, 
     // just pass it through
-    cmatch what;
 
-    if (regex_match(str, what, (*latlng_re))) 
+    string lat, lng;
+    if (latlng_re.FullMatch(str, &lat, &lng))
     {
-        string lat, lng;
-        lat.assign(what[1].first, what[1].second);
-        lng.assign(what[2].first, what[2].second);
         return new pair<float, float>(atof(lat.c_str()), atof(lng.c_str()));
     }
     Address *addr = parser->parse_address(str);

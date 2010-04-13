@@ -4,8 +4,8 @@
 #include <assert.h>
 #include <sstream>
 
-using namespace boost;
 using namespace std;
+using namespace pcrecpp;
 
 static string NUM_REGEX = "(?:([0-9]+)(?:[a-z])?(?: +)(?!(?:@SUFFIX_EXPR@)(?:[^a-z]+)))?";
 static string STREETNAME_REGEX = "([0-9]+(?:st|nd|rd|th)?|(?:[a-z]+(?: [a-z]+)*?))";
@@ -31,7 +31,7 @@ static int placename_cb(void *userdata, int argc, char **argv, char **azColName)
 }
 
 
-static regex * create_re_with_region(string &base_re, vector<string> placenames) 
+static RE *create_re_with_region(string &base_re, vector<string> placenames) 
 {
     stringstream regex_str;
 
@@ -48,7 +48,7 @@ static regex * create_re_with_region(string &base_re, vector<string> placenames)
 
     //printf("regex_str: %s\n", regex_str.str().c_str());
     
-    return new regex(regex_str.str(), regex::icase);
+    return new RE(regex_str.str(), PCRE_CASELESS);
 }
 
 
@@ -85,85 +85,39 @@ GeoParser::GeoParser(const vector<string> &placenames)
 GeoParser::~GeoParser()
 {
     delete address_re;
+    delete intersection_re;
 }
-
-
-static const int ADDRESS_NUMBER_INDEX = 0;
-static const int ADDRESS_STREET_INDEX = 1;
-static const int ADDRESS_SUFFIX_INDEX = 2;
-static const int ADDRESS_DIRECTION_INDEX = 3;
-static const int ADDRESS_REGION_INDEX = 4;
-
-static const int INTERSECTION_STREET_INDEX = 0;
-static const int INTERSECTION_SUFFIX_INDEX = 1;
-static const int INTERSECTION_DIRECTION_INDEX = 2;
-static const int INTERSECTION_REGION_INDEX = 6;
 
 Address * GeoParser::parse_address(const string &str)
 {    
-    // yes, this code is totally gross
-
-    cmatch what;
-
     // try to find an intersection match first, then fall back to address 
     // level matching
-    if (regex_match(str.c_str(), what, (*intersection_re))) 
+
+    if (intersection_re->FullMatch(str)) 
     {
         Address *addr = new Address;
         addr->cross_street = new Address;
 
-        for (int i=1; i<what.size(); i++) 
-        {
-            if (what[i].second > what[i].first) 
-            {
-                string s;
-                s.assign(what[i].first, what[i].second);
-                Address * curaddr = addr;
-                int index = i - 1;
-                if (index > INTERSECTION_DIRECTION_INDEX && 
-                    index < INTERSECTION_REGION_INDEX)
-                {
-                    curaddr = curaddr->cross_street;
-                    index -= 3;
-                }
-    
-                if (index == INTERSECTION_STREET_INDEX)
-                    curaddr->street = s;
-                else if (index == INTERSECTION_SUFFIX_INDEX) 
-                    curaddr->suffix = Address::get_suffix(s);
-                else if (index == INTERSECTION_DIRECTION_INDEX) 
-                    curaddr->direction = Address::get_direction(s);
-                else if (index == INTERSECTION_REGION_INDEX) 
-                    curaddr->region = s;
-            }
-        }
-
+	std::string suffix1, direction1, suffix2, direction2;
+	intersection_re->FullMatch(str, &addr->street, &suffix1, &direction1,
+				  &addr->cross_street->street, 
+				  &suffix2,
+				  &direction2,
+				  &addr->region);
+	addr->suffix = Address::get_suffix(suffix1);
+	addr->direction = Address::get_direction(direction2);
+	addr->cross_street->suffix = Address::get_suffix(suffix2);
+	addr->cross_street->direction = Address::get_direction(direction2);
         return addr;
     }
-    else if (regex_match(str.c_str(), what, (*address_re))) 
+    else if (address_re->FullMatch(str))
     {
         Address *addr = new Address;
-
-        for (int i=1; i<what.size(); i++) 
-        {
-            if (what[i].second > what[i].first) 
-            {
-                string s;
-                s.assign(what[i].first, what[i].second);
-                int index = i - 1;
-
-                if (index == ADDRESS_NUMBER_INDEX)
-                    addr->number = atoi(s.c_str());
-                else if (index == ADDRESS_STREET_INDEX)
-                    addr->street = s;
-                else if (index == ADDRESS_SUFFIX_INDEX) 
-                    addr->suffix = Address::get_suffix(s);
-                else if (index == ADDRESS_DIRECTION_INDEX) 
-                    addr->direction = Address::get_direction(s);
-                else if (index == ADDRESS_REGION_INDEX) 
-                    addr->region = s;
-            }
-        }
+	std::string suffix_str, direction_str;
+	address_re->FullMatch(str, &addr->number, &addr->street, &suffix_str, 
+			     &direction_str, &addr->region);
+	addr->suffix = Address::get_suffix(suffix_str);
+	addr->direction = Address::get_direction(direction_str);
 
         return addr;
     }

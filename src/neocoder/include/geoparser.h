@@ -1,6 +1,6 @@
 #include "address.h"
 
-#include <boost/regex.hpp>
+#include <pcrecpp.h>
 #include <vector>
 #include <sqlite3.h>
 
@@ -15,8 +15,7 @@ class GeoParser
 
     Address * parse_address(const std::string &str);
 
-
   private:
-    boost::regex * address_re;
-    boost::regex * intersection_re;
+    pcrecpp::RE *address_re;
+    pcrecpp::RE *intersection_re;
 };

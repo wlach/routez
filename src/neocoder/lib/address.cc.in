@@ -1,9 +1,7 @@
 #include "address.h"
 
 #include <strings.h>
-#include <boost/regex.hpp>
 
-using namespace boost;
 using namespace std;
 
 
