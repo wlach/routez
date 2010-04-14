@@ -9,4 +9,4 @@ if [ -f $PIDFILE ]; then
     rm -f -- $PIDFILE
 fi
 
-${buildout:directory}/bin/django-libroutez runfcgi daemonize=true socket=$SOCKET pidfile=$PIDFILE method=threaded umask=000
+${buildout:directory}/bin/routez runfcgi daemonize=true socket=$SOCKET pidfile=$PIDFILE method=threaded umask=000
