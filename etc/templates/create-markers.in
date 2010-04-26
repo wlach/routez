@@ -1,0 +1,32 @@
+#!${buildout:directory}/bin/python
+
+import os
+
+# Manually import django
+sys.path.append(os.path.join(os.getcwd(), os.pardir))
+os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
+
+from routez.travel.models import Route
+
+routes = Route.objects.all()
+
+for route in routes:
+
+    marker_basepath = "${buildout:directory}/src/routez/site_media/images/"
+    marker_genpath = "${buildout:directory}/var/generated/"
+
+    os.system("mkdir -p " + marker_genpath)
+
+    marker_basename = None
+    if route.type == 3:
+        marker_basename = "marker_bus"
+    elif route.type == 4:
+        marker_basename = "marker_ferry"
+
+    if marker_basename:
+        print "Creating marker for %s"  % route.short_name
+        os.system('convert %s -weight Bold -annotate +34+14 %s %s' %
+                   (marker_basepath + marker_basename + ".png",
+                   route.short_name, 
+                   marker_genpath + marker_basename + route.short_name + \
+                       ".png"))
