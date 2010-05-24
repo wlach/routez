@@ -69,19 +69,25 @@ if __name__ == '__main__':
             if r.route_long_name:
                 long_name = str(r.route_long_name)
             # FIXME: why does this fail???
-            print "route with no mapping. probably no trips assc. with it."
+            print "WARNING: route with no mapping. probably no trips assc. with it."
             #print "WARNING: Route %s (%s) has no mapping... probably means it "
             #"has no trips associated with it." % (short_name, long_name)
 
     for s in schedule.GetStopList():
-        s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_id,
-                  name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
-        s2.save()
+        if mapping['Stops'].get(s.stop_id):
+            s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_id,
+                      name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
+            s2.save()
+        else:
+            print "WARNING: Stop with no mapping '%s'" % s.stop_id
 
     print "Importing trips!"
     for t in schedule.GetTripList():
-        t2 = Trip(trip_id=mapping['Trips'][t.trip_id], headsign=t.trip_headsign)
-        t2.save()
+        if mapping['Trips'].get(t.trip_id):
+            t2 = Trip(trip_id=mapping['Trips'][t.trip_id], headsign=t.trip_headsign)
+            t2.save()
+        else:
+            print "WARNING: Trip with no mapping '%s'" % t.trip_id
 
     (_min_lat, _min_lon, _max_lat, _max_lon) = schedule.GetStopBoundingBox()
     m = Map(min_lat=_min_lat, min_lng=_min_lon, max_lat=_max_lat, max_lng=_max_lon)
