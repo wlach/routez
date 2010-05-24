@@ -6,7 +6,7 @@ import datetime
 import simplejson
 import time
 
-from routez.travel.models import Route, Map, Shape
+from routez.travel.models import Route, Map
 from routez.stop.models import Stop
 from routez.trip.models import Trip, StopHeadsign
 from libroutez.tripgraph import TripStop

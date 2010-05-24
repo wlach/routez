@@ -6,7 +6,7 @@ import datetime
 import simplejson
 import time
 
-from routez.travel.models import Route, Map, Shape
+from routez.travel.models import Route, Map
 from routez.stop.models import Stop
 
 class TripPlan:
@@ -129,23 +129,16 @@ def routeplan(request):
                                       'route_shortname': route.short_name,
                                       'route_longname': route.long_name }) 
 
-        shape = None
         ts = graph.get_tripstop(action.src_id)
-        if action.route_id != -1:
-            shapes = Shape.objects.filter(src_id=action.src_id, 
-                                          dest_id=action.dest_id)
-            shape = None
-            if len(shapes):
-                shape = simplejson.loads(shapes[0].polyline)
-        else:
+        if action.route_id == -1:
             walking_time += (action.end_time - action.start_time)
         action_time = human_time(action.start_time);
         actions_desc.append({ 'type':'pass', 'id':action.src_id, 
                               'lat': ts.lat, 
                               'lng': ts.lng,
                               'time': action_time,
-                              'dest_id':action.dest_id,
-                              'shape':shape })
+                              'dest_id':action.dest_id
+                              })
         last_action = action
 
     # if we had a path at all, append the last getting off action here

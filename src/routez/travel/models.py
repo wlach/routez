@@ -21,8 +21,3 @@ class Route(models.Model):
         (7, 'Funicular'),
         )
     type = models.IntegerField(choices=ROUTE_TYPE_CHOICES)
-
-class Shape(models.Model):
-    src_id = models.CharField(max_length=20)
-    dest_id = models.CharField(max_length=20)
-    polyline = models.CharField(max_length=512)
