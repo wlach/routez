@@ -179,14 +179,19 @@ function updateMapDirections(start, end, actions) {
         if (actions[i].type == "board") {
             routePath[routePath.length] = latlng;
 
-            var icon = new CM.Icon();
-            icon.image = "site_media/images/bus/marker_bus_" + 
-            actions[i].route_shortname + ".png"
-            icon.iconSize = new CM.Size(76, 36);
-            icon.iconAnchor = new CM.Point(1, 35);
-            map.addOverlay(new CM.Marker(latlng, 
-                                         { icon: icon, title: "Board" }));
-            
+            if (actions[i].route_type == 3 || actions[i].route_type == 4) {
+                var icon = new CM.Icon();
+                if (actions[i].route_type == 3)
+                    base_name = "site_media/images/generated/marker_bus";
+                else
+                    base_name = "site_media/images/generated/marker_ferry";
+                icon.image =  base_name + actions[i].route_shortname + ".png"
+                icon.iconSize = new CM.Size(76, 36);
+                icon.iconAnchor = new CM.Point(1, 35);
+                map.addOverlay(new CM.Marker(latlng, 
+                                             { icon: icon, title: "Board" }));
+            } 
+
             addLine(routePath, walkPathColour);
             routePath = new Array();
             routePath[routePath.length] = latlng;
