@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ $# != 2 ]; then
+   echo "Usage: $0 <gtfs feed> <gml file>"
+   exit 1
+fi
+
+PYTHONPATH="${neocoder:path}/utils:$PYTHONPATH"
+PYTHON="${buildout:directory}/bin/python"
+
+BOUNDS=`${libroutez:path}/utils/get-gtfs-bounds.py -m $1`
+
+echo $BOUNDS
+
+${neocoder:path}/utils/gml2py.py $2 $BOUNDS | ${neocoder:path}/utils/creategeodb.py - ${development:var-directory}/mygeocoder.db
