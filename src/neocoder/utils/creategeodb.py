@@ -57,7 +57,10 @@ if __name__ == '__main__':
     placenames = set() # keep track of all placenames (e.g. Edmonton, Dartmouth)
 
     print "Parsing geodb and writing road segments"
-    f = open(sys.argv[1])
+    if sys.argv[1] == "-":
+        f = sys.stdin
+    else:
+        f = open(sys.argv[1])
     line = f.readline()
     while line:
         dict = eval(line)
