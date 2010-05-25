@@ -41,6 +41,7 @@ def main_page(request):
         {'min_lat': m.min_lat, 'min_lon': m.min_lng, 
          'max_lat': m.max_lat, 'max_lon': m.max_lng, 
          'key': settings.CMAPS_API_KEY,
+         'style_id': settings.CMAPS_STYLE_ID,
          'analytics_key': settings.ANALYTICS_KEY })
 
 def iphone(request):
