@@ -8,12 +8,12 @@ import transitfeed
 import sys
 import os
 import simplejson
-import settings
+import routez.settings
 import yaml
 
 # Manually import django
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
-os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = "routez.settings"
 
 from django.db import transaction
 
