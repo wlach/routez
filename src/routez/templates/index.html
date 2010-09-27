@@ -19,15 +19,7 @@
 
   <script type="text/javascript">
     function load() {
-        // initialize map
-        var cloudmade = new CM.Tiles.CloudMade.Web({key: '{{ key }}',styleId: {{ style_id }} });
-        bb = new CM.LatLngBounds(new CM.LatLng({{ min_lat }}, {{ min_lon }}),new CM.LatLng({{ max_lat }}, {{ max_lon }}));
-        map = new CM.Map('map', cloudmade);
-        map.addControl(new CM.LargeMapControl());
-        initIcons();
-        map.enableScrollWheelZoom();
-        map.enableDoubleClickZoom();
-        map.enableShiftDragZoom();
+        initMap('{{ key }}', {{ style_id }}, {{ min_lat }}, {{ min_lon }}, {{ max_lat }}, {{ max_lon }});
 
         YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe"); 
         var routezBookmarkedState = YAHOO.util.History.getBookmarkedState("plan");

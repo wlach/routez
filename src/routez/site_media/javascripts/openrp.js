@@ -11,6 +11,7 @@ var routePlanStart = null;
 var routePlanEnd = null;
 var routePlanStartDefault = null;
 var routePlanEndDefault = null;
+var aroundMePlaceDefault = null;
 
 /**
  * Setup locations based on previous browser locations or cookie. Call 
@@ -49,31 +50,6 @@ function setupRoutePlanForm(state) {
  * Initialize icons. Call once during load.
  */
 function initIcons() {
-    /*
-    walkStopIcon = new CM.Icon();
-    walkStopIcon.image = "site_media/images/marker_walk.png";
-    walkStopIcon.iconSize = new GSize(46, 36);
-    walkStopIcon.iconAnchor = new GPoint(1, 35);
-
-    ferryStopIcon = new CM.Icon();
-    ferryStopIcon.image = "site_media/images/marker_ferry.png";
-    ferryStopIcon.iconSize = new GSize(46, 36);
-    ferryStopIcon.iconAnchor = new GPoint(1, 35);
-
-    switchStopIcon = new CM.Icon();
-    switchStopIcon.image = "site_media/images/marker_switch.png";
-    switchStopIcon.iconSize = new GSize(46, 36);
-    switchStopIcon.iconAnchor = new GPoint(1, 35);
-    */
-    startIcon = new CM.Icon();
-    startIcon.image = "site_media/images/marker_from.png";
-    startIcon.iconSize = new CM.Size(34, 36);
-    startIcon.iconAnchor = new CM.Point(11, 35);
-    
-    endIcon = new CM.Icon();
-    endIcon.image = "site_media/images/marker_to.png";
-    endIcon.iconSize = new CM.Size(34, 36);
-    endIcon.iconAnchor = new CM.Point(11, 35);
 }
 
 function reverseDirections() {
@@ -104,6 +80,42 @@ String.prototype.normalize_space = function() {
     return this.replace(/^\s*|\s(?=\s)|\s*$/g, "");
 }
 
+function initMap(cmKey, cmStyleId, minLat, minLon, maxLat, maxLon) {
+    // initialize map
+    var cloudmade = new CM.Tiles.CloudMade.Web({key: cmKey, styleId: cmStyleId });
+    bb = new CM.LatLngBounds(new CM.LatLng(minLat, minLon),new CM.LatLng(maxLat, maxLon));
+    map = new CM.Map('map', cloudmade);
+    map.addControl(new CM.LargeMapControl());
+    map.enableScrollWheelZoom();
+    map.enableDoubleClickZoom();
+    map.enableShiftDragZoom();
+
+    /*
+    walkStopIcon = new CM.Icon();
+    walkStopIcon.image = "site_media/images/marker_walk.png";
+    walkStopIcon.iconSize = new GSize(46, 36);
+    walkStopIcon.iconAnchor = new GPoint(1, 35);
+
+    ferryStopIcon = new CM.Icon();
+    ferryStopIcon.image = "site_media/images/marker_ferry.png";
+    ferryStopIcon.iconSize = new GSize(46, 36);
+    ferryStopIcon.iconAnchor = new GPoint(1, 35);
+
+    switchStopIcon = new CM.Icon();
+    switchStopIcon.image = "site_media/images/marker_switch.png";
+    switchStopIcon.iconSize = new GSize(46, 36);
+    switchStopIcon.iconAnchor = new GPoint(1, 35);
+    */
+    startIcon = new CM.Icon();
+    startIcon.image = "site_media/images/marker_from.png";
+    startIcon.iconSize = new CM.Size(34, 36);
+    startIcon.iconAnchor = new CM.Point(11, 35);
+    
+    endIcon = new CM.Icon();
+    endIcon.image = "site_media/images/marker_to.png";
+    endIcon.iconSize = new CM.Size(34, 36);
+    endIcon.iconAnchor = new CM.Point(11, 35);
+}
 
 function reset() {
     // reset everything, called on first load (if no trip) and in case
