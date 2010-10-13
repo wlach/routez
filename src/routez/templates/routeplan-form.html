@@ -1,10 +1,10 @@
 <div class="panel">
-  <h2>Plan a trip</h2>
+  <h2 id="planner-title">Plan a trip</h2>
   <div class="content">
 {% if analytics_key %}
-    <form id="routePlan" onSubmit="pageTracker._trackPageview('/json/routeplan'); submitRoutePlan(); return false;">
+    <form id="routeplan-form">
 {% else %}
-    <form id="routePlan" onSubmit="submitRoutePlan(); return false;">
+    <form id="routeplan-form">
 {% endif %}
       <table class="location-input">
 	<tr>
@@ -12,22 +12,20 @@
 	    <div>
               <label class="from" for="routePlanStart">From</label>
               <span>
-		<input class="text" type="text" id="routePlanStart" 
-		       onFocus="javascript:locationInputFocused('start');"/>
+		<input class="text" type="text" id="routePlanStart"/>
 		<label>Ex.: North and Agricola</label>
               </span>
 	    </div>
 	    <div>
               <label class="to" for="routePlanEnd">To</label>
               <span>
-		<input class="text" type="text" id="routePlanEnd" 
-		       onFocus="javascript:locationInputFocused('end');"/>
+		<input class="text" type="text" id="routePlanEnd"/>
 		<label>Ex.: 1496 Lower Water</label>
               </span>
 	    </div>
 	  </td>
 	  <td class="rev-cell">	    
-	    <a href="javascript:reverseDirections()" title="Reverse Directions">
+ 	    <a href="javascript:reverseDirections()" title="Reverse Directions">
 	      <img src="site_media/images/link_reverse.png"></a>
 	  </td>
 	</tr>
@@ -36,7 +34,7 @@
       <div>
         <label class="time" for="time">Time:</label>
         <span>
-	  <input class="text" type="text" id="time" class="textfield" value="now" onFocus="select();"/>
+	  <input class="text" type="text" id="routePlanTime" class="textfield" value="now"/>
 	  <label>Ex.: Saturday at 5pm</label>
         </span>
       </div>

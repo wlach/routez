@@ -7,12 +7,6 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
-var routePlanStart = null;
-var routePlanEnd = null;
-var routePlanStartDefault = null;
-var routePlanEndDefault = null;
-var aroundMePlaceDefault = null;
-
 /**
  * Setup locations based on previous browser locations or cookie. Call 
  * during or after location changes. Returns true if we should try to load
@@ -24,14 +18,32 @@ function setupRoutePlanForm(state) {
     // if no cookie yet exists, no biggie, these values just won't get set
     // to anything
     // FIXME: Actually no, you see null on internet explorer. must fix.    
-    routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
-    routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
+    var routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
+    var routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
 
-    if (state == "default") {        
+    // setup focus handling
+    $('input#routePlanStart').focus(function() {
+	if (this.value === routePlanStartDefault) {
+	    this.select();
+	}
+    });
+    $('input#routePlanStart').mouseup(function(e) { e.preventDefault(); });
+
+    $('input#routePlanEnd').focus(function() {
+	if (this.value === routePlanEndDefault) {
+	    this.select();
+	} 
+	return false;
+    });
+    $('input#routePlanEnd').mouseup(function(e) { e.preventDefault(); });
+
+    $('input#routePlanTime').focus(function() { this.select(); });
+    $('input#routePlanTime').mouseup(function(e) { e.preventDefault(); });
+    
+    if (state === "default") {        
         // if no history state, then (try) to load locations from cookies
-        
-        document.getElementById('routePlanStart').value = routePlanStartDefault;
-        document.getElementById('routePlanEnd').value = routePlanEndDefault;
+        $('input#routePlanStart').val(routePlanStartDefault);
+        $('input#routePlanEnd').val(routePlanEndDefault);
 
         return false;
     } 
@@ -39,23 +51,17 @@ function setupRoutePlanForm(state) {
     // otherwise we try to get history out of json 
     // FIXME: no error handling here yet
     var stateHash = YAHOO.lang.JSON.parse(state);
-    document.getElementById('routePlanStart').value = stateHash.saddr;
-    document.getElementById('routePlanEnd').value = stateHash.daddr;
-    document.getElementById('time').value = stateHash.time;
+    $('input#routePlanStart').val(stateHash.saddr);
+    $('input#routePlanEnd').val(stateHash.daddr);
+    $('input#routePlanTime').val(stateHash.time);
     
     return true;
 }
 
-/**
- * Initialize icons. Call once during load.
- */
-function initIcons() {
-}
-
 function reverseDirections() {
-    var tmp = document.getElementById('routePlanStart').value; 
-    document.getElementById('routePlanStart').value = document.getElementById('routePlanEnd').value;   
-    document.getElementById('routePlanEnd').value = tmp;
+    var tmp = $('#routePlanStart').val()
+    $('#routePlanStart').val($('#routePlanEnd').val());
+    $('#routePlanEnd').val(tmp);
 }
 
 // Capitalizes a string, first letter in upper case and the rest in lower case.
@@ -120,16 +126,21 @@ function initMap(cmKey, cmStyleId, minLat, minLon, maxLat, maxLon) {
 function reset() {
     // reset everything, called on first load (if no trip) and in case
     // of error
-    document.getElementById('route-plan').style.display = 'none';
+    $('#route-plan').hide();
     map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb)+1);
     map.clearOverlays();
 }
 
-function addLine(routePath, colour) {
-    if (routePath.length > 0) {
-        var polyline = new CM.Polyline(routePath, colour, 5);
-        map.addOverlay(polyline);
-    }
+function resetPlanButton() {
+    $('#plan-button').val('Plan!');
+    $('#plan-button').css('color', "#000");
+}
+
+function loadRoutePlanForm() {
+    $('form#routeplan-form').submit(function() {
+	submitRoutePlan();
+	return false;
+    });
 }
 
 function updateMapBounds(actions) {
@@ -159,6 +170,13 @@ function updateMapDirections(start, end, actions) {
     var routePath = new Array();
     var walkPathColour = "#004";
     var busPathColour = "#22f";
+
+    function addLine(colour) {
+	if (routePath.length > 0) {
+            var polyline = new CM.Polyline(routePath, colour, 5);
+            map.addOverlay(polyline);
+	}
+    }
 
     // before doing anything else, set bounds (if we're loading
     // directions on a new page, we need to do this before adding overlays)
@@ -204,11 +222,11 @@ function updateMapDirections(start, end, actions) {
                                              { icon: icon, title: "Board" }));
             } 
 
-            addLine(routePath, walkPathColour);
+            addLine(walkPathColour);
             routePath = new Array();
             routePath[routePath.length] = latlng;
         } else if (actions[i].type == "alight") {
-            addLine(routePath, busPathColour);
+            addLine(busPathColour);
             routePath = new Array();
         } 
             
@@ -225,7 +243,7 @@ function updateMapDirections(start, end, actions) {
     }
     
     routePath[routePath.length] = new CM.LatLng(end.lat, end.lng);
-    addLine(routePath, walkPathColour);
+    addLine(walkPathColour);
 }
 
 function showMapLink(latlngStr) {
@@ -233,43 +251,35 @@ function showMapLink(latlngStr) {
     routePlan += latlngStr + "\">Map</a>]";
 }
 
-var submitCallbackError = function(o) {
-    // reset plan button
-    planButton = document.getElementById('plan-button');
-    planButton.value = 'Plan!';
-    planButton.style.color = "#000";
-
-    // show the error message
-    document.getElementById('error-submit').style.display = 'block';
+var routePlanCallbackError = function(o) {
+    resetPlanButton();
+    $('#error-submit').show();
     reset();
 }
 
-var submitCallback = function(o) {
-    // reset plan button
-    planButton = document.getElementById('plan-button');
-    planButton.value = 'Plan!';
-    planButton.style.color = "#000";
+var routePlanCallback = function(o) {
+    resetPlanButton();
 
-    // clear any previous submit error notices
-    document.getElementById('error-submit').style.display = 'none';
+    $('#error-submit').hide(); // clear any previous submit error notices
+
     try { 
         myresponse = YAHOO.lang.JSON.parse(o.responseText);
     } 
     catch (e) { 
-        submitCallbackError(o); 
-    } 
+        routePlanCallbackError(o); 
+    }
 
     // check for fails
     errors = myresponse['errors'];
     if (errors) {
         for (var i in errors) {
             if (errors[i] == "start_latlng_decode") {
-                document.getElementById('routePlanStart').className = 'text text_error';
-                document.getElementById('error-from').style.display = 'block';
+		$('#routePlanStart').toggleClass('text_error');
+		$('#error-from').show();
             }
             if (errors[i] == "end_latlng_decode") {
-                document.getElementById('routePlanEnd').className = 'text text_error';
-                document.getElementById('error-to').style.display = 'block';
+		$('#routePlanEnd').toggleClass('text_error');
+		$('#error-to').show();
             }
         }
 
@@ -278,8 +288,8 @@ var submitCallback = function(o) {
     }
 
     YAHOO.util.Cookie.setSubs("routeplan", 
-                              { start: routePlanStart, 
-                                  end: routePlanEnd },
+                              { start: $('input#routePlanStart').val(), 
+                                  end: $('input#routePlanEnd').val() },
                               { expires: new Date("January 12, 2025") });
 
     actions = myresponse['actions'];
@@ -292,8 +302,8 @@ var submitCallback = function(o) {
     if (actions.length == 0) {
         routePlan = "<p>Couldn't find a path!</p>";
     } else {                
-        var origin_str = document.getElementById('routePlanStart').value.capitalize().trim().normalize_space();
-        var dest_str = document.getElementById('routePlanEnd').value.capitalize();
+        var origin_str = $('#routePlanStart').val().capitalize().trim().normalize_space();
+        var dest_str = $('#routePlanEnd').val().capitalize().trim().normalize_space();
         document.title = "Trip from " + origin_str + " to " + dest_str; 
         first_stop = "";
         for (var i = 0; i < actions.length; ++i) {
@@ -351,17 +361,17 @@ var submitCallback = function(o) {
     // version)
     if (map) {
         if (myresponse['walking_time'] > (20 * 60)) {
-            document.getElementById('longwalk').style.display = 'block';
+            $('#longwalk').show();
         } else {
-            document.getElementById('longwalk').style.display = 'none';
+            $('#longwalk').hide();
         }
     }
 
     // show the route plan (and options), hide the about box
     document.getElementById('route-plan-content').innerHTML = routePlan;
     //document.getElementById('route-plan-options').style.display = 'block';
-    document.getElementById('route-plan').style.display = 'block';
-    document.getElementById('intro').style.display = 'none';
+    ('#route-plan').show();
+    ('#intro').hide();
 }
 
 function showDebugInfo(actions) {
@@ -387,33 +397,30 @@ function showDebugInfo(actions) {
     debug_div.innerHTML = debug_str;
 }
 
-function resetPlanButton() {
-    planButton = document.getElementById('plan-button');
-    planButton.value = 'Plan!';
-    planButton.style.color = "#000";
-}
-
 function submitRoutePlan() {
-    routePlanStart = document.getElementById('routePlanStart').value;
-    routePlanEnd = document.getElementById('routePlanEnd').value;
+    // if google analytics defined, send a page tracker view
+    if (typeof(pageTracker) != "undefined") {
+	pageTracker._trackPageview('/json/routeplan');
+    }
+
+    var start = $('input#routePlanStart').val();
+    var end = $('input#routePlanEnd').val();
+    var ptime = $('input#routePlanTime').val();
 
     // clear errors
-    document.getElementById('error-from').style.display = 'none';
-    document.getElementById('error-to').style.display = 'none';
-    document.getElementById('routePlanStart').className = 'text';
-    document.getElementById('routePlanEnd').className = 'text';
+    $('#error-from').hide();
+    $('#error-to').hide();
+    $('#routePlanStart').removeClass('text_error');
+    $('#routePlanEnd').removeClass('text_error');
 
     // let user know something exciting is about to happen!
-    planButton = document.getElementById('plan-button');
-    planButton.value = 'Working...';
-    planButton.style.color = "#aaa";
+    $('#plan-button').val('Working...');
+    $('#plan-button').css('color', "#aaa");
 
-    time = document.getElementById('time').value;
-        
     var currentState = YAHOO.util.History.getCurrentState("plan");
-    var newState = YAHOO.lang.JSON.stringify({ saddr: routePlanStart, 
-                                               daddr: routePlanEnd,
-                                               time: time });
+    var newState = YAHOO.lang.JSON.stringify({ saddr: start, 
+                                               daddr: end,
+                                               time: ptime });
 
     // if currentState is equal to newState, then we've already set the
     // browser history state to the appropriate value: proceed to plan trip
@@ -423,19 +430,9 @@ function submitRoutePlan() {
     } else {
         
         YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
-                                        "?start=" + escape(routePlanStart) + "&end=" + escape(routePlanEnd) +
-                                        "&time=" + time, 
-                                        { success:submitCallback, failure:submitCallbackError }, null);
+                                        "?start=" + escape(start) + "&end=" + escape(end) +
+                                        "&time=" + ptime, 
+                                        { success:routePlanCallback, failure:routePlanCallbackError }, null);
         
-    }
-}
-
-
-function locationInputFocused(location) {
-    if (location == "start" && 
-        document.getElementById('routePlanStart').value == routePlanStartDefault) {
-        document.getElementById('routePlanStart').select();
-    } else if (location == "end" && document.getElementById('routePlanEnd').value == routePlanEndDefault) {
-        document.getElementById('routePlanEnd').select();
     }
 }
