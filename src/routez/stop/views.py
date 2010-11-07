@@ -5,6 +5,7 @@ from django.conf import settings
 import datetime
 import simplejson
 import time
+import parsedatetime.parsedatetime as pdt
 
 from routez.travel.models import Route, Map
 from routez.stop.models import Stop
@@ -114,11 +115,17 @@ def stoptimes_for_stop(request, stop_code):
                         mimetype="application/json")
 
 def stoptimes_in_range(request, location):
-    starttime = request.GET.get('time')
-    if not starttime:
+    timestr = request.GET.get('time')
+    starttime = None
+
+    if not timestr:
         starttime = time.time()
     else:
-        starttime = int(starttime) # cast to integer
+        if timestr.isdigit():
+            starttime = int(starttime) # cast to integer
+        else:
+            calendar = pdt.Calendar()
+            starttime = time.mktime(calendar.parse(timestr)[0])
 
     import routez
 

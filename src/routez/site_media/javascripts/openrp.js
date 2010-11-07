@@ -13,48 +13,44 @@ var endIcon;
  * a path, false otherwise.
  */
 function setupRoutePlanForm(state) {
-    // first, set defaults
 
-    // if no cookie yet exists, no biggie, these values just won't get set
-    // to anything
-    // FIXME: Actually no, you see null on internet explorer. must fix.    
+    var aroundMePlaceDefault = YAHOO.util.Cookie.getSub("aroundme", "place");
     var routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
     var routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
 
-    // setup focus handling
-    $('input#routePlanStart').focus(function() {
-	if (this.value === routePlanStartDefault) {
-	    this.select();
+    function setupInputField(name, defaultValue) {
+	$(name).focus(function() {
+	    if (this.value == defaultValue) {
+		this.select();
+	    }
+	});
+
+	// work around select bug with google chrome and other webkit-based
+	// browsers
+	$(name).mouseup(function(e) { e.preventDefault(); });
+
+	if (state === "default") {
+            // if no history state, then (try) to load defaults
+	    $(name).val(defaultValue);
 	}
-    });
-    $('input#routePlanStart').mouseup(function(e) { e.preventDefault(); });
+    }
 
-    $('input#routePlanEnd').focus(function() {
-	if (this.value === routePlanEndDefault) {
-	    this.select();
-	} 
+    setupInputField('input#routePlanStart', routePlanStartDefault);
+    setupInputField('input#routePlanEnd', routePlanEndDefault);
+    setupInputField('input#routePlanTime', "now");
+
+    setupInputField('input#aroundMePlace', aroundMePlaceDefault);
+    setupInputField('input#aroundMeTime', "now");
+
+    if (state === "default") {
 	return false;
-    });
-    $('input#routePlanEnd').mouseup(function(e) { e.preventDefault(); });
+    }
 
-    $('input#routePlanTime').focus(function() { this.select(); });
-    $('input#routePlanTime').mouseup(function(e) { e.preventDefault(); });
-    
-    if (state === "default") {        
-        // if no history state, then (try) to load locations from cookies
-        $('input#routePlanStart').val(routePlanStartDefault);
-        $('input#routePlanEnd').val(routePlanEndDefault);
-
-        return false;
-    } 
-
-    // otherwise we try to get history out of json 
-    // FIXME: no error handling here yet
+    // get history out of JSON
     var stateHash = YAHOO.lang.JSON.parse(state);
     $('input#routePlanStart').val(stateHash.saddr);
     $('input#routePlanEnd').val(stateHash.daddr);
     $('input#routePlanTime').val(stateHash.time);
-    
     return true;
 }
 
@@ -137,8 +133,27 @@ function resetPlanButton() {
 }
 
 function loadRoutePlanForm() {
+    $("a#launch-plan-trip").click(function() {	
+	$('a#launch-plan-trip').addClass('link-text-selected');
+	$('a#launch-find-routes').removeClass('link-text-selected');
+	$('form#routeplan-form').show();
+	$('form#aroundme-form').hide();
+    });
+
+    $('a#launch-find-routes').click(function() {
+	$('a#launch-find-routes').addClass('link-text-selected');
+	$('a#launch-plan-trip').removeClass('link-text-selected');
+	$('form#routeplan-form').hide();
+	$('form#aroundme-form').show();
+    });
+
     $('form#routeplan-form').submit(function() {
 	submitRoutePlan();
+	return false;
+    });
+
+    $('form#aroundme-form').submit(function() {
+	submitAroundMe();
 	return false;
     });
 }
@@ -251,13 +266,15 @@ function showMapLink(latlngStr) {
     routePlan += latlngStr + "\">Map</a>]";
 }
 
-var routePlanCallbackError = function(o) {
+var submitErrorCallback = function(o) {
     resetPlanButton();
     $('#error-submit').show();
     reset();
 }
 
 var routePlanCallback = function(o) {
+    var myresponse;
+
     resetPlanButton();
 
     $('#error-submit').hide(); // clear any previous submit error notices
@@ -266,7 +283,7 @@ var routePlanCallback = function(o) {
         myresponse = YAHOO.lang.JSON.parse(o.responseText);
     } 
     catch (e) { 
-        routePlanCallbackError(o); 
+        submitErrorCallback(o); 
     }
 
     // check for fails
@@ -432,7 +449,54 @@ function submitRoutePlan() {
         YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
                                         "?start=" + escape(start) + "&end=" + escape(end) +
                                         "&time=" + ptime, 
-                                        { success:routePlanCallback, failure:routePlanCallbackError }, null);
+                                        { success:routePlanCallback, failure:submitErrorCallback }, null);
         
     }
 }
+
+var aroundMeCallback = function(o) {
+    var myresponse;
+
+    resetPlanButton();
+
+    $('#error-submit').hide(); // clear any previous submit error notices
+
+    try { 
+        myresponse = YAHOO.lang.JSON.parse(o.responseText);
+    } 
+    catch (e) { 
+        aroundMeCallbackError(o); 
+    }
+
+    for (var i in myresponse.stops) {
+	var stop = myresponse.stops[i];
+	console.log("Stop: " + stop.name);
+    }
+
+    if (myresponse.stops.length > 0) {
+	YAHOO.util.Cookie.setSubs("aroundme",
+				  { place: $('input#aroundMePlace').val() },
+				  { expires: new Date("January 12, 2025") });
+	console.log("Setting place in cookie " + $('input#aroundMePlace').val());
+    }
+
+}
+
+function submitAroundMe() {
+    // if google analytics defined, send a page tracker view
+    if (typeof(pageTracker) != "undefined") {
+	pageTracker._trackPageview('/api/v1/place');
+    }
+
+    var location = $('input#aroundMePlace').val();
+    var ptime = $('input#aroundMeTime').val();
+
+    // let user know something exciting is about to happen!
+    $('#plan-button').val('Working...');
+    $('#plan-button').css('color', "#aaa");
+
+    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + escape(location) + "/upcoming_stoptimes?time=" + ptime, 
+                                    { success:aroundMeCallback, failure:submitErrorCallback }, null);
+    
+}
+

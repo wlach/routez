@@ -44,7 +44,9 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels p { font-size: 12px; color: #000000; }
 #panels p#intro { font-size: 14px; margin: 0 0 10px; }
 #panels div.panel { border: 1px solid #5A7F85; -moz-border-radius: 3px; -webkit-border-radius: 3px; margin: 0 0 10px; }
-#panels div.panel h2 { line-height: 1; background: #E4EAEB; padding: 5px 10px; margin: 0; font-weight: bold; font-size: 12px; }
+#panels div.panel h2 { line-height: 1; background: #E4EAEB; font-weight: normal; padding: 5px 10px; margin: 0; font-size: 12px; }
+#panels div.panel h2 a.link-text-selected { font-weight: bold; color: #000; }
+#panels div.panel h2 a.link-text-selected:hover { text-decoration: none; cursor: pointer; }
 #panels div.content { padding: 10px; }
 
 /* Plan a Trip */
@@ -66,6 +68,9 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels form table.location-input { width:230px; overflow: hidden; padding: 0; margin: 0; }
 #panels form td.location-cell { width:210px; overflow: hidden;}
 #panels form td.rev-cell { width:16px; vertical-align: middle; overflow: hidden;}
+
+/* Around me (hidden by default) */
+#aroundme-form { display: none; }
 
 /* Alternate Routes */
 #route-plan-options { display: none; }
@@ -94,6 +99,14 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #route-plan p.feedback { color: #808080; margin: 0; }
 #route-plan p.warning { color: #FF5555; }
 #route-plan a { color: #22F; }
+
+#around-me table { border: 1px dotted #808080; margin: 0 0 10px; }
+#around-me th { padding: 5px 5px 5px 5px; text-align: left;}
+#around-me th label { display: block; height: 16px; width: 16px; float: left; margin: 4px 0 0 0; text-indent: -9000px; }
+#around-me th label { background: url('../images/icon_bus.png') no-repeat top left; padding-left: 8px; }
+#around-me td { padding: 5px 5px 5px 5px; }
+#around-me td.route { padding: 5px 5px 5px 10px; }
+#around-me td.time { font-weight: normal; }
 
 /* Map */
 #map { width: 100%; height: 100%; }

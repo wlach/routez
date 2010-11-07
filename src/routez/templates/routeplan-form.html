@@ -1,11 +1,7 @@
 <div class="panel">
-  <h2 id="planner-title">Plan a trip</h2>
+  <h2 id="planner-title"><a id="launch-plan-trip" class="link-text-selected" href="#">Plan a trip</a>&nbsp; | &nbsp;<a id="launch-find-routes" href="#">Find routes around me</a></h2>
   <div class="content">
-{% if analytics_key %}
     <form id="routeplan-form">
-{% else %}
-    <form id="routeplan-form">
-{% endif %}
       <table class="location-input">
 	<tr>
 	  <td class="location-cell">
@@ -44,6 +40,31 @@
 	<p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
         <div class="submit-buttons">
 	  <input value="Plan!" class="button" type="submit" id="plan-button"/>
+	</div>
+      </div>
+    </form>
+
+    <form id="aroundme-form">
+      <div>
+	<label class="from" for="aroundMePlace">From</label>
+        <span>
+	  <input class="text" type="text" id="aroundMePlace"/>
+	  <label>Ex.: North and Agricola</label>
+        </span>
+      </div>
+      
+      <div>
+	<label class="time" for="time">Time:</label>
+	<span>
+	  <input class="text" type="text" id="aroundMeTime" class="textfield"/>
+	  <label>Ex.: Saturday at 5pm</label>
+	</span>
+      </div>
+      <div class="submit">
+	<p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
+	<p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
+	<div class="submit-buttons">
+	  <input value="Find!" class="button" type="submit" id="plan-button"/>
 	</div>
       </div>
     </form>
