@@ -7,8 +7,8 @@
 import transitfeed
 import sys
 import os
-import simplejson
 import routez.settings
+import simplejson
 import yaml
 
 # Manually import django
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     mapping = yaml.load(stream)
 
     # Use the graph we specify in the config file
-    import travel
-    graph = travel.graph
+    import routez.travel
+    graph = routez.travel.graph
 
     print "Exporting schedule as database"
     

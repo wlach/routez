@@ -4,7 +4,7 @@ import os
 
 # Manually import django
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
-os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = "routez.settings"
 
 from routez.travel.models import Route
 
