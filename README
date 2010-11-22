@@ -1,0 +1,72 @@
+=== About ===
+
+Routez is a transit planning web service written in Python and Javascript. 
+It uses the libroutez (http://github.com/wlach/libroutez) library for trip
+planning functionality.
+
+=== Setup ===
+
+Steps to installing routez:
+
+1. Install various required packages:
+
+sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev \
+     libpcre++-dev
+
+2. In root, copy local.cfg.tmpl to local.cfg and modify it according to your 
+needs. It should be fairly self-explanatory how to do so-- here's the one I
+use for hbus.ca:
+
+[buildout]
+extends = buildout.cfg
+
+[routez_settings]
+server_name = hbus.ca
+cmaps_api_key = 6cf313fb0cac592a98c0f60ab0693118
+analytics_key = UA-1648932-4
+
+[geodata]
+gtfs_file = /Users/wlach/src/halifax-metro-transit_20101104_0800.zip
+osm_file = /Users/wlach/src/hrm-area-serviced-by-mt-3.osm
+gml_file = /Users/wlach/src/ns-geobase/NRN_NS_7_1_GEOM.gml
+
+3. Run buildout from the project's root directory:
+
+python bootstrap.py
+./bin/buildout -c local.cfg
+
+4. Run scripts to generate the required databases:
+
+./bin/creategraph
+./bin/creategeodb
+./bin/createdb
+
+=== Running libroutez ===
+
+To run a test server on your workstation, simply run:
+
+./bin/routez runserver
+
+The supported configuration for running routez in a production environment is
+through the nginx web server. So install that:
+
+sudo apt-get install -y nginx
+
+Remove nginx's default site:
+
+rm /etc/nginx/sites-enabled/default
+
+Link routez to your sites-enabled directory:
+
+ln -s $PWD/etc/routez-nginx.conf /etc/nginx/sites-enabled/routez
+
+Restart nginx:
+
+/etc/init.d/nginx restart
+
+Start routez:
+
+./bin/restart-routez
+
+And you're off! You should be able to get access to routez through your site's 
+IP address.
