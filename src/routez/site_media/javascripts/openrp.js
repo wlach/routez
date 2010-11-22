@@ -370,8 +370,8 @@ var routePlanCallback = function(o) {
     // show the route plan (and options), hide the about box
     document.getElementById('route-plan-content').innerHTML = routePlan;
     //document.getElementById('route-plan-options').style.display = 'block';
-    ('#route-plan').show();
-    ('#intro').hide();
+    $('#route-plan').show();
+    $('#intro').hide();
 }
 
 function showDebugInfo(actions) {
