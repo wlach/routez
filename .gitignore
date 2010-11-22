@@ -3,6 +3,7 @@ bin
 develop-eggs
 downloads
 eggs
+etc/routez-nginx.conf
 local.cfg
 parts
 src/routez.egg-info
