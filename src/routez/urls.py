@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     (r'^help$', 'routez.travel.views.help'),
     (r'^privacy$', 'routez.travel.views.privacy'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
-    (r'^api/v1/stop/(\d{4})/upcoming_stoptimes$', 
+    (r'^api/v1/stop/(\d+)/upcoming_stoptimes$', 
      'routez.stop.views.stoptimes_for_stop'),
     (r'^api/v1/place/([^/]+)/upcoming_stoptimes$',
      'routez.stop.views.stoptimes_in_range')
