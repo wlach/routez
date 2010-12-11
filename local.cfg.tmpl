@@ -1,12 +1,28 @@
 [buildout]
 extends = buildout.cfg
 
+# For production, the server name should correspond to the public DNS
+# of your routez server. You can just leave it as localhost if you're
+# just developing or building locally
+
 [routez_settings]
 server_name = localhost
 cmaps_api_key = 
 analytics_key = 
 
+# This section only needed/useful if you're planning to build geodata
+# locally. Not needed if you're running a production server and you're
+# planning to transfer the data from another location (see below)
+
 [geodata]
 gtfs_file = /full/path/to/gtfs/file
 osm_file = /full/path/to/osm/file
 gml_file = /full/path/to/gml/file
+
+# This section only needed/useful if you're planning to transfer built
+# geodata to remote server. Not needed if you're running a local-only
+# development server.
+
+[routez_server]
+ssh_alias = 
+buildout_directory = 
