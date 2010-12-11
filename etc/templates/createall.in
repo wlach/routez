@@ -1,0 +1,17 @@
+#!/bin/sh
+
+GTFS_FILE=${geodata:gtfs_file}
+
+if [ ! -f $GTFS_FILE ]; then
+   echo "GTFS file $GTFS_FILE does not exist! Check your local buildout configuration."
+   exit 1
+fi
+
+echo "Creating graph..."
+${buildout:directory}/bin/creategraph || exit 1
+echo "Creating geocoder db..."
+${buildout:directory}/bin/creategeodb || exit 1
+echo "Creating db..."
+${buildout:directory}/bin/createdb || exit 1
+echo "Creating markers..."
+${buildout:directory}/bin/create-markers || exit 1
