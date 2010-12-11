@@ -6,6 +6,9 @@ GML_FILE=${geodata:gml_file}
 PYTHONPATH="${neocoder:path}/utils:$PYTHONPATH"
 PYTHON="${buildout:directory}/bin/python"
 
-BOUNDS=`${libroutez:path}/utils/get-gtfs-bounds.py -m $GTFS_FILE`
+# Only do this if we have a GML file (you can use routez without one)
+if [ $GML_FILE ]; then
+    BOUNDS=`${libroutez:path}/utils/get-gtfs-bounds.py -m $GTFS_FILE`
 
-${neocoder:path}/utils/gml2py.py $GML_FILE $BOUNDS | ${neocoder:path}/utils/creategeodb.py - ${development:var-directory}/mygeocoder.db
+    ${neocoder:path}/utils/gml2py.py $GML_FILE $BOUNDS | ${neocoder:path}/utils/creategeodb.py - ${development:var-directory}/mygeocoder.db
+fi
