@@ -2,6 +2,7 @@
 #include "address.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <sqlite3.h>
 #include <math.h>
