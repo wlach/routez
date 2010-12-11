@@ -37,9 +37,7 @@ python bootstrap.py
 
 4. Run scripts to generate the required databases:
 
-./bin/creategraph
-./bin/creategeodb
-./bin/createdb
+./bin/createall
 
 === Running libroutez ===
 
