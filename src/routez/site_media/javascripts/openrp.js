@@ -55,7 +55,7 @@ function setupRoutePlanForm(state) {
 }
 
 function reverseDirections() {
-    var tmp = $('#routePlanStart').val()
+    var tmp = $('routePlanStart').val()
     $('#routePlanStart').val($('#routePlanEnd').val());
     $('#routePlanEnd').val(tmp);
 }
@@ -127,9 +127,12 @@ function reset() {
     map.clearOverlays();
 }
 
-function resetPlanButton() {
-    $('#plan-button').val('Plan!');
-    $('#plan-button').css('color', "#000");
+function resetButtons() {
+    $('#planButton').val('Plan!');
+    $('#planButton').css('color', "#000");
+
+    $('#aroundmeButton').val('Find!');
+    $('#aroundmeButton').css('color', "#000");
 }
 
 function loadRoutePlanForm() {
@@ -138,6 +141,10 @@ function loadRoutePlanForm() {
 	$('a#launch-find-routes').removeClass('link-text-selected');
 	$('form#routeplan-form').show();
 	$('form#aroundme-form').hide();
+	$('#around-me').hide();
+	if ($('#route-plan-content').html().length) {
+	    $('#route-plan').show();
+	}
     });
 
     $('a#launch-find-routes').click(function() {
@@ -145,6 +152,10 @@ function loadRoutePlanForm() {
 	$('a#launch-plan-trip').removeClass('link-text-selected');
 	$('form#routeplan-form').hide();
 	$('form#aroundme-form').show();
+	$('#route-plan').hide();
+	if ($('#around-me-content').html().length) {
+	    $('#around-me').show();
+	}
     });
 
     $('form#routeplan-form').submit(function() {
@@ -275,7 +286,7 @@ var submitErrorCallback = function(o) {
 var routePlanCallback = function(o) {
     var myresponse;
 
-    resetPlanButton();
+    resetButtons();
 
     $('#error-submit').hide(); // clear any previous submit error notices
 
@@ -386,7 +397,7 @@ var routePlanCallback = function(o) {
 
     // show the route plan (and options), hide the about box
     document.getElementById('route-plan-content').innerHTML = routePlan;
-    //document.getElementById('route-plan-options').style.display = 'block';
+
     $('#route-plan').show();
     $('#intro').hide();
 }
@@ -420,6 +431,8 @@ function submitRoutePlan() {
 	pageTracker._trackPageview('/json/routeplan');
     }
 
+    $('#around-me').hide();
+
     var start = $('input#routePlanStart').val();
     var end = $('input#routePlanEnd').val();
     var ptime = $('input#routePlanTime').val();
@@ -431,8 +444,8 @@ function submitRoutePlan() {
     $('#routePlanEnd').removeClass('text_error');
 
     // let user know something exciting is about to happen!
-    $('#plan-button').val('Working...');
-    $('#plan-button').css('color', "#aaa");
+    $('#planButton').val('Working...');
+    $('#planButton').css('color', "#aaa");
 
     var currentState = YAHOO.util.History.getCurrentState("plan");
     var newState = YAHOO.lang.JSON.stringify({ saddr: start, 
@@ -457,7 +470,7 @@ function submitRoutePlan() {
 var aroundMeCallback = function(o) {
     var myresponse;
 
-    resetPlanButton();
+    resetButtons();
 
     $('#error-submit').hide(); // clear any previous submit error notices
 
@@ -468,10 +481,64 @@ var aroundMeCallback = function(o) {
         aroundMeCallbackError(o); 
     }
 
+    map.clearOverlays();
+
+    var aroundmeHTML = "";
+
+    var latlngs = new Array();
+
     for (var i in myresponse.stops) {
 	var stop = myresponse.stops[i];
+	var latlng = new CM.LatLng(stop.lat, stop.lng);
+	latlngs[latlngs.length] = latlng;
+
+	map.addOverlay(new CM.Marker(latlng, 
+				     { title: stop.name }));
+	aroundmeHTML += "<div id=\"around-me-stop\"><table><tr>" +
+	    "<th colspan=\"4\"><label>Bus Stop</label>" + stop.name + 
+	    "<br/><small>Stop Code: " + stop.code + "</small></th></tr>";
+
+	for (var j in stop.routes) {
+	    var route = stop.routes[j];
+	    var first_headsign = route.trips[0].headsign;
+	    aroundmeHTML += "<tr><td class=\"route\">" + first_headsign + "</td>";
+	    for (var k in route.trips) {
+		var trip = route.trips[k];
+		var date = new Date(trip.time * 1000);
+
+		// possibly not the most elegant time formatter ever, but it works
+		var a_p;
+		var hours = date.getHours();
+		if (hours < 12) { 
+		    a_p = "a";
+		} else {
+		    a_p = "p";
+		}
+	
+		hours = hours % 12; 
+		if (hours == 0) {
+		    hours = 12;
+		}
+
+		var mins = date.getMinutes();
+		
+		if (mins < 10) {
+		    mins = "0" + mins;
+		}
+		
+		aroundmeHTML += "<td class=\"time\">" + hours + ":" + mins + a_p + "</td>";
+	    }
+	    aroundmeHTML += "</tr>";
+	}
+	aroundmeHTML += "</table></div>";
 	console.log("Stop: " + stop.name);
     }
+    
+    var bounds = new CM.LatLngBounds(latlngs);
+    map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+    
+    $('#around-me-content').html(aroundmeHTML);
+    $('#around-me').show();
 
     if (myresponse.stops.length > 0) {
 	YAHOO.util.Cookie.setSubs("aroundme",
@@ -488,12 +555,14 @@ function submitAroundMe() {
 	pageTracker._trackPageview('/api/v1/place');
     }
 
+    $('#route-plan').hide();
+
     var location = $('input#aroundMePlace').val();
     var ptime = $('input#aroundMeTime').val();
 
     // let user know something exciting is about to happen!
-    $('#plan-button').val('Working...');
-    $('#plan-button').css('color', "#aaa");
+    $('#aroundmeButton').val('Working...');
+    $('#aroundmeButton').css('color', "#aaa");
 
     YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + escape(location) + "/upcoming_stoptimes?time=" + ptime, 
                                     { success:aroundMeCallback, failure:submitErrorCallback }, null);
