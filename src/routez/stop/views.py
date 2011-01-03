@@ -105,6 +105,8 @@ def stoptimes_for_stop(request, stop_code):
                             "type": route.type,
                             "trips": trips,
                             "times": times })
+    
+    routes.sort(lambda x,y: x['times'][0]-y['times'][0])
 
     return HttpResponse(simplejson.dumps({ "stops": [ {'name': stop.name, 
                                                        'code': stop.stop_code,
@@ -191,6 +193,8 @@ def stoptimes_in_range(request, location):
                         "times": times }
                     routedicts.append(routedict)
         if len(routedicts) > 0:
+            routedicts.sort(lambda x,y: x['times'][0]-y['times'][0])
+
             dbstop = Stop.objects.filter(stop_id=stop[0])[0]
 
             stopsjson.append({ 
