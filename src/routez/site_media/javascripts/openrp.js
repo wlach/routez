@@ -173,7 +173,7 @@ function updateMapBounds(actions) {
 
     var bound_latlngs = new Array();
 
-    for (var i = 0; i < actions.length; ++i) {
+    for (var i in actions) {
         // only alight and pass actions have latlng info
         if (actions[i].type == "alight" || actions[i].type == "pass") {
             bound_latlngs[bound_latlngs.length] = new CM.LatLng(actions[i].lat, actions[i].lng);
@@ -217,13 +217,13 @@ function updateMapDirections(start, end, actions) {
                                  { icon: endIcon, title: "end" }));
     routePath[routePath.length] = new CM.LatLng(start.lat, start.lng);
 
-    for (var i = 0; i < actions.length; ++i) {
+    for (var i in actions) {
         var latlng = new CM.LatLng(actions[i].lat, actions[i].lng);
 
         if (actions[i].type == "alight" || actions[i].type == "pass") {
             // also add any shape to the path
             if (actions[i].shape) {
-                for (var j=0; j<actions[i].shape.length; ++j) {
+                for (var j in actions[i].shape) {
                     routePath[routePath.length] = new CM.LatLng(
                         actions[i].shape[j][0], actions[i].shape[j][1]);
                 }
@@ -334,7 +334,7 @@ var routePlanCallback = function(o) {
         var dest_str = $('#routePlanEnd').val().capitalize().trim().normalize_space();
         document.title = "Trip from " + origin_str + " to " + dest_str; 
         first_stop = "";
-        for (var i = 0; i < actions.length; ++i) {
+        for (var i in actions) {
             if (actions[i].route_id >= 0) {
                 firstStop = actions[i].stopname;
                 firstStopLatlng = actions[i].lat + "," + actions[i].lng;
@@ -354,8 +354,7 @@ var routePlanCallback = function(o) {
         }
         routePlan += "</li>";
 
-        for (var i = 0; i < actions.length; ++i) {
-
+        for (var i in actions) {
             if (actions[i].type == "board") {
                 routePlan += "<li class='board'><strong>" + actions[i].time + ":</strong> ";
                 routePlan += "Board the " + actions[i].route_shortname + " (";
@@ -404,7 +403,7 @@ var routePlanCallback = function(o) {
 
 function showDebugInfo(actions) {
     var debug_str = "<p>";
-    for (var i = 0; i < actions.length; ++i) {
+    for (var i in actions) {
         debug_str += "Action " + i + ":"; 
         debug_str += " id=" + actions[i].id;
         debug_str += "; route_id=" + actions[i].route_id;
