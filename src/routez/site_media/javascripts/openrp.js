@@ -494,13 +494,13 @@ var aroundMeCallback = function(o) {
 	map.addOverlay(new CM.Marker(latlng, 
 				     { title: stop.name }));
 	aroundmeHTML += "<div id=\"around-me-stop\"><table><tr>" +
-	    "<th colspan=\"4\"><label>Bus Stop</label>" + stop.name + 
-	    "<br/><small>Stop Code: " + stop.code + "</small></th></tr>";
+	    "<th rowspan=\"2\"><label>Bus Stop</label></th><th colspan=\"4\" class=\"stop-name\">" + stop.name + 
+	    "</th></tr><tr><th class=\"stop-code\" colspan=\"4\"><small>Stop Code: " + stop.code + "</small></th></tr>";
 
 	for (var j in stop.routes) {
 	    var route = stop.routes[j];
 	    var first_headsign = route.trips[0].headsign;
-	    aroundmeHTML += "<tr><td class=\"route\">" + first_headsign + "</td>";
+	    aroundmeHTML += "<tr><td class=\"route-short-name\">" + route.short_name + "</td><td class=\"route-headsign\">" + first_headsign + "</td>";
 	    for (var k in route.trips) {
 		var trip = route.trips[k];
 		var date = new Date(trip.time * 1000);
@@ -526,6 +526,10 @@ var aroundMeCallback = function(o) {
 		}
 		
 		aroundmeHTML += "<td class=\"time\">" + hours + ":" + mins + a_p + "</td>";
+	    }
+	    for (i=0; i<(3-route.trips.length); i++) {
+		// placeholders for where we have <3 upcoming trips
+		aroundmeHTML += "<td class=\"time\"></td>";
 	    }
 	    aroundmeHTML += "</tr>";
 	}
