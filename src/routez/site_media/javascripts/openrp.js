@@ -2,6 +2,9 @@ var routePlan;
 var map = null;
 var bb = null;
 
+var aroundMeResponse = null;
+var routePlanResponse = null;
+
 var busStopIcon;
 var walkStopIcon;
 var startIcon;
@@ -120,9 +123,10 @@ function initMap(cmKey, cmStyleId, minLat, minLon, maxLat, maxLon) {
 }
 
 function reset() {
-    // reset everything, called on first load (if no trip) and in case
+    // reset everything, called on first load of planner and around me and in case
     // of error
     $('#route-plan').hide();
+    $('#around-me').hide();
     map.setCenter(bb.getCenter(), map.getBoundsZoomLevel(bb)+1);
     map.clearOverlays();
 }
@@ -144,6 +148,7 @@ function loadRoutePlanForm() {
 	$('#around-me').hide();
 	if ($('#route-plan-content').html().length) {
 	    $('#route-plan').show();
+	    renderRoutePlan();
 	}
     });
 
@@ -155,6 +160,9 @@ function loadRoutePlanForm() {
 	$('#route-plan').hide();
 	if ($('#around-me-content').html().length) {
 	    $('#around-me').show();
+	    renderAroundMe();
+	} else {
+	    reset();
 	}
     });
 
@@ -169,21 +177,9 @@ function loadRoutePlanForm() {
     });
 }
 
-function updateMapBounds(actions) {
-
-    var bound_latlngs = new Array();
-
-    for (var i in actions) {
-        // only alight and pass actions have latlng info
-        if (actions[i].type == "alight" || actions[i].type == "pass") {
-            bound_latlngs[bound_latlngs.length] = new CM.LatLng(actions[i].lat, actions[i].lng);
-        }
-    }
-
-    var bounds = new CM.LatLngBounds(bound_latlngs);
-    var zoom = map.getBoundsZoomLevel(bounds);
-
-    map.setCenter(bounds.getCenter(), zoom);
+function updateMapBounds(latlngs) {
+    var bounds = new CM.LatLngBounds(latlngs);
+    map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds)-1);
 }
 
 function updateMapDirections(start, end, actions) {
@@ -206,7 +202,14 @@ function updateMapDirections(start, end, actions) {
 
     // before doing anything else, set bounds (if we're loading
     // directions on a new page, we need to do this before adding overlays)
-    updateMapBounds(actions);
+    var latlngs = new Array();
+    for (var i in actions) {
+        // only alight and pass actions have latlng info
+        if (actions[i].type == "alight" || actions[i].type == "pass") {
+            latlngs[latlngs.length] = new CM.LatLng(actions[i].lat, actions[i].lng);
+        }
+    }
+    updateMapBounds(latlngs);
 
     // nuke any existing map overlays
     map.clearOverlays();
@@ -277,54 +280,13 @@ function showMapLink(latlngStr) {
     routePlan += latlngStr + "\">Map</a>]";
 }
 
-var submitErrorCallback = function(o) {
-    resetPlanButton();
-    $('#error-submit').show();
-    reset();
-}
+function renderRoutePlan() {
 
-var routePlanCallback = function(o) {
-    var myresponse;
-
-    resetButtons();
-
-    $('#error-submit').hide(); // clear any previous submit error notices
-
-    try { 
-        myresponse = YAHOO.lang.JSON.parse(o.responseText);
-    } 
-    catch (e) { 
-        submitErrorCallback(o); 
-    }
-
-    // check for fails
-    errors = myresponse['errors'];
-    if (errors) {
-        for (var i in errors) {
-            if (errors[i] == "start_latlng_decode") {
-		$('#routePlanStart').toggleClass('text_error');
-		$('#error-from').show();
-            }
-            if (errors[i] == "end_latlng_decode") {
-		$('#routePlanEnd').toggleClass('text_error');
-		$('#error-to').show();
-            }
-        }
-
-        reset();
-        return;
-    }
-
-    YAHOO.util.Cookie.setSubs("routeplan", 
-                              { start: $('input#routePlanStart').val(), 
-                                  end: $('input#routePlanEnd').val() },
-                              { expires: new Date("January 12, 2025") });
-
-    actions = myresponse['actions'];
+    actions = routePlanResponse['actions'];
     routePlan = "";
 
     if (map) {
-        updateMapDirections(myresponse['start'], myresponse['end'], actions);
+        updateMapDirections(routePlanResponse['start'], routePlanResponse['end'], actions);
     }
 
     if (actions.length == 0) {
@@ -387,7 +349,7 @@ var routePlanCallback = function(o) {
     // show a warning if there's too much walking time (only on non-mobile
     // version)
     if (map) {
-        if (myresponse['walking_time'] > (20 * 60)) {
+        if (routePlanResponse['walking_time'] > (20 * 60)) {
             $('#longwalk').show();
         } else {
             $('#longwalk').hide();
@@ -398,6 +360,55 @@ var routePlanCallback = function(o) {
     document.getElementById('route-plan-content').innerHTML = routePlan;
 
     $('#route-plan').show();
+}
+
+var submitErrorCallback = function(o) {
+    resetPlanButton();
+    $('#error-submit').show();
+    reset();
+}
+
+var routePlanCallback = function(o) {
+    var myresponse;
+
+    resetButtons();
+    routePlanResponse = null;
+
+    $('#error-submit').hide(); // clear any previous submit error notices
+
+    try { 
+        myresponse = YAHOO.lang.JSON.parse(o.responseText);
+    } 
+    catch (e) { 
+        submitErrorCallback(o); 
+    }
+
+    // check for fails
+    errors = myresponse['errors'];
+    if (errors) {
+        for (var i in errors) {
+            if (errors[i] == "start_latlng_decode") {
+		$('#routePlanStart').toggleClass('text_error');
+		$('#error-from').show();
+            }
+            if (errors[i] == "end_latlng_decode") {
+		$('#routePlanEnd').toggleClass('text_error');
+		$('#error-to').show();
+            }
+        }
+
+        reset();
+        return;
+    }
+
+    YAHOO.util.Cookie.setSubs("routeplan", 
+                              { start: $('input#routePlanStart').val(), 
+                                  end: $('input#routePlanEnd').val() },
+                              { expires: new Date("January 12, 2025") });
+
+    routePlanResponse = myresponse;
+    renderRoutePlan();
+
     $('#intro').hide();
 }
 
@@ -466,19 +477,13 @@ function submitRoutePlan() {
     }
 }
 
-var aroundMeCallback = function(o) {
-    var myresponse;
-
-    resetButtons();
-
-    $('#error-submit').hide(); // clear any previous submit error notices
-
-    try { 
-        myresponse = YAHOO.lang.JSON.parse(o.responseText);
-    } 
-    catch (e) { 
-        aroundMeCallbackError(o); 
+function renderAroundMe() {
+    if (!aroundMeResponse) {
+	return;
     }
+
+    var placeStr = $('#aroundMePlace').val().capitalize().trim().normalize_space();
+    document.title = "Routes near " + placeStr; 
 
     map.clearOverlays();
 
@@ -486,8 +491,8 @@ var aroundMeCallback = function(o) {
 
     var latlngs = new Array();
 
-    for (var i in myresponse.stops) {
-	var stop = myresponse.stops[i];
+    for (var i in aroundMeResponse.stops) {
+	var stop = aroundMeResponse.stops[i];
 	var latlng = new CM.LatLng(stop.lat, stop.lng);
 	latlngs[latlngs.length] = latlng;
 
@@ -534,16 +539,32 @@ var aroundMeCallback = function(o) {
 	    aroundmeHTML += "</tr>";
 	}
 	aroundmeHTML += "</table></div>";
-	console.log("Stop: " + stop.name);
     }
-    
-    var bounds = new CM.LatLngBounds(latlngs);
-    map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+
+    updateMapBounds(latlngs);
     
     $('#around-me-content').html(aroundmeHTML);
     $('#around-me').show();
+}
 
-    if (myresponse.stops.length > 0) {
+var aroundMeCallback = function(o) {
+    var myresponse;
+
+    resetButtons();
+
+    $('#error-submit').hide(); // clear any previous submit error notices
+
+    try { 
+        myresponse = YAHOO.lang.JSON.parse(o.responseText);
+    } 
+    catch (e) { 
+        aroundMeCallbackError(o); 
+    }
+
+    aroundMeResponse = myresponse;
+    renderAroundMe();
+
+    if (aroundMeResponse.stops.length > 0) {
 	YAHOO.util.Cookie.setSubs("aroundme",
 				  { place: $('input#aroundMePlace').val() },
 				  { expires: new Date("January 12, 2025") });
