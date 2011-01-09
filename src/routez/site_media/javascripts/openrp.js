@@ -90,7 +90,7 @@ function initMap(cmKey, cmStyleId, minLat, minLon, maxLat, maxLon) {
     var cloudmade = new CM.Tiles.CloudMade.Web({key: cmKey, styleId: cmStyleId });
     bb = new CM.LatLngBounds(new CM.LatLng(minLat, minLon),new CM.LatLng(maxLat, maxLon));
     map = new CM.Map('map', cloudmade);
-    map.addControl(new CM.LargeMapControl());
+    map.addControl(new CM.SmallMapControl());
     map.enableScrollWheelZoom();
     map.enableDoubleClickZoom();
     map.enableShiftDragZoom();
