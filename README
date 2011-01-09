@@ -10,8 +10,15 @@ Steps to installing routez:
 
 1. Install various required packages:
 
+Ubuntu or Debian Linux:
+
 sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev \
      libpcre++-dev
+
+MacOS X:
+
+Install an Apple Developer SDK (the iOS dev SDK should work fine) and a copy 
+of pcre (http://www.pcre.org/). 
 
 2. In root, copy local.cfg.tmpl to local.cfg and modify it according to your 
 needs. It should be fairly self-explanatory how to do so-- here's the one I
@@ -30,16 +37,18 @@ gtfs_file = /Users/wlach/src/halifax-metro-transit_20101104_0800.zip
 osm_file = /Users/wlach/src/hrm-area-serviced-by-mt-3.osm
 gml_file = /Users/wlach/src/ns-geobase/NRN_NS_7_1_GEOM.gml
 
+[routez_server]
+ssh_alias = hbus
+buildout_directory = /home/routez/Sites/hbus
+
 3. Run buildout from the project's root directory:
 
 python bootstrap.py
 ./bin/buildout -c local.cfg
 
-4. Run scripts to generate the required databases:
+4. Run a script to generate the required databases:
 
-./bin/creategraph
-./bin/creategeodb
-./bin/createdb
+./bin/createall
 
 === Running libroutez ===
 
@@ -47,8 +56,9 @@ To run a test server on your workstation, simply run:
 
 ./bin/routez runserver
 
-The supported configuration for running routez in a production environment is
-through the nginx web server. So install that:
+The only currently supported server configuration for routez is currently the 
+Ubuntu Lucid LTS release (http://releases.ubuntu.com/lucid/) using the nginx
+web server (http://nginx.org/). So install that if needed:
 
 sudo apt-get install -y nginx
 

@@ -3,6 +3,7 @@
 import transitfeed
 from rtree import Rtree
 import libroutez.osm as osm
+from json import JSONEncoder
 import math
 import time
 import sys
@@ -21,31 +22,18 @@ class IdMap:
     def save(self, fname):
         f = open(fname, 'w')
 
-        print >> f, "Service Periods: {"
-        for gtfs_sp_id in sorted(self.spmap.keys()):
-            print >>f, "    '%s': %s," % (gtfs_sp_id, self.spmap[gtfs_sp_id])
-        print >> f, "}"
-        
-        print >> f, "Stops: {"
-        for gtfs_stop_id in sorted(self.stopmap.keys()):
-            print >>f, "    '%s': %s," % (gtfs_stop_id, self.stopmap[gtfs_stop_id])
-        print >> f, "}"
+        def write_mapping(name, mapping):
+            jsonencoder = JSONEncoder()
+            print >> f, "%s: {" % name
+            for key in sorted(mapping.keys()):
+                print >>f, "    %s: %s," % (jsonencoder.encode(key), mapping[key])
+            print >> f, "}"
 
-        print >> f, "Routes: {"
-        for gtfs_route_id in sorted(self.routemap.keys()):
-            print >>f, "    '%s': %s," % (gtfs_route_id, 
-                                      self.routemap[gtfs_route_id])
-        print >> f, "}"
-
-        print >> f, "Trips: {"
-        for gtfs_trip_id in sorted(self.tripmap.keys()):
-            print >> f, "    '%s': %s," % (gtfs_trip_id, self.tripmap[gtfs_trip_id])
-        print >> f, "}"
-
-        print >> f, "Headsigns: {"
-        for gtfs_headsign_name in sorted(self.headsignmap.keys()):
-            print >> f, "    '%s': %s," % (gtfs_headsign_name, self.headsignmap[gtfs_headsign_name])
-        print >> f, "}"
+        write_mapping('Service Periods', self.spmap)
+        write_mapping('Stops', self.stopmap)
+        write_mapping('Routes', self.routemap)
+        write_mapping('Trips', self.tripmap)
+        write_mapping('Headsigns', self.headsignmap)
 
         f.close()
 

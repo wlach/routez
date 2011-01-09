@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scp -C ${buildout:directory}/var/* ${routez_server:ssh_alias}:${routez_server:buildout_directory}/var/
