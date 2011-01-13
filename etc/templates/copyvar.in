@@ -1,3 +1,12 @@
 #!/bin/sh
 
-scp -C ${buildout:directory}/var/* ${routez_server:ssh_alias}:${routez_server:buildout_directory}/var/
+FILES_TO_COPY="routez.db mygraph.routez"
+if [ ${geodata:gml_file} ]; then
+    FILES_TO_COPY="$FILES_TO_COPY mygeocoder.db"
+fi
+
+for FILE in $FILES_TO_COPY; do
+    scp -C ${buildout:directory}/var/$FILE ${routez_server:ssh_alias}:${routez_server:buildout_directory}/var/
+done
+
+ssh ${routez_server:ssh_alias} ${routez_server:buildout_directory}/bin/restart-routez
