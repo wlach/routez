@@ -17,8 +17,9 @@ sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev \
 
 MacOS X:
 
-Install an Apple Developer SDK (the iOS dev SDK should work fine) and a copy 
-of pcre (http://www.pcre.org/). 
+Install an Apple Developer SDK (the iOS dev SDK should work fine), pcre 
+(http://www.pcre.org/) and ImageMagick (easiest to install this via 
+MacPorts or similar). 
 
 2. In root, copy local.cfg.tmpl to local.cfg and modify it according to your 
 needs. It should be fairly self-explanatory how to do so-- here's the one I
