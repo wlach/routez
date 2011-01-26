@@ -40,10 +40,9 @@ body#nav_help ul.nav li.nav_help a,
 body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; }
 
 /* Panels */
-#panels { padding: 0 10px; overflow: hidden; width: 252px; }
+#panels { padding: 0 0 0 0; overflow: hidden; }
 #panels p { font-size: 12px; color: #000000; }
-#panels p#intro { font-size: 14px; margin: 0 0 10px; }
-#panels div.panel h2 { line-height: 1; background: #E4EAEB; font-weight: normal; padding: 5px 10px; margin: 0; font-size: 12px; }
+#panels div.panel h2 { line-height: 1; background: #E4EAEB; font-weight: normal; padding: 5px 0 5px 10px; margin: 0; font-size: 12px; }
 #panels div.panel h2 a.link-text-selected { font-weight: bold; color: #000; }
 #panels div.panel h2 a.link-text-selected:hover { text-decoration: none; cursor: pointer; }
 #panels div.content { padding: 10px; }
@@ -103,9 +102,9 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #around-me { display: none; }
 #around-me table { border: 1px dotted #808080; margin: 0 0 10px; }
 #around-me th { padding: 5px 5px 5px 5px; text-align: left;}
-#around-me th.stop-name { padding: 5px 0px 0px 0px; }
-#around-me th.stop-code { padding: 0px 0px 5px 0px; vertical-align: top; }
-#around-me th label { display: block; height: 16px; width: 16px; float: left; margin: 4px 0 0 0; text-indent: -9000px; }
+#around-me th.stop-name { padding: 5px 0 0 0; vertical-align: top; }
+#around-me th.stop-code { padding: 0 0 0 0; vertical-align: top; }
+#around-me th label { display: block; height: 16px; width: 16px; float: left; margin: 0; text-indent: -9000px; }
 #around-me th label { background: url('../images/icon_bus.png') no-repeat top left; padding-left: 8px; }
 #around-me td { padding: 5px 5px 5px 5px; }
 #around-me td.route-short-name { padding: 5px 5px 5px 5px; font-weight: bold; }
