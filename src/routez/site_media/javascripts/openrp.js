@@ -57,12 +57,6 @@ function setupRoutePlanForm(state) {
     return true;
 }
 
-function reverseDirections() {
-    var tmp = $('routePlanStart').val()
-    $('#routePlanStart').val($('#routePlanEnd').val());
-    $('#routePlanEnd').val(tmp);
-}
-
 // Capitalizes a string, first letter in upper case and the rest in lower case.
 // Created: 2005.11.20  - Modified 2005.11.21
 //+ Jonas Raoni Soares Silva
@@ -165,6 +159,13 @@ function loadRoutePlanForm() {
 	    reset();
 	}
     });
+
+    $('a#reverse-directions').click(function() {
+	var tmpval = $('#routePlanStart').val()
+	$('#routePlanStart').val($('#routePlanEnd').val());
+	$('#routePlanEnd').val(tmpval);
+    });
+				    
 
     $('form#routeplan-form').submit(function() {
 	submitRoutePlan();
