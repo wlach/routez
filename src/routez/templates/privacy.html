@@ -4,15 +4,21 @@
 
 <head>
   <title>Privacy</title>
-  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>.
+  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>
   <link href="site_media/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
   <link href="site_media/stylesheets/style.css" rel="stylesheet" type="text/css" />
 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery-1.4.2.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery.layout-1.2.0.js"></script> 
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+	$('body').layout({ defaults: { spacing_open: 0 }, 
+                           applyDefaultStyles: true, 
+                           north: { innerHeight: 30 },
+                           center: { } });
+    });
+  </script>
 
   <style type="text/css">
     v\:* {
@@ -27,20 +33,23 @@
   {% include 'header.html' %}
   {% include 'analytics.html' %}
 
-  <div class="container" id="content">
+  <div class="ui-layout-center" style="overflow: auto;">
 
-    <h2>Privacy policy</h2>
-    <p>When you submit a search to hbus.ca, you are passing location-based information to our servers.</p>
+    <div class="container" id="content">
 
-    <p>The information collected by this web server is used to improve the content of the site. We promise that any 
-      personally identifiable information will not be shared with third parties.</p>
+      <h2>Privacy policy</h2>
+      <p>When you submit a search to hbus.ca, you are passing location-based information to our servers.</p>
+      
+      <p>The information collected by this web server is used to improve the content of the site. We promise that any 
+	personally identifiable information will not be shared with third parties.</p>
+      
+      <p>From time to time, we may use the web server logs for new, unanticipated uses not previously disclosed in this 
+	privacy notice. If this happens we will update this page. If you are concerned about how your information is used, 
+	you should check here periodically.</p>
+      
+      {% include 'footer.html' %}
 
-    <p>From time to time, we may use the web server logs for new, unanticipated uses not previously disclosed in this 
-      privacy notice. If this happens we will update this page. If you are concerned about how your information is used, 
-      you should check here periodically.</p>
-
-    {% include 'footer.html' %}
-
+    </div>
   </div>
 
   {% include 'layout-standard.html' %}

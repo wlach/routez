@@ -4,16 +4,21 @@
 
 <head>
   <title>Help</title>
-  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>.
+  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>
   <link href="site_media/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
   <link href="site_media/stylesheets/style.css" rel="stylesheet" type="text/css" />
 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery-1.4.2.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery.layout-1.2.0.js"></script> 
 
+  <script type="text/javascript">
+    $(document).ready(function () {
+	$('body').layout({ defaults: { spacing_open: 0 }, 
+                           applyDefaultStyles: true, 
+                           north: { innerHeight: 30 },
+                           center: { } });
+    });
+  </script>
 
   <style type="text/css">
     v\:* {
@@ -28,39 +33,39 @@
   {% include 'header.html' %}
   {% include 'analytics.html' %}
 
-  <div class="container" id="content">
+  <div class="ui-layout-center" style="overflow: auto;">
 
-    <p>This page is meant to help users encountering some common problems.</p>
+    <div class="container" id="content">
 
-    <a name="location"></a>
-    <h2>Having trouble entering origin / destination</h2>
-    <p>In order to plan a route for you, hbus needs to be able to map the
-      location you specify into a latitude/longitude pair (this process is 
-      called geocoding).</p>
-    <p>At this time, the functionality is very much in development. 
-      We don't understand any location other than a specific address
-      (e.g. 5000 North Street, North &amp; Agricola). In particular, we do 
-      <b>not</b> understand landmarks (e.g. Scotia Square).</p>
-    <p>The good news? This will soon be fixed. We plan to add a comprehensive
-      set of landmarks from the <a href="http://openstreetmap.org">OpenStreetMap</a> 
-      dataset, as well as dynamic keyboard autocompletion of location. It's 
-      going to be awesome.</p>
-    <p>If you are entering an address that you think should work and 
-      doesn't, please let us know at our 
-      <a href="http://hbus.uservoice.com">feedback page</a>.</p>
-    <a name="walking"/></a>
-    <h2>My route has too much walking!</h2>
-    <p>It used to be that this was due to the data being incomplete. Now that
-      hbus.ca uses the official Metro Transit GTFS, we no longer have that excuse.
-      Please report any issues with this on our 
-      <a href="http://hbus.uservoice.com">feedback page</a>.
-    </p>
+      <p>This page is meant to help users encountering some common problems.</p>
 
-    {% include 'footer.html' %}
-
+      <a name="location"></a>
+      <h2>Having trouble entering origin / destination</h2>
+      <p>In order to plan a route for you, hbus needs to be able to map the
+	location you specify into a latitude/longitude pair (this process is 
+	called geocoding).</p>
+      <p>At this time, the functionality is very much in development. 
+	We don't understand any location other than a specific address
+	(e.g. 5000 North Street, North &amp; Agricola). In particular, we do 
+	<b>not</b> understand landmarks (e.g. Scotia Square).</p>
+      <p>The good news? This will soon be fixed. We plan to add a comprehensive
+	set of landmarks from the <a href="http://openstreetmap.org">OpenStreetMap</a> 
+	dataset, as well as dynamic keyboard autocompletion of location. It's 
+	going to be awesome.</p>
+      <p>If you are entering an address that you think should work and 
+	doesn't, please let us know at our 
+	<a href="http://hbus.uservoice.com">feedback page</a>.</p>
+      <a name="walking"/></a>
+      <h2>My route has too much walking!</h2>
+      <p>It used to be that this was due to the data being incomplete. Now that
+	hbus.ca uses the official Metro Transit GTFS, we no longer have that excuse.
+	Please report any issues with this on our 
+	<a href="http://hbus.uservoice.com">feedback page</a>.
+      </p>
+    
+      {% include 'footer.html' %}
+    </div>
   </div>
-
-  {% include 'layout-standard.html' %}
 
 </body>
 

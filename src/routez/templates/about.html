@@ -4,15 +4,21 @@
 
 <head>
   <title>About</title>
-  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>.
+  <link rel="icon" type="image/png" href="site_media/images/favico_bus.png"/>
   <link href="site_media/stylesheets/scaffold.css" rel="stylesheet" type="text/css" />
   <link href="site_media/stylesheets/style.css" rel="stylesheet" type="text/css" />
 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo/yahoo-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/layout/layout-min.js"></script>
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/event/event-min.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery-1.4.2.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery.layout-1.2.0.js"></script> 
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+	$('body').layout({ defaults: { spacing_open: 0 }, 
+                           applyDefaultStyles: true, 
+                           north: { innerHeight: 30 },
+                           center: { } });
+    });
+  </script>
 
 
   <style type="text/css">
@@ -28,8 +34,8 @@
   {% include 'header.html' %}
   {% include 'analytics.html' %}
 
-  <div class="container" id="content">
-
+  <div class="ui-layout-center" style="overflow: auto;">
+    <div id="content">
     <h2>Motivation and Philosophy</h2>
     <p>The aim of hbus.ca is to make bus and ferry travel in Halifax and the surrounding regions easier and more enjoyable, by reducing the time needed to 
       plan trips. Want to go somewhere but wondering how to do so? Our philosophy is that you should be able to get a good answer to that question in as 
@@ -67,10 +73,8 @@
       and <a href="http://danielharan.com">Daniel Haran</a> for their ideas.</a></p>
 
     {% include 'footer.html' %}
-
+    </div>
   </div>
-
-  {% include 'layout-standard.html' %}
 
 </body>
 

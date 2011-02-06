@@ -1,9 +1,5 @@
 /* Accent Colour: #5A7F85 */
 
-/* YUI Reset */
-div.yui-layout-hd { display: none; }
-.yui-layout-scroll div.yui-layout-bd { overflow: auto; }
-
 /* Hide the YUI history iframe */
 #yui-history-iframe {
   position:absolute;
@@ -114,6 +110,9 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 /* Map */
 #map { width: 100%; height: 100%; }
 #map div.tooltip { white-space: nowrap; padding: 2px; color: #000000; font-weight: bold; font-size: 12px; }
+
+/* About pages */
+#content { margin: 10px 40px 20px 20px; }
 
 /* Footer */
 #footer p { margin: 0 0 10px; }
