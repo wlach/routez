@@ -69,33 +69,32 @@
   {% include 'analytics.html' %}
   
   <div class="ui-layout-west">
-  <div class="ui-layout-content"> 
-  <div id="panels">
-    <div class="panel" id="intro">
-      <div class="content">
-	<p>
-	  <strong>hbus.ca</strong> is an <b>unofficial</b> site for users of the <a href="http://www.halifax.ca/metrotransit/">Metro Transit</a> system in the greater area of Halifax, Nova Scotia.
-	</p>
-	<p>This site is <b>still under development</b> and does have some bugs and missing features. Please consider providing <a onclick="this.blur(); try { UserVoice.PopIn.show(); return false; } catch(e){}" href="http://hbus.uservoice.com/">feedback</a> to help make it better!</p>
+    <div id="panels">
+      <div class="panel" id="intro">
+	<div class="content">
+	  <p>
+	    <strong>hbus.ca</strong> is an <b>unofficial</b> site for users of the <a href="http://www.halifax.ca/metrotransit/">Metro Transit</a> system in the greater area of Halifax, Nova Scotia.
+	  </p>
+	  <p>This site is <b>still under development</b> and does have some bugs and missing features. Please consider providing <a onclick="this.blur(); try { UserVoice.PopIn.show(); return false; } catch(e){}" href="http://hbus.uservoice.com/">feedback</a> to help make it better!</p>
+	</div>
       </div>
-    </div>
-
-    {% include 'routeplan-form.html' %}
-    
-    <div id="route-plan-options" class="panel">
-      <h2>Alternate Routes</h2>
-      <div class="content">
-        <ul class="options">
-          <li class="content-element" id="routeOption1" onmouseover="document.getElementById('routeOption1').style.background = '#F2F5F5';" onmouseout="document.getElementById('routeOption1').style.background = '#FFFFFF';">
-            <ul class="directions">
-              <li class="bus">7</li>
-              <li class="bus">10</li>
-            </ul>
-            <span class="time_range">9:00am-9:40am</span>
-            <span class="time">(40 minutes)</span>
-            <span class="walking_time">7 minutes walking time</span>
-          </li>
-          <li class="content-element" id="routeOption2" onmouseover="document.getElementById('routeOption2').style.background = '#F2F5F5';" onmouseout="document.getElementById('routeOption2').style.background = '#FFFFFF';">
+      
+      {% include 'routeplan-form.html' %}
+      
+      <div id="route-plan-options" class="panel">
+	<h2>Alternate Routes</h2>
+	<div class="content">
+          <ul class="options">
+            <li class="content-element" id="routeOption1" onmouseover="document.getElementById('routeOption1').style.background = '#F2F5F5';" onmouseout="document.getElementById('routeOption1').style.background = '#FFFFFF';">
+              <ul class="directions">
+		<li class="bus">7</li>
+		<li class="bus">10</li>
+              </ul>
+              <span class="time_range">9:00am-9:40am</span>
+              <span class="time">(40 minutes)</span>
+              <span class="walking_time">7 minutes walking time</span>
+            </li>
+            <li class="content-element" id="routeOption2" onmouseover="document.getElementById('routeOption2').style.background = '#F2F5F5';" onmouseout="document.getElementById('routeOption2').style.background = '#FFFFFF';">
             <ul class="directions">
               <li class="bus">10</li>
               <li class="bus">23</li>
@@ -105,40 +104,39 @@
             <span class="time_range">9:00am-10:40am</span>
             <span class="time">(1:40 minutes)</span>
             <span class="walking_time">17 minutes walking time</span>
-          </li>
-        </ul>
+            </li>
+          </ul>
+	</div>
       </div>
-    </div>
-
-    <div id="route-plan" class="panel">
-      <h2>Directions</h2>
-      <div class="content">
-        <div id="route-plan-content"></div>
-	<p class="warning" id="longwalk" style="display:none;">This trip seems 
+      
+      <div id="route-plan" class="panel">
+	<h2>Directions</h2>
+	<div class="content">
+          <div id="route-plan-content"></div>
+	  <p class="warning" id="longwalk" style="display:none;">This trip seems 
 	  to involve a great deal of walking. This may be due to incomplete 
 	  route coverage by hbus. <a href="help#walking">Learn more</a>.</p>
-        <p class="feedback">Did that sound sensible? Was it what you expected? <a onclick="this.blur(); try { UserVoice.PopIn.show(); return false; } catch(e){}" href="http://hbus.uservoice.com/">Let us know!</a></p>
+          <p class="feedback">Did that sound sensible? Was it what you expected? <a onclick="this.blur(); try { UserVoice.PopIn.show(); return false; } catch(e){}" href="http://hbus.uservoice.com/">Let us know!</a></p>
+	</div>
       </div>
-    </div>
-
-    <div id="around-me" class="panel">
-      <h2>Around me</h2>
-      <div class="content">
-	<div id="around-me-content"></div>
+      
+      <div id="around-me" class="panel">
+	<h2>Around me</h2>
+	<div class="content">
+	  <div id="around-me-content"></div>
+	</div>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="content">
+      <div class="panel">
+	<div class="content">
 	{% include 'footer.html' %}
+	</div>
       </div>
     </div>
-  </div>
-  </div>
   </div>
   <div class="ui-layout-center"><div id="map"></div></div>
 
-<script src="http://hbus.uservoice.com/pages/general/widgets/tab.js?alignment=right&amp;color=66f" type="text/javascript"></script>
+  <script src="http://hbus.uservoice.com/pages/general/widgets/tab.js?alignment=right&amp;color=66f" type="text/javascript"></script>
 </body>
 
 </html>
