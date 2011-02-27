@@ -97,6 +97,9 @@ def routeplan(request):
     graph = routez.travel.graph
     trippath = graph.find_path(time.mktime(start_time), False, start_latlng[0], start_latlng[1], 
                                end_latlng[0], end_latlng[1])
+    if not trippath:
+        return HttpResponse(simplejson.dumps({ 'errors': [ 'find_path' ] }), 
+                            mimetype="application/json")
 
     actions_desc = []
     route_shortnames = []
