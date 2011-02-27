@@ -32,6 +32,7 @@ extends = buildout.cfg
 server_name = hbus.ca
 cmaps_api_key = 6cf313fb0cac592a98c0f60ab0693118
 analytics_key = UA-1648932-4
+use_local_geocoder = 1
 
 [geodata]
 gtfs_file = /Users/wlach/src/halifax-metro-transit_20101104_0800.zip
@@ -41,6 +42,16 @@ gml_file = /Users/wlach/src/ns-geobase/NRN_NS_7_1_GEOM.gml
 [routez_server]
 ssh_alias = hbus
 buildout_directory = /home/routez/Sites/hbus
+
+The only section that really demands explanation is geodata.
+
+* gtfs_file: A general transit feed file of the region you're covering
+* osm_file:  An OpenStreetMap file of the road network for the region you're 
+	     covering
+* gml_file:  A geometry markup file (as published by geobase.ca) of the region
+	     you're covering. Canadian-specific, can be omitted for other 
+	     locales (though typing in an address will no longer work in the 
+	     travel UI)
 
 3. Run buildout from the project's root directory:
 
