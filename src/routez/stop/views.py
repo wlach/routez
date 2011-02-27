@@ -10,6 +10,7 @@ from routez.travel.models import Route, Map
 from routez.stop.models import Stop
 from routez.trip.models import Trip, StopHeadsign
 from libroutez.tripgraph import TripStop
+import routez.geocoder as geocoder
 
 # fixme: this function is a disaster. put a latlng function in libroutez
 # for goodness sakes!
@@ -120,16 +121,15 @@ def stoptimes_in_range(request, location):
     else:
         starttime = int(starttime) # cast to integer
 
-    import routez
+    latlng = geocoder.geocode(str(location))
 
-    geocoder = routez.travel.geocoder
-    latlng = geocoder.get_latlng(str(location))
     if not latlng:
         return HttpResponseNotFound(simplejson.dumps(
                 { 'errors': ["Location not found"] }), 
                                     mimetype="application/json")
 
     # checking 500 meters. FIXME: make configurable
+    import routez.travel
     graph = routez.travel.graph
     tstops = graph.find_tripstops_in_range(latlng[0], latlng[1], TripStop.GTFS,
                                            500)
