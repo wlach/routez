@@ -97,9 +97,9 @@ div.ui-layout-west { padding-top: 8px; overflow: auto; }
 
 /* Around me results */
 #around-me { display: none; }
-#around-me table { border: 1px dotted #808080; margin: 0 0 10px; }
+#around-me table { margin: 0 0 10px; }
 #around-me th { padding: 5px 5px 5px 5px; text-align: left;}
-#around-me th.stop-name { padding: 5px 0 0 0; vertical-align: top; }
+#around-me th.stop-name { padding: 5px 0 0 0; vertical-align: top; font-weight: bold; font-size: 14px; }
 #around-me th.stop-code { padding: 0 0 0 0; vertical-align: top; }
 #around-me th label { display: block; height: 16px; width: 16px; float: left; margin: 0; text-indent: -9000px; }
 #around-me th label { background: url('../images/icon_bus.png') no-repeat top left; padding-left: 8px; }
