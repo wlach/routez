@@ -38,7 +38,7 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 /* Panels */
 #panels { padding: 0 0 0 0; overflow: hidden; width: 100%; }
 #panels p { font-size: 12px; color: #000000; }
-#panels div.panel h2 { line-height: 1; background: #E4EAEB; font-weight: normal; padding: 5px 0 5px 10px; margin: 0; font-size: 12px; }
+#panels div.panel h2 { line-height: 1; font-weight: bold; padding: 5px 0 5px 10px; margin: 0; font-size: 16px; }
 #panels div.panel h2 a.link-text-selected { font-weight: bold; color: #000; }
 #panels div.panel h2 a.link-text-selected:hover { text-decoration: none; cursor: pointer; }
 #panels div.content { padding: 10px; }

@@ -484,7 +484,15 @@ function renderAroundMe() {
     }
 
     var placeStr = $('#aroundMePlace').val().capitalize().trim().normalize_space();
-    document.title = "Routes near " + placeStr; 
+    var title;
+    if ($('#aroundMeTime').val() === "now") {
+	title = "Upcoming departures near " + placeStr;
+    } else {
+	title = "Departures near " + placeStr + " around " + $('#aroundMeTime').val();
+    }
+
+    document.title = title; 
+    $('#around-me h2').html(title);
 
     map.clearOverlays();
 
