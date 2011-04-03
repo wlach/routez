@@ -8,8 +8,8 @@ import time
 import parsedatetime.parsedatetime as pdt
 
 from routez.travel.models import Route, Map
-from routez.stop.models import Stop
-from routez.trip.models import Trip, StopHeadsign
+from routez.stops.models import Stop
+from routez.trips.models import Trip, StopHeadsign
 from libroutez.tripgraph import TripStop
 import routez.geocoder as geocoder
 

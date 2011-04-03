@@ -18,8 +18,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "routez.settings"
 from django.db import transaction
 
 from routez.travel.models import Route, Map
-from routez.stop.models import Stop
-from routez.trip.models import Trip, StopHeadsign
+from routez.stops.models import Stop
+from routez.trips.models import Trip, StopHeadsign
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

@@ -14,9 +14,9 @@ urlpatterns = patterns('',
     (r'^privacy$', 'routez.travel.views.privacy'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
     (r'^api/v1/stop/(\d+)/upcoming_stoptimes$', 
-     'routez.stop.views.stoptimes_for_stop'),
+     'routez.stops.views.stoptimes_for_stop'),
     (r'^api/v1/place/([^/]+)/upcoming_stoptimes$',
-     'routez.stop.views.stoptimes_in_range')
+     'routez.stops.views.stoptimes_in_range')
 
     # Uncomment this for admin:
     #(r'^admin/(.*)', admin.site.root),
