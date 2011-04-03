@@ -85,8 +85,8 @@ def get_headsigns(stops):
                     
         # Keep a list of stop headsigns: nothing until we hit our inflection 
         # stop (fall back to default), last stop in route afterwards
-        if reversed:
-            stop_headsigns.append("To " + stops[-1].stop_name)
+        if reversed:            
+            stop_headsigns.append(update_headsign("To " + stops[-1].stop_name))
         else:
             stop_headsigns.append(None)
                 
