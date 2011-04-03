@@ -8,5 +8,5 @@ etc/routez-nginx.conf
 local.cfg
 parts
 src/routez.egg-info
-src/routez/settings.py
+src/routez/local_settings.py
 var
