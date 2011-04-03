@@ -107,6 +107,15 @@ def get_headsigns(stops):
 
     print "%s reverse_stop: %s end_stop: %s" % (stop_headsigns, inflection_stop, stops[-1].stop_name)
     
+    def update_headsign(headsign):
+        # Abbreviate transit center to something shorter
+        headsign = re.sub('Transit Centre', 'TC', headsign)
+
+        # HACK: work around a ridiculous bug in your YAML intermediary format
+        headsign = re.sub('\'', '', headsign)
+
+        return headsign
+
     if not inflection_stop:
         return ("To " + update_headsign(stops[-1].stop_name), stop_headsigns)
     else:
