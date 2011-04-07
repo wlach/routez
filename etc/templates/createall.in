@@ -15,3 +15,4 @@ echo "Creating db..."
 ${buildout:directory}/bin/createdb || exit 1
 echo "Creating markers..."
 ${buildout:directory}/bin/create-markers || exit 1
+${buildout:directory}/bin/routez generatestopmarkers || exit 1

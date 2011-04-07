@@ -505,8 +505,13 @@ function renderAroundMe() {
 	var latlng = new CM.LatLng(stop.lat, stop.lng);
 	latlngs[latlngs.length] = latlng;
 
+        var stopicon = new CM.Icon();
+        stopicon.image = "site_media/images/generated/marker_stop" + stop.code + ".png"
+        stopicon.iconSize = new CM.Size(88, 36);
+        stopicon.iconAnchor = new CM.Point(38, 36);
+
 	map.addOverlay(new CM.Marker(latlng, 
-				     { title: stop.name }));
+				     { icon: stopicon, title: stop.name }));
 	aroundmeHTML += "<div id=\"around-me-stop\"><table><tr>" +
 	    "<th rowspan=\"2\"><label>Bus Stop</label></th><th colspan=\"4\" class=\"stop-name\">" + stop.name + 
 	    "</th></tr><tr><th class=\"stop-code\" colspan=\"4\"><small>Stop Code: " + stop.code + "</small></th></tr>";
