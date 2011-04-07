@@ -1,6 +1,0 @@
-#!/bin/sh
-
-BASEPATH="${buildout:directory}/src/routez/site_media/images/"
-GENPATH="${buildout:directory}/var/generated/"
-
-${buildout:directory}/bin/python ${buildout:directory}/src/routez/create-markers.py $BASEPATH $GENPATH

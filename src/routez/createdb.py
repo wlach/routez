@@ -17,7 +17,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "routez.settings"
 
 from django.db import transaction
 
-from routez.travel.models import Route, Map
+from routez.travel.models import Map
+from routez.routes.models import Route
 from routez.stops.models import Stop
 from routez.trips.models import Trip, StopHeadsign
 

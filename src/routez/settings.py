@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'routez.travel',
+    'routez.routes',
     'routez.stops',
     'routez.trips'
 

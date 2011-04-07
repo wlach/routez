@@ -7,8 +7,9 @@ import simplejson
 import time
 import parsedatetime.parsedatetime as pdt
 
-from routez.travel.models import Route, Map
+from routez.travel.models import Map
 from routez.stops.models import Stop
+from routez.routes.models import Route
 from routez.trips.models import Trip, StopHeadsign
 from libroutez.tripgraph import TripStop
 import routez.geocoder as geocoder
