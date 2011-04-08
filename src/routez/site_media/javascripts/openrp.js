@@ -496,6 +496,14 @@ function renderAroundMe() {
 
     map.clearOverlays();
 
+    var locationIcon = new CM.Icon();
+    locationIcon.image = "site_media/images/marker_current_location.png";
+    locationIcon.iconSize = new CM.Size(16,16);
+    locationIcon.iconAnchor = new CM.Point(8,8);
+    map.addOverlay(new CM.Marker(new CM.LatLng(aroundMeResponse.location.lat, 
+					       aroundMeResponse.location.lng),
+				 { icon: locationIcon, title: "Current Location" }));
+
     var aroundmeHTML = "";
 
     var latlngs = new Array();

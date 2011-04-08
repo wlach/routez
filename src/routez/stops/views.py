@@ -141,7 +141,7 @@ def stoptimes_in_range(request, location):
     import routez.travel
     graph = routez.travel.graph
     tstops = graph.find_tripstops_in_range(latlng[0], latlng[1], TripStop.GTFS,
-                                           500)
+                                           250)
 
     # filter twice, once to get all the stops we're interested in, then
     # remove any duplicate trips at stops that are further away
@@ -205,5 +205,7 @@ def stoptimes_in_range(request, location):
                     "distance": distance_to_stop_hash[stop[0]],
                     "routes": routedicts })
             
-    return HttpResponse(simplejson.dumps({ 'stops': stopsjson }), 
+    return HttpResponse(simplejson.dumps({ 'location': { 'lat': latlng[0], 
+                                                         'lng': latlng[1] },
+                                           'stops': stopsjson }), 
                         mimetype="application/json")
