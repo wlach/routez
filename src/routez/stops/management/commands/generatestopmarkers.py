@@ -5,6 +5,7 @@ from routez.travel import graph
 import time
 import math
 import os
+import subprocess
 
 class Command(BaseCommand):
     help = 'Creates a set of stop icons'
@@ -15,8 +16,16 @@ class Command(BaseCommand):
         now = time.time()
         t = time.localtime(now)
         elapsed_daysecs = t.tm_sec + (t.tm_min * 60) + (t.tm_hour * 60 * 60)
+        cmds = []
 
         for stop in Stop.objects.all():
+            for cmd in cmds:
+                res = cmd.poll()
+                if res is not None:
+                    if res != 0:
+                        raise CommandError('Error writing stop')
+                    cmds.remove(cmd)
+
             stop_display = stop.stop_code
             if stop.stop_code:
                 print "Processing stop %s" % stop.stop_code
@@ -56,9 +65,9 @@ class Command(BaseCommand):
                         else:
                             stop_image = settings.PROJECT_PATH + "/site_media/images/marker_stop.png" 
 
-                        ret = os.system('convert %s -weight Bold -annotate +24+15 %s %s' %
-                                        (stop_image, stop_display,
-                                         ("%smarker_stop%s.png" % (generated_path, stop.stop_code))))
-                        if ret != 0:
-                            raise CommandError('Error writing stop with code %s' % stop.stop_code)
+                        
+                cmdstr = 'convert %s -weight Bold -annotate +24+15 %s %s' % (stop_image, stop_display,
+                                                                             ("%smarker_stop%s.png" % (generated_path, stop.stop_code)))
+                p = subprocess.Popen(cmdstr.split())
+                cmds.append(p)
 
