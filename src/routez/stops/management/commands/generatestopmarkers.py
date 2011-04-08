@@ -20,7 +20,7 @@ class Command(BaseCommand):
             stop_display = stop.stop_code
             if stop.stop_code:
                 print "Processing stop %s" % stop.stop_code
-                ts = graph.get_tripstop(stop.stop_id)
+                ts = graph.get_tripstop(stop.id)
 
                 lat_v = 0.0
                 lng_v = 0.0
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                                                  route_id, sptuple[0], 1)
                         for thop in thops:
                             try:
-                                dest_stop = Stop.objects.get(stop_id=thop.dest_id)
+                                dest_stop = Stop.objects.get(id=thop.dest_id)
                                 lat_v += (dest_stop.lat - stop.lat)
                                 lng_v += (dest_stop.lng - stop.lng)
                             except Stop.DoesNotExist:

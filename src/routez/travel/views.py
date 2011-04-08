@@ -111,7 +111,7 @@ def routeplan(request):
         # then move
         if last_action and last_action.route_id != action.route_id:
             if last_action.route_id != -1:
-                stop = Stop.objects.filter(stop_id=last_action.dest_id)[0]
+                stop = Stop.objects.filter(id=last_action.dest_id)[0]
                 action_time = human_time(last_action.end_time)
                 actions_desc.append({ 'type':'alight', 
                                     'lat': stop.lat, 
@@ -122,8 +122,8 @@ def routeplan(request):
         if not last_action or last_action.route_id != action.route_id:
             if action.route_id >= 0:
                 action_time = human_time(action.start_time)
-                route = Route.objects.filter(route_id=action.route_id)[0]
-                stop = Stop.objects.filter(stop_id=action.src_id)[0]
+                route = Route.objects.filter(id=action.route_id)[0]
+                stop = Stop.objects.filter(id=action.src_id)[0]
                 actions_desc.append({ 'type':'board', 
                                       'lat':stop.lat,
                                       'lng':stop.lng,

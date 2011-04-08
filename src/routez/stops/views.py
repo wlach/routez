@@ -84,10 +84,10 @@ def stoptimes_for_stop(request, stop_code):
     import routez
     graph = routez.travel.graph
 
-    route_ids = get_route_ids_for_stop(graph, int(stop.stop_id), starttime)
+    route_ids = get_route_ids_for_stop(graph, stop.id, starttime)
     routes = []
     for route_id in route_ids:
-        thops = find_triphops_for_stop(graph, int(stop.stop_id), route_id,
+        thops = find_triphops_for_stop(graph, stop.id, route_id,
                                        starttime, 3)
         times = []
         trips = []
@@ -98,10 +98,9 @@ def stoptimes_for_stop(request, stop_code):
                     headsign = StopHeadsign.objects.filter(
                         id=thop.headsign_id)[0].headsign
                 else:
-                    headsign = Trip.objects.filter(
-                        trip_id=thop.trip_id)[0].headsign
+                    headsign = Trip.objects.filter(id=thop.trip_id)[0].headsign
                 trips.append({ "headsign": headsign, "time": thop.start_time })
-            route = Route.objects.filter(route_id=route_id)[0]
+            route = Route.objects.filter(id=route_id)[0]
             routes.append({ "short_name": route.short_name,
                             "long_name": route.long_name,
                             "type": route.type,
@@ -182,10 +181,10 @@ def stoptimes_in_range(request, location):
                                 id=thop.headsign_id)[0].headsign
                         else:
                             headsign = Trip.objects.filter(
-                                trip_id=thop.trip_id)[0].headsign
+                                id=thop.trip_id)[0].headsign
 
                         trips.append({ "headsign": headsign, "time": thop.start_time })
-                    route = Route.objects.filter(route_id=route_id)[0]
+                    route = Route.objects.filter(id=route_id)[0]
                     routedict = { 
                         "short_name": route.short_name,
                         "long_name": route.long_name,
@@ -196,7 +195,7 @@ def stoptimes_in_range(request, location):
         if len(routedicts) > 0:
             routedicts.sort(lambda x,y: x['times'][0]-y['times'][0])
 
-            dbstop = Stop.objects.filter(stop_id=stop[0])[0]
+            dbstop = Stop.objects.filter(id=stop[0])[0]
 
             stopsjson.append({ 
                     "name": dbstop.name,

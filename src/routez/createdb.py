@@ -56,7 +56,7 @@ if __name__ == '__main__':
     for r in schedule.GetRouteList():
         if mapping['Routes'].has_key(r.route_id):
             #print "%s" % (mapping['Routes'][r.route_id])
-            r2 = Route(route_id=mapping['Routes'][r.route_id], 
+            r2 = Route(id=mapping['Routes'][r.route_id], 
                        short_name=r.route_short_name, long_name=r.route_long_name,
                        type=r.route_type)
             r2.save()
@@ -74,8 +74,11 @@ if __name__ == '__main__':
             #"has no trips associated with it." % (short_name, long_name)
 
     for s in schedule.GetStopList():
-        if mapping['Stops'].get(s.stop_id):
-            s2 = Stop(stop_id=mapping['Stops'][s.stop_id], stop_code = s.stop_id,
+        if s.stop_id in mapping['Stops']:
+            stop_code = s.stop_code
+            if not stop_code:
+                stop_code = s.stop_id
+            s2 = Stop(id=mapping['Stops'][s.stop_id], stop_code=stop_code,
                       name=s.stop_name, lat=s.stop_lat, lng=s.stop_lon)
             s2.save()
         else:
@@ -83,8 +86,8 @@ if __name__ == '__main__':
 
     print "Importing trips!"
     for t in schedule.GetTripList():
-        if mapping['Trips'].get(t.trip_id):
-            t2 = Trip(trip_id=mapping['Trips'][t.trip_id], headsign=t.trip_headsign)
+        if t.trip_id in mapping['Trips']:
+            t2 = Trip(id=mapping['Trips'][t.trip_id], headsign=t.trip_headsign)
             t2.save()
         else:
             print "WARNING: Trip with no mapping '%s'" % t.trip_id
