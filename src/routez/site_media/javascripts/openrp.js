@@ -478,6 +478,26 @@ function submitRoutePlan() {
     }
 }
 
+function drawCircle(center, radius, nodes) {
+    // Based on Esa's Google Maps API examples (with various modifications to
+    // get around various deficiencies in Cloudmade's API)
+
+    var R = 6371.0 * 1000.0;
+    var latConv = Math.sqrt(1.0/(R*R)) * 180 / Math.PI;
+    var lngConv = Math.sqrt(1.0/((R*R)*((Math.cos(center.lat()*Math.PI/180))*Math.cos(center.lat()*Math.PI/180)))) * 180 / Math.PI;
+    
+    var points = [];
+    var step = parseInt(360/nodes)||10;
+    for(var i=0; i<=360; i+=step) {
+	var pint = new CM.LatLng(center.lat() + (radius * latConv * Math.cos(i * Math.PI/180)), 
+				 center.lng() + (radius * lngConv * Math.sin(i * Math.PI/180)));
+	points.push(pint);
+    }
+    points.push(points[0]); // Closes the circle, thanks Martin
+    var poly = new CM.Polygon(points, null, 2);
+    map.addOverlay(poly);
+}
+
 function renderAroundMe() {
     if (!aroundMeResponse) {
 	return;
@@ -500,9 +520,12 @@ function renderAroundMe() {
     locationIcon.image = "site_media/images/marker_current_location.png";
     locationIcon.iconSize = new CM.Size(16,16);
     locationIcon.iconAnchor = new CM.Point(8,8);
-    map.addOverlay(new CM.Marker(new CM.LatLng(aroundMeResponse.location.lat, 
-					       aroundMeResponse.location.lng),
+    var location = new CM.LatLng(aroundMeResponse.location.lat, 
+				 aroundMeResponse.location.lng);
+    map.addOverlay(new CM.Marker(location,
 				 { icon: locationIcon, title: "Current Location" }));
+
+    drawCircle(location, 250, 64);
 
     var aroundmeHTML = "";
 
