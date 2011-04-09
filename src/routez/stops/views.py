@@ -118,9 +118,14 @@ def stoptimes_for_stop(request, stop_code):
                         mimetype="application/json")
 
 def stoptimes_in_range(request, location):
+    distance = float(request.GET.get('distance', 500.0))
+    if distance > 1000.0:
+        return HttpResponseNotFound(simplejson.dumps(
+                { 'errors': ["Distance of more than 1000 meters not allowed"] }), 
+                                    mimetype="application/json")
+
     timestr = request.GET.get('time')
     starttime = None
-
     if not timestr:
         starttime = time.time()
     else:
@@ -137,11 +142,10 @@ def stoptimes_in_range(request, location):
                 { 'errors': ["Location not found"] }), 
                                     mimetype="application/json")
 
-    # checking 500 meters. FIXME: make configurable
     import routez.travel
     graph = routez.travel.graph
     tstops = graph.find_tripstops_in_range(latlng[0], latlng[1], TripStop.GTFS,
-                                           250)
+                                           distance)
 
     # filter twice, once to get all the stops we're interested in, then
     # remove any duplicate trips at stops that are further away

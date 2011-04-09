@@ -610,7 +610,7 @@ function submitAroundMe() {
     $('#aroundmeButton').val('Working...');
     $('#aroundmeButton').css('color', "#aaa");
 
-    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + escape(location) + "/upcoming_stoptimes?time=" + ptime, 
+    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + escape(location) + "/upcoming_stoptimes?distance=250&time=" + ptime,
                                     { success:aroundMeCallback, failure:submitErrorCallback }, null);
     
 }
