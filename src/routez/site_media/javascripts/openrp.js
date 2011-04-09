@@ -539,7 +539,7 @@ function renderAroundMe() {
         var stopicon = new CM.Icon();
         stopicon.image = "site_media/images/generated/marker_stop" + stop.code + ".png"
         stopicon.iconSize = new CM.Size(88, 36);
-        stopicon.iconAnchor = new CM.Point(38, 36);
+        stopicon.iconAnchor = new CM.Point(24, 37);
 
 	map.addOverlay(new CM.Marker(latlng, 
 				     { icon: stopicon, title: stop.name }));
