@@ -1,72 +1,77 @@
 <div class="panel">
-  <h2 id="planner-title"><a id="launch-plan-trip" class="link-text-selected" href="#">Plan a trip</a>&nbsp; | &nbsp;<a id="launch-find-routes" href="#">Find routes around me</a></h2>
   <div class="content">
-    <form id="routeplan-form">
-      <table class="location-input">
-	<tr>
-	  <td class="location-cell">
-	    <div>
-              <label class="from" for="routePlanStart">From</label>
-              <span>
-		<input class="text" type="text" id="routePlanStart"/>
-		<label>Ex.: North and Agricola</label>
-              </span>
-	    </div>
-	    <div>
-              <label class="to" for="routePlanEnd">To</label>
-              <span>
-		<input class="text" type="text" id="routePlanEnd"/>
-		<label>Ex.: 1496 Lower Water</label>
-              </span>
-	    </div>
-	  </td>
-	  <td class="rev-cell">	    
- 	    <a id="reverse-directions" title="Reverse Directions">
-	      <img src="site_media/images/link_reverse.png"></a>
-	  </td>
-	</tr>
-      </table>
+    <div id="controller">
+      <div id="tab-selector">
+	<input type="radio" id="trip-planner" name="radio" checked="checked"/><label for="trip-planner">Plan Trip</label>	  
+	<input type="radio" id="find-nearby" name="radio"/><label for="find-nearby">Nearby</label>
+      </div>      
+      <form id="routeplan-form">
+	<table class="location-input">
+	  <tr>
+	    <td class="location-cell">
+	      <div>
+		<label class="from" for="routePlanStart">From</label>
+		<span>
+		  <input class="text" type="text" id="routePlanStart"/>
+		  <label>Ex.: North and Agricola</label>
+		</span>
+	      </div>
+	      <div>
+		<label class="to" for="routePlanEnd">To</label>
+		<span>
+		  <input class="text" type="text" id="routePlanEnd"/>
+		  <label>Ex.: 1496 Lower Water</label>
+		</span>
+	      </div>
+	    </td>
+	    <td class="rev-cell">	    
+ 	      <a id="reverse-directions" title="Reverse Directions">
+		<img src="site_media/images/link_reverse.png"></a>
+	    </td>
+	  </tr>
+	</table>
 
-      <div>
-        <label class="time" for="time">Time:</label>
-        <span>
-	  <input class="text" type="text" id="routePlanTime" class="textfield" value="now"/>
-	  <label>Ex.: Saturday at 5pm</label>
-        </span>
-      </div>
-      <div class="submit">
-	<p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
-	<p class="error" id="error-to" style="display:none;">Didn't understand "to" location. <a href="help#location" class="help">Get help</a>.</p>
-	<p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
-        <div class="submit-buttons">
-	  <input value="Plan!" class="button" type="submit" id="planButton"/>
+	<div>
+          <label class="time" for="time">Time:</label>
+          <span>
+	    <input class="text" type="text" id="routePlanTime" class="textfield" value="now"/>
+	    <label>Ex.: Saturday at 5pm</label>
+          </span>
 	</div>
-      </div>
-    </form>
+	<div class="submit">
+	  <p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
+	  <p class="error" id="error-to" style="display:none;">Didn't understand "to" location. <a href="help#location" class="help">Get help</a>.</p>
+	  <p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
+          <div class="submit-buttons">
+	    <input value="Plan!" class="button" type="submit" id="planButton"/>
+	  </div>
+	</div>
+      </form>
 
-    <form id="aroundme-form">
-      <div>
-	<label class="from" for="aroundMePlace">From</label>
-        <span>
-	  <input class="text" type="text" id="aroundMePlace"/>
-	  <label>Ex.: North and Agricola</label>
-        </span>
-      </div>
-      
-      <div>
-	<label class="time" for="time">Time:</label>
-	<span>
-	  <input class="text" type="text" id="aroundMeTime" class="textfield"/>
-	  <label>Ex.: Saturday at 5pm</label>
-	</span>
-      </div>
-      <div class="submit">
-	<p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
-	<p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
-	<div class="submit-buttons">
-	  <input value="Find!" class="button" type="submit" id="aroundmeButton"/>
+      <form id="aroundme-form">
+	<div>
+	  <label class="from" for="aroundMePlace">From</label>
+          <span>
+	    <input class="text" type="text" id="aroundMePlace"/>
+	    <label>Ex.: North and Agricola</label>
+          </span>
 	</div>
-      </div>
-    </form>
+	
+	<div>
+	  <label class="time" for="time">Time:</label>
+	  <span>
+	    <input class="text" type="text" id="aroundMeTime" class="textfield"/>
+	    <label>Ex.: Saturday at 5pm</label>
+	  </span>
+	</div>
+	<div class="submit">
+	  <p class="error" id="error-from" style="display:none;">Didn't understand "from" location. <a href="help#location" class="help">Get help</a>.</p>
+	  <p class="error" id="error-submit" style="display:none;">Error planning route. Sorry. Problem reported (and we will do our best to fix it). Please try another trip.</p>
+	  <div class="submit-buttons">
+	    <input value="Find!" class="button" type="submit" id="aroundmeButton"/>
+	  </div>
+	</div>
+      </form>
+    </div>
   </div>
 </div>

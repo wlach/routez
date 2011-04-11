@@ -43,9 +43,15 @@ body#nav_privacy ul.nav li.nav_privacy a { background: #FFFFFF; color: #000000; 
 #panels div.panel h2 a.link-text-selected:hover { text-decoration: none; cursor: pointer; }
 #panels div.content { padding: 10px; }
 
+/* Controller */
+#panels #controller { width: 250px; padding: 8px; border-width: 1px 1px 1px 1px; border-color: #B4B4B4; border-style: solid; margin: auto; }
+
+/* Selector */
+#panels #tab-selector { margin: auto; margin-left: auto; margin-right: auto; text-align: center; height: 40px; }
+
 /* Plan a Trip */
 div.ui-layout-west { padding-top: 8px; overflow: auto; }
-#panels form { }
+#panels form { width: 240px;  margin: auto; }
 #panels form div { clear: both; overflow: hidden; margin: 0; padding: 0 0 5px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }
 #panels form div.submit { margin: 0; padding: 0 0 0 21px; }

@@ -134,21 +134,22 @@ function resetButtons() {
 }
 
 function loadRoutePlanForm() {
-    $("a#launch-plan-trip").click(function() {	
-	$('a#launch-plan-trip').addClass('link-text-selected');
-	$('a#launch-find-routes').removeClass('link-text-selected');
+    // Switch between different functions
+    $("#tab-selector").buttonset();
+
+    $('input#trip-planner').click(function() {
 	$('form#routeplan-form').show();
 	$('form#aroundme-form').hide();
 	$('#around-me').hide();
 	if ($('#route-plan-content').html().length) {
 	    $('#route-plan').show();
 	    renderRoutePlan();
+	} else {
+	    reset();
 	}
     });
 
-    $('a#launch-find-routes').click(function() {
-	$('a#launch-find-routes').addClass('link-text-selected');
-	$('a#launch-plan-trip').removeClass('link-text-selected');
+    $('input#find-nearby').click(function() {
 	$('form#routeplan-form').hide();
 	$('form#aroundme-form').show();
 	$('#route-plan').hide();
@@ -159,19 +160,20 @@ function loadRoutePlanForm() {
 	    reset();
 	}
     });
+    
+    // Planning trips
+    $('form#routeplan-form').submit(function() {
+	submitRoutePlan();
+	return false;
+    });
 
     $('a#reverse-directions').click(function() {
 	var tmpval = $('#routePlanStart').val()
 	$('#routePlanStart').val($('#routePlanEnd').val());
 	$('#routePlanEnd').val(tmpval);
     });
-				    
 
-    $('form#routeplan-form').submit(function() {
-	submitRoutePlan();
-	return false;
-    });
-
+    // Nearby
     $('form#aroundme-form').submit(function() {
 	submitAroundMe();
 	return false;

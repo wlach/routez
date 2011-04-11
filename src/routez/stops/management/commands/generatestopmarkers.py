@@ -65,9 +65,8 @@ class Command(BaseCommand):
                         else:
                             stop_image = settings.PROJECT_PATH + "/site_media/images/marker_stop.png" 
 
-                        
-                cmdstr = 'convert %s -weight Bold -annotate +24+15 %s %s' % (stop_image, stop_display,
-                                                                             ("%smarker_stop%s.png" % (generated_path, stop.stop_code)))
-                p = subprocess.Popen(cmdstr.split())
-                cmds.append(p)
-
+                
+                generated_marker_name = "%smarker_stop%s" % (generated_path, stop.stop_code)
+                os.system('convert %s -weight Bold -annotate +24+15 %s %s.png' % (stop_image, stop_display,
+                                                                                  generated_marker_name))
+                os.system('convert %s.png -channel Alpha -evaluate Divide 4 %s_transparent.png' % (generated_marker_name, generated_marker_name))
