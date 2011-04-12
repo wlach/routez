@@ -61,11 +61,23 @@ function setupForms() {
     
     // Planning trips
     $('form#routeplan-form').submit(function() {
-	var start = $('input#routePlanStart').val();
-	var end = $('input#routePlanEnd').val();
-	var ptime = $('input#routePlanTime').val();
+	var params = { 
+	    "tab": "plan", 
+	    "saddr": $('input#routePlanStart').val(), 
+	    "daddr": $('input#routePlanEnd').val(), 
+	    "time": $('input#routePlanTime').val() 
+	};
 
-	jQuery.bbq.pushState({ "tab": "plan", "saddr": start, "daddr": end, "time": ptime }, 2);
+	if (planData && (params.saddr === planData.saddr ||
+			 params.daddr === planData.daddr ||
+			 params.time === planData.time)) {
+	    // force a trip to be replanned if user presses button, even if
+	    // we've already planned it (maybe "now" is different from what
+	    // it was before)
+	    planTrip(params);
+	} else {
+	    jQuery.bbq.pushState(params, 2);
+	}
 
 	return false;
     });
@@ -78,10 +90,18 @@ function setupForms() {
 
     // Nearby
     $('form#aroundme-form').submit(function() {
-	var place = $('input#aroundMePlace').val();
-	var ptime = $('input#aroundMeTime').val();
-	
-	jQuery.bbq.pushState({ "tab": "nearby", "place": place, "time": ptime }, 2); 
+	var params = { "tab": "nearby", 
+		       "place": $('input#aroundMePlace').val(), 
+		       "time": $('input#aroundMeTime').val() }
+
+	if (nearbyData && (params.place === nearbyData.place &&
+			   params.time === nearbyData.time)) {
+	    // force reload if user presses button, same reason as for
+	    // trip planning
+	    getNearby(params);
+	} else {
+	    jQuery.bbq.pushState(params, 2); 
+	}
 
 	return false;
     });
