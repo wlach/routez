@@ -356,7 +356,7 @@ function renderRoutePlan() {
         var origin_str = $('#routePlanStart').val().capitalize().trim().normalize_space();
         var dest_str = $('#routePlanEnd').val().capitalize().trim().normalize_space();
         document.title = "Trip from " + origin_str + " to " + dest_str; 
-        first_stop = "";
+        var firstStop = "";
         for (var i in actions) {
             if (actions[i].route_id >= 0) {
                 firstStop = actions[i].stopname;
