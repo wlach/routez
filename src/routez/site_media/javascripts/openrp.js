@@ -473,13 +473,14 @@ function planTrip(params) {
     $.getJSON("/json/routeplan" + "?start=" + params.saddr + "&end=" + params.daddr +
               "&time=" + params.time, function(data) {
 		  $('#error-submit').hide(); // clear any previous submit error notices
-		  
+
 		  YAHOO.util.Cookie.setSubs("routeplan", 
 					    { start: $('input#routePlanStart').val(), 
 					      end: $('input#routePlanEnd').val() },
 					    { expires: new Date("January 12, 2025") });
 		  
 		  routePlanResponse = data;
+		  resetButtons();
 		  renderRoutePlan();
 	      }).error(function(response) {
 		  resetButtons();
@@ -499,8 +500,6 @@ function planTrip(params) {
 		      }
 		  }
 	      });
-    resetButtons();
-
 }
 
 function drawCircle(center, radius, nodes) {
