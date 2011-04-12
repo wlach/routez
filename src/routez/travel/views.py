@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.conf import settings
 
 import datetime
@@ -82,8 +82,8 @@ def routeplan(request):
         errors.append("end_latlng_decode")
 
     if len(errors):
-        return HttpResponse(simplejson.dumps({ 'errors': errors }), 
-                            mimetype="application/json")
+        return HttpResponseNotFound(simplejson.dumps({ 'errors': errors }), 
+                                    mimetype="application/json")
 
 
     import parsedatetime.parsedatetime as pdt
@@ -99,8 +99,8 @@ def routeplan(request):
     trippath = graph.find_path(time.mktime(start_time), False, start_latlng[0], start_latlng[1], 
                                end_latlng[0], end_latlng[1])
     if not trippath:
-        return HttpResponse(simplejson.dumps({ 'errors': [ 'find_path' ] }), 
-                            mimetype="application/json")
+        return HttpResponseNotFound(simplejson.dumps({ 'errors': [ 'find_path' ] }), 
+                                    mimetype="application/json")
 
     actions_desc = []
     route_shortnames = []

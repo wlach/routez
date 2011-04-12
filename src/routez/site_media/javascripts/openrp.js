@@ -394,56 +394,6 @@ function renderRoutePlan() {
     $('#route-plan').show();
 }
 
-var submitErrorCallback = function(o) {
-    resetPlanButton();
-    $('#error-submit').show();
-    reset();
-}
-
-var routePlanCallback = function(o) {
-    var myresponse;
-
-    resetButtons();
-    routePlanResponse = null;
-
-    $('#error-submit').hide(); // clear any previous submit error notices
-
-    try { 
-        myresponse = YAHOO.lang.JSON.parse(o.responseText);
-    } 
-    catch (e) { 
-        submitErrorCallback(o); 
-    }
-
-    // check for fails
-    errors = myresponse['errors'];
-    if (errors) {
-        for (var i in errors) {
-            if (errors[i] == "start_latlng_decode") {
-		$('#routePlanStart').toggleClass('text_error');
-		$('#error-from').show();
-            }
-            if (errors[i] == "end_latlng_decode") {
-		$('#routePlanEnd').toggleClass('text_error');
-		$('#error-to').show();
-            }
-        }
-
-        reset();
-        return;
-    }
-
-    YAHOO.util.Cookie.setSubs("routeplan", 
-                              { start: $('input#routePlanStart').val(), 
-                                  end: $('input#routePlanEnd').val() },
-                              { expires: new Date("January 12, 2025") });
-
-    routePlanResponse = myresponse;
-    renderRoutePlan();
-
-    $('#intro').hide();
-}
-
 function showDebugInfo(actions) {
     var debug_str = "<p>";
     for (var i in actions) {
@@ -473,6 +423,9 @@ function planTrip(params) {
 	pageTracker._trackPageview('/json/routeplan');
     }
 
+    // Clear intro text (if any)
+    $('#intro').hide();
+
     // clear errors
     $('#error-from').hide();
     $('#error-to').hide();
@@ -488,10 +441,37 @@ function planTrip(params) {
     $('#planButton').val('Working...');
     $('#planButton').css('color', "#aaa");
     
-    YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
-                                    "?start=" + params.saddr + "&end=" + params.daddr +
-                                    "&time=" + params.time, 
-                                    { success:routePlanCallback, failure:submitErrorCallback }, null);    
+    $.getJSON("/json/routeplan" + "?start=" + params.saddr + "&end=" + params.daddr +
+              "&time=" + params.time, function(data) {
+		  $('#error-submit').hide(); // clear any previous submit error notices
+		  
+		  YAHOO.util.Cookie.setSubs("routeplan", 
+					    { start: $('input#routePlanStart').val(), 
+					      end: $('input#routePlanEnd').val() },
+					    { expires: new Date("January 12, 2025") });
+		  
+		  routePlanResponse = data;
+		  renderRoutePlan();
+	      }).error(function(response) {
+		  resetButtons();
+
+		  var responseJSON = jQuery.parseJSON(response.responseText);
+		  if (responseJSON.errors) {
+		      var errors = responseJSON.errors;
+		      for (var i in errors) {
+			  if (errors[i] == "start_latlng_decode") {
+			      $('#routePlanStart').toggleClass('text_error');
+			      $('#error-from').show();
+			  }
+			  if (errors[i] == "end_latlng_decode") {
+			      $('#routePlanEnd').toggleClass('text_error');
+			      $('#error-to').show();
+			  }
+		      }
+		  }
+	      });
+    resetButtons();
+
 }
 
 function drawCircle(center, radius, nodes) {
@@ -608,36 +588,14 @@ function renderAroundMe() {
     $('#around-me').show();
 }
 
-var aroundMeCallback = function(o) {
-    var myresponse;
-
-    resetButtons();
-
-    $('#error-submit').hide(); // clear any previous submit error notices
-
-    try { 
-        myresponse = YAHOO.lang.JSON.parse(o.responseText);
-    } 
-    catch (e) { 
-        aroundMeCallbackError(o); 
-    }
-
-    aroundMeResponse = myresponse;
-    renderAroundMe();
-
-    if (aroundMeResponse.stops.length > 0) {
-	YAHOO.util.Cookie.setSubs("aroundme",
-				  { place: $('input#aroundMePlace').val() },
-				  { expires: new Date("January 12, 2025") });
-    }
-
-}
-
 function getNearby(params) {
     // if google analytics defined, send a page tracker view
     if (typeof(pageTracker) != "undefined") {
 	pageTracker._trackPageview('/api/v1/place');
     }
+
+    // Clear intro text (if any)
+    $('#intro').hide();
 
     // Setup form values (if not already set)
     $('input#aroundMePlace').val(params.place);
@@ -646,8 +604,29 @@ function getNearby(params) {
     // let user know something exciting is about to happen!
     $('#aroundmeButton').val('Working...');
     $('#aroundmeButton').css('color', "#aaa");
-        
-    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + params.place + "/upcoming_stoptimes?distance=250&time=" + params.time,
-                                    { success:aroundMeCallback, failure:submitErrorCallback }, null);
+    
+    $.getJSON("/api/v1/place/" + params.place + "/upcoming_stoptimes?distance=250&time=" + params.time, function(data) {
+	resetButtons();	
+	$('#error-submit').hide(); // clear any previous submit error notices
+
+	aroundMeResponse = data;
+	renderAroundMe();
+	if (data.stops && data.stops.length > 0) {
+	    YAHOO.util.Cookie.setSubs("aroundme",
+				      { place: $('input#aroundMePlace').val() },
+				      { expires: new Date("January 12, 2025") });
+	}
+    }).error(function(response) {
+	var responseJSON = jQuery.parseJSON(response.responseText);
+	if (responseJSON.errors) {
+            for (var i in responseJSON.errors) {
+		if (responseJSON.errors[i] === "Location not found") {
+		    $('#aroundMePlace').toggleClass('text_error');
+		    $('#error-location').show();
+		}
+	    }
+	}
+	resetButtons();	
+    });
 }
 
