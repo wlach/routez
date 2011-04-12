@@ -11,11 +11,12 @@
   <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/cookie/cookie-min.js"></script> 
   <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/event/event-min.js"></script> 
   <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script> 
-  <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/history/history-min.js"></script> 
   <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script> 
   <script type="text/javascript" src="http://tile.cloudmade.com/wml/0.8/web-maps-lite.js"></script>
   <script type="text/javascript" src="site_media/javascripts/jquery-1.4.2.js"></script> 
   <script type="text/javascript" src="site_media/javascripts/jquery.layout-1.2.0.js"></script> 
+  <script type="text/javascript" src="site_media/javascripts/jquery.ba-bbq.js"></script> 
+
   <script type="text/javascript" src="site_media/javascripts/ui/jquery.ui.core.js" type="text/javascript"></script>
   <script type="text/javascript" src="site_media/javascripts/ui/jquery.ui.widget.js" type="text/javascript"></script>
   <script type="text/javascript" src="site_media/javascripts/ui/jquery.ui.button.js" type="text/javascript"></script>
@@ -26,33 +27,12 @@
                            applyDefaultStyles: true, 
                            west: { size: 300 },
                            north: { innerHeight: 30 },
-                           center: { onresize_end: function () { map.setCenter(map.getCenter(), map.getZoom()); } } });
-        loadRoutePlanForm();    
-        
+                           center: { onresize_end: function () { map.setCenter(map.getCenter(), map.getZoom()); } } });        
+        setupForms();    
         initMap('{{ key }}', {{ style_id }}, {{ min_lat }}, {{ min_lon }}, {{ max_lat }}, {{ max_lon }});
-
-        YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe"); 
-        var routezBookmarkedState = YAHOO.util.History.getBookmarkedState("plan");
-        var routezInitialState = routezBookmarkedState || "default"; 
-        function routezStateChangeHandler (state) {
-            if (setupRoutePlanForm(state)) {
-                submitRoutePlan();
-            } else {
-                reset();
-            } 
-        }
-        YAHOO.util.History.register("plan", routezInitialState, 
-                                    routezStateChangeHandler); 
-
-        YAHOO.util.History.onReady(function () {
-            // if, after setting up our routePlan form, we discover that it should be submitted, do that. 
-            // otherwise, set up the map to something central
-            if (setupRoutePlanForm(YAHOO.util.History.getCurrentState("plan"))) {
-                submitRoutePlan();
-            } else {
-                reset();
-            }
-        });
+        initBBQ();
+        reset();
+        $(window).trigger('hashchange');
     });
   </script>
 

@@ -2,6 +2,9 @@ var routePlan;
 var map = null;
 var bb = null;
 
+var planData = null;
+var nearbyData = null;
+
 var aroundMeResponse = null;
 var routePlanResponse = null;
 
@@ -10,13 +13,7 @@ var walkStopIcon;
 var startIcon;
 var endIcon;
 
-/**
- * Setup locations based on previous browser locations or cookie. Call 
- * during or after location changes. Returns true if we should try to load
- * a path, false otherwise.
- */
-function setupRoutePlanForm(state) {
-
+function setupForms() {
     var aroundMePlaceDefault = YAHOO.util.Cookie.getSub("aroundme", "place");
     var routePlanStartDefault = YAHOO.util.Cookie.getSub("routeplan", "start");
     var routePlanEndDefault = YAHOO.util.Cookie.getSub("routeplan", "end");
@@ -32,10 +29,8 @@ function setupRoutePlanForm(state) {
 	// browsers
 	$(name).mouseup(function(e) { e.preventDefault(); });
 
-	if (state === "default") {
-            // if no history state, then (try) to load defaults
-	    $(name).val(defaultValue);
-	}
+	// Set to default value
+	$(name).val(defaultValue);
     }
 
     setupInputField('input#routePlanStart', routePlanStartDefault);
@@ -45,16 +40,51 @@ function setupRoutePlanForm(state) {
     setupInputField('input#aroundMePlace', aroundMePlaceDefault);
     setupInputField('input#aroundMeTime', "now");
 
-    if (state === "default") {
-	return false;
-    }
+    // Switch between different functions
+    $("#tab-selector").buttonset();
 
-    // get history out of JSON
-    var stateHash = YAHOO.lang.JSON.parse(state);
-    $('input#routePlanStart').val(stateHash.saddr);
-    $('input#routePlanEnd').val(stateHash.daddr);
-    $('input#routePlanTime').val(stateHash.time);
-    return true;
+    $('input#trip-planner').click(function()  {
+	if (planData) {
+	    jQuery.bbq.pushState(planData, 2);
+	} else {
+	    jQuery.bbq.pushState({ 'tab': 'plan' }, 2);
+	}
+    });
+
+    $('input#find-nearby').click(function() {
+	if (nearbyData) {
+	    jQuery.bbq.pushState(nearbyData, 2);
+	} else {
+	    jQuery.bbq.pushState({ 'tab': 'nearby' }, 2);
+	}
+    });
+    
+    // Planning trips
+    $('form#routeplan-form').submit(function() {
+	var start = $('input#routePlanStart').val();
+	var end = $('input#routePlanEnd').val();
+	var ptime = $('input#routePlanTime').val();
+
+	jQuery.bbq.pushState({ "tab": "plan", "saddr": start, "daddr": end, "time": ptime }, 2);
+
+	return false;
+    });
+
+    $('a#reverse-directions').click(function() {
+	var tmpval = $('#routePlanStart').val()
+	$('#routePlanStart').val($('#routePlanEnd').val());
+	$('#routePlanEnd').val(tmpval);
+    });
+
+    // Nearby
+    $('form#aroundme-form').submit(function() {
+	var place = $('input#aroundMePlace').val();
+	var ptime = $('input#aroundMeTime').val();
+	
+	jQuery.bbq.pushState({ "tab": "nearby", "place": place, "time": ptime }, 2); 
+
+	return false;
+    });
 }
 
 // Capitalizes a string, first letter in upper case and the rest in lower case.
@@ -116,6 +146,52 @@ function initMap(cmKey, cmStyleId, minLat, minLon, maxLat, maxLon) {
     endIcon.iconAnchor = new CM.Point(11, 35);
 }
 
+function initBBQ() {
+    $(window).bind( 'hashchange', function(e) {
+	var url = $.param.fragment();
+	var params = $.deparam(url);
+	if (params.tab === "plan") {
+	    $('form#routeplan-form').show();
+	    $('form#aroundme-form').hide();
+	    $('#around-me').hide();
+	    
+	    if (params.saddr && params.daddr && params.time) {		     
+		if (!planData ||
+		    (planData.saddr !== params.saddr || 
+		    planData.daddr !== params.daddr ||
+		     planData.time !== params.time)) {
+		    planTrip(params);
+		} else {
+		    $('#route-plan').show();
+		    renderRoutePlan();
+		}
+	    } else {
+		reset();
+	    }
+
+	    planData = params;
+	} else if (params.tab === "nearby") {
+	    $('form#routeplan-form').hide();
+	    $('form#aroundme-form').show();
+	    $('#route-plan').hide();
+	    if (params.place && params.time) {
+		if (!nearbyData || 
+		    (nearbyData.place !== params.place ||
+		     nearbyData.time !== params.time)) {
+		    getNearby(params);
+		} else {
+		    $('#around-me').show();
+		    renderAroundMe();
+		}
+	    } else {
+		reset();
+	    }
+	    nearbyData = params;
+	}
+
+    });
+}
+
 function reset() {
     // reset everything, called on first load of planner and around me and in case
     // of error
@@ -131,53 +207,6 @@ function resetButtons() {
 
     $('#aroundmeButton').val('Find!');
     $('#aroundmeButton').css('color', "#000");
-}
-
-function loadRoutePlanForm() {
-    // Switch between different functions
-    $("#tab-selector").buttonset();
-
-    $('input#trip-planner').click(function() {
-	$('form#routeplan-form').show();
-	$('form#aroundme-form').hide();
-	$('#around-me').hide();
-	if ($('#route-plan-content').html().length) {
-	    $('#route-plan').show();
-	    renderRoutePlan();
-	} else {
-	    reset();
-	}
-    });
-
-    $('input#find-nearby').click(function() {
-	$('form#routeplan-form').hide();
-	$('form#aroundme-form').show();
-	$('#route-plan').hide();
-	if ($('#around-me-content').html().length) {
-	    $('#around-me').show();
-	    renderAroundMe();
-	} else {
-	    reset();
-	}
-    });
-    
-    // Planning trips
-    $('form#routeplan-form').submit(function() {
-	submitRoutePlan();
-	return false;
-    });
-
-    $('a#reverse-directions').click(function() {
-	var tmpval = $('#routePlanStart').val()
-	$('#routePlanStart').val($('#routePlanEnd').val());
-	$('#routePlanEnd').val(tmpval);
-    });
-
-    // Nearby
-    $('form#aroundme-form').submit(function() {
-	submitAroundMe();
-	return false;
-    });
 }
 
 function updateMapBounds(latlngs) {
@@ -438,17 +467,11 @@ function showDebugInfo(actions) {
     debug_div.innerHTML = debug_str;
 }
 
-function submitRoutePlan() {
+function planTrip(params) {
     // if google analytics defined, send a page tracker view
     if (typeof(pageTracker) != "undefined") {
 	pageTracker._trackPageview('/json/routeplan');
     }
-
-    $('#around-me').hide();
-
-    var start = $('input#routePlanStart').val();
-    var end = $('input#routePlanEnd').val();
-    var ptime = $('input#routePlanTime').val();
 
     // clear errors
     $('#error-from').hide();
@@ -456,28 +479,19 @@ function submitRoutePlan() {
     $('#routePlanStart').removeClass('text_error');
     $('#routePlanEnd').removeClass('text_error');
 
+    // fill in values of form (if not already set)
+    $('input#routePlanStart').val(params.saddr);
+    $('input#routePlanEnd').val(params.daddr);
+    $('input#routePlanTime').val(params.time);
+
     // let user know something exciting is about to happen!
     $('#planButton').val('Working...');
     $('#planButton').css('color', "#aaa");
-
-    var currentState = YAHOO.util.History.getCurrentState("plan");
-    var newState = YAHOO.lang.JSON.stringify({ saddr: start, 
-                                               daddr: end,
-                                               time: ptime });
-
-    // if currentState is equal to newState, then we've already set the
-    // browser history state to the appropriate value: proceed to plan trip
-    // otherwise, we want to setup the history before doing anything else
-    if (currentState !== newState) {
-        YAHOO.util.History.navigate("plan", newState);
-    } else {
-        
-        YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
-                                        "?start=" + escape(start) + "&end=" + escape(end) +
-                                        "&time=" + ptime, 
-                                        { success:routePlanCallback, failure:submitErrorCallback }, null);
-        
-    }
+    
+    YAHOO.util.Connect.asyncRequest("GET", "/json/routeplan" + 
+                                    "?start=" + params.saddr + "&end=" + params.daddr +
+                                    "&time=" + params.time, 
+                                    { success:routePlanCallback, failure:submitErrorCallback }, null);    
 }
 
 function drawCircle(center, radius, nodes) {
@@ -615,28 +629,25 @@ var aroundMeCallback = function(o) {
 	YAHOO.util.Cookie.setSubs("aroundme",
 				  { place: $('input#aroundMePlace').val() },
 				  { expires: new Date("January 12, 2025") });
-	console.log("Setting place in cookie " + $('input#aroundMePlace').val());
     }
 
 }
 
-function submitAroundMe() {
+function getNearby(params) {
     // if google analytics defined, send a page tracker view
     if (typeof(pageTracker) != "undefined") {
 	pageTracker._trackPageview('/api/v1/place');
     }
 
-    $('#route-plan').hide();
-
-    var location = $('input#aroundMePlace').val();
-    var ptime = $('input#aroundMeTime').val();
+    // Setup form values (if not already set)
+    $('input#aroundMePlace').val(params.place);
+    $('input#aroundMeTime').val(params.time);
 
     // let user know something exciting is about to happen!
     $('#aroundmeButton').val('Working...');
     $('#aroundmeButton').css('color', "#aaa");
-
-    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + escape(location) + "/upcoming_stoptimes?distance=250&time=" + ptime,
+        
+    YAHOO.util.Connect.asyncRequest("GET", "/api/v1/place/" + params.place + "/upcoming_stoptimes?distance=250&time=" + params.time,
                                     { success:aroundMeCallback, failure:submitErrorCallback }, null);
-    
 }
 
