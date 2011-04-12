@@ -154,7 +154,11 @@ function initBBQ() {
 	    $('form#routeplan-form').show();
 	    $('form#aroundme-form').hide();
 	    $('#around-me').hide();
-	    
+
+	    $('input#trip-planner').attr('checked', true);
+	    $('input#find-nearby').removeAttr('checked');
+	    $("#tab-selector").buttonset('refresh');
+
 	    if (params.saddr && params.daddr && params.time) {		     
 		if (!planData ||
 		    (planData.saddr !== params.saddr || 
@@ -174,6 +178,11 @@ function initBBQ() {
 	    $('form#routeplan-form').hide();
 	    $('form#aroundme-form').show();
 	    $('#route-plan').hide();
+
+	    $('input#trip-planner').removeAttr('checked');
+	    $('input#find-nearby').attr('checked', true);
+	    $("#tab-selector").buttonset('refresh');
+
 	    if (params.place && params.time) {
 		if (!nearbyData || 
 		    (nearbyData.place !== params.place ||
