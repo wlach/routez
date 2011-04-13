@@ -7,11 +7,11 @@ import os
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^$', 'routez.travel.views.main_page'),
-    (r'^iphone$', 'routez.travel.views.iphone'),
-    (r'^about$', 'routez.travel.views.about'),
-    (r'^help$', 'routez.travel.views.help'),
-    (r'^privacy$', 'routez.travel.views.privacy'),
+    (r'^$', 'routez.webapp.views.index'),
+    (r'^iphone$', 'routez.webapp.views.index_iphone'),
+    (r'^about$', 'routez.webapp.views.about'),
+    (r'^help$', 'routez.webapp.views.help'),
+    (r'^privacy$', 'routez.webapp.views.privacy'),
     (r'^json/routeplan$', 'routez.travel.views.routeplan'),
     (r'^api/v1/stop/(\d+)/upcoming_stoptimes$', 
      'routez.stops.views.stoptimes_for_stop'),

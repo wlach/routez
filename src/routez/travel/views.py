@@ -6,7 +6,6 @@ import datetime
 import simplejson
 import time
 
-from routez.travel.models import Map
 from routez.routes.models import Route
 from routez.stops.models import Stop
 import routez.geocoder as geocoder
