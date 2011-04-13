@@ -27,4 +27,7 @@ DATABASES = {
     }
 }
 
+# Static files
+STATIC_ROOT = "${development:var-directory}/static"
+
 DEBUG = ${routez_settings:enable_debug}

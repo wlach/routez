@@ -7,8 +7,8 @@ class Command(BaseCommand):
     help = 'Creates a set of stop icons'
 
     def handle(self, *args, **options):
-        marker_basepath = settings.PROJECT_PATH + "/site_media/images/"
-        generated_path = settings.PROJECT_PATH + "/site_media/images/generated/"
+        marker_basepath = settings.PROJECT_PATH + "/webapp/static/images/"
+        generated_path = settings.PROJECT_PATH + "/webapp/static/images/generated/"
         for route in Route.objects.all():
             if route.type == 3:
                 marker_basename = "marker_bus"

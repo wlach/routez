@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 import os
 
 # Uncomment the next two lines to enable the admin:
@@ -25,10 +26,4 @@ urlpatterns = patterns('',
 # Only serve media from Django in debug mode.  In non-debug mode, the regular
 # web server should do this.
 if settings.DEBUG:
-    urlpatterns += patterns('',
-        (r'^site_media/(?P<path>.*)$', 
-            'django.views.static.serve', 
-            {'document_root': os.path.join(settings.PROJECT_PATH, 'site_media'), 
-                'show_indexes': True}),
-    )
-
+    urlpatterns += staticfiles_urlpatterns()

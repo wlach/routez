@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = 'Creates a set of stop icons'
 
     def handle(self, *args, **options):
-        generated_path = settings.PROJECT_PATH + "/site_media/images/generated/"
+        generated_path = settings.PROJECT_PATH + "/webapp/static/images/generated/"
 
         now = time.time()
         t = time.localtime(now)
@@ -61,12 +61,13 @@ class Command(BaseCommand):
                         if lng_v <= (-0.5):
                             dir += "w"
                         if len(dir):
-                            stop_image = settings.PROJECT_PATH + "/site_media/images/marker_stop_%s.png" % dir
+                            stop_image = settings.PROJECT_PATH + "/webapp/static/images/marker_stop_%s.png" % dir
                         else:
-                            stop_image = settings.PROJECT_PATH + "/site_media/images/marker_stop.png" 
+                            stop_image = settings.PROJECT_PATH + "/webapp/static/images/marker_stop.png" 
 
                 
                 generated_marker_name = "%smarker_stop%s" % (generated_path, stop.stop_code)
-                os.system('convert %s -weight Bold -annotate +24+15 %s %s.png' % (stop_image, stop_display,
-                                                                                  generated_marker_name))
-                os.system('convert %s.png -channel Alpha -evaluate Divide 4 %s_transparent.png' % (generated_marker_name, generated_marker_name))
+                if os.system('convert %s -weight Bold -annotate +24+15 %s %s.png' % (stop_image, stop_display,
+                                                                                  generated_marker_name)) != 0:
+                    raise CommandError('Error writing stop image')
+                #os.system('convert %s.png -channel Alpha -evaluate Divide 4 %s_transparent.png' % (generated_marker_name, generated_marker_name))

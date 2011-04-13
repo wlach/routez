@@ -62,7 +62,7 @@ python bootstrap.py
 
 ./bin/createall
 
-=== Running libroutez ===
+=== Running routez ===
 
 To run a test server on your workstation, simply run:
 
@@ -81,6 +81,10 @@ rm /etc/nginx/sites-enabled/default
 Link routez to your sites-enabled directory:
 
 ln -s $PWD/etc/routez-nginx.conf /etc/nginx/sites-enabled/routez
+
+Generate static files:
+
+./bin/routez collectstatic
 
 Restart nginx:
 

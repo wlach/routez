@@ -29,6 +29,6 @@ server {
 
   location /site_media {
     set $https_param off;
-    root ${buildout:directory}/src/routez;
+    root ${buildout:directory}/var/static/;
   }   
 }
