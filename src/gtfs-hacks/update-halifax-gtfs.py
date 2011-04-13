@@ -16,27 +16,19 @@ import transitfeed
 def revise_stopname(stopname):
     # we ALWAYS want to apply these
     place_substitutions1 = [
-        ('\ *<DND>\ *', ''),
-        ('\ *<NB>\ *', ''),
-        ('\ *<INBOUND>\ *', ''), 
-        ('\ *<OUTBOUND>\ *', ''), 
-        ('<TO HFX>', ''), 
-        ('<TO DART>', ''), 
-        (' <GOTTINGE$', ''), 
-        ('\ <([^>]|\ )+>$', ''), 
-        (' TO\ [^<]+$', ''),
-        (' <[^>]+$', ''), # ending with <...
+        ('\[[^\[\]]+\] ?', ''),
+        ('and *$', ''), # trailing ands...
         ]
     for subst in place_substitutions1:
         stopname = re.sub(subst[0], subst[1], stopname)
 
     # replace '... <...> CIVIC XX' w/ 'Near XX ...'
-    m = re.match('([^<]*) .* CIVIC ([0-9]+)', stopname)
+    m = re.match('(.+) (in front of|before|after|opposite|before and opposite) civic address ([0-9]+)', stopname)
     if m:
-        return "Near %s %s" % (m.group(2), string.capwords(m.group(1)))
+        return "Near %s %s" % (m.group(3), string.capwords(m.group(1)))
 
-    boring_street_suffixes = [ "AVE", "BLVD", "CR", "CRT", "CT", "DR", "GATE", "PKWY", "RD", "ROW", 
-                               "ST" ]
+    boring_street_suffixes = [ "Ave", "Blvd", "Cr", "Crt", "Ct", "Dr", "Gate", "Pkwy", "Rd", "Row", 
+                               "St" ]
     boring_street_regex = '(?:' + '|'.join(boring_street_suffixes) + ')'
     def strip_boring_street_suffix(text):
         m = re.match('(.*) ' + boring_street_regex, text)
@@ -45,19 +37,13 @@ def revise_stopname(stopname):
 
         return text
 
-    street_suffixes = boring_street_suffixes + [ "HWY", "TERR" ]
+    street_suffixes = boring_street_suffixes + [ "Hwy", "Terr" ]
     street_regex = '(?:' + '|'.join(street_suffixes) + ')'
 
-    m = re.match('^([^<]* ' + street_regex + ').*> ([^>]* ' + street_regex + ')$', stopname)
+    m = re.match('^(.*) ' + street_regex + ' (after|before|opposite|in front of) (.*) ' + street_regex + '$', stopname)
     if m:
         return "%s & %s" % (string.capwords(strip_boring_street_suffix(m.group(1))), 
-                            string.capwords(strip_boring_street_suffix(m.group(2))))
-    else:
-        # if that didn't match, check to see if we need to use a more vague "near"
-        # description
-        m = re.match('^([^<]*) .*> ([^>]*)$', stopname)
-        if m:
-            return "%s near %s" % (string.capwords(m.group(1)), string.capwords(m.group(2)))
+                            string.capwords(strip_boring_street_suffix(m.group(3))))
 
     return string.capwords(stopname)
 
@@ -95,17 +81,41 @@ for stop in schedule.GetStopList():
 print "Clearing routes not usable by general public"
 special_routes = [
     "bjhs-90",
+    "bjhs-95",
+    "bjhs-96",
     "cp1-90",
+    "cp1-95",
+    "cp1-96",
     "ecrl-90",
+    "ecrl-95",
+    "ecrl-96",
     "ecs-90",
+    "ecs-95",
+    "ecs-96",
     "fv01-90",
+    "fv01-95",
+    "fv01-96",
     "hwst-90",
+    "hwst-95",
+    "hwst-96",
     "s14-90",
+    "s14-95",
+    "s14-96",
     "sp14-90",
+    "sp14-95",
+    "sp14-96",
     "sp53-90",
+    "sp53-95",
+    "sp53-96",
     "sp58-90",
+    "sp58-95",
+    "sp58-96",
     "sp6-90",
+    "sp6-95",
+    "sp6-96",
     "sp65-90",
+    "sp65-95",
+    "sp65-96",
 ]
 for special_route in special_routes:
     trip_ids_to_delete = []
