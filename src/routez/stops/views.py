@@ -31,6 +31,19 @@ def latlng_dist(src_lat, src_lng, dest_lat, dest_lng):
     dist = math.degrees(math.acos(dist)) * (60.0 * 1.1515 * 1.609344 * 1000.0)
     return dist
 
+def get_starttime(timestr):
+    starttime = None
+    if not timestr:
+        starttime = time.time()
+    else:
+        if timestr.isdigit():
+            starttime = int(timestr) # cast to integer
+        else:
+            calendar = pdt.Calendar()
+            starttime = time.mktime(calendar.parse(timestr)[0])
+
+    return starttime
+
 def get_route_ids_for_stop(graph, stop_id, secs):
     ts = graph.get_tripstop(stop_id)
 
@@ -68,11 +81,7 @@ def find_triphops_for_stop(graph, stop_id, route_id, secs, num):
     return all_triphops
 
 def stoptimes_for_stop(request, stop_code):
-    starttime = request.GET.get('time')
-    if not starttime:
-        starttime = time.time()
-    else:
-        starttime = int(starttime) # cast to integer
+    starttime = get_starttime(request.GET.get('time'))
 
     stop = Stop.objects.filter(stop_code=stop_code)
     if not len(stop):
@@ -124,17 +133,7 @@ def stoptimes_in_range(request, location):
                 { 'errors': ["Distance of more than 1000 meters not allowed"] }), 
                                     mimetype="application/json")
 
-    timestr = request.GET.get('time')
-    starttime = None
-    if not timestr:
-        starttime = time.time()
-    else:
-        if timestr.isdigit():
-            starttime = int(starttime) # cast to integer
-        else:
-            calendar = pdt.Calendar()
-            starttime = time.mktime(calendar.parse(timestr)[0])
-
+    starttime = get_starttime(request.GET.get('time'))
     latlng = geocoder.geocode(str(location))
 
     if not latlng:
