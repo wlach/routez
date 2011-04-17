@@ -27,8 +27,14 @@ server {
     fastcgi_intercept_errors off;
   }
 
+  location /site_media/CACHE {
+    set $https_param off;
+    alias ${buildout:directory}/var/static/CACHE;
+    expires max;
+  }
+
   location /site_media {
     set $https_param off;
-    root ${buildout:directory}/var/static/;
-  }   
+    alias ${buildout:directory}/var/static/;
+  }
 }
