@@ -43,6 +43,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -72,7 +73,8 @@ INSTALLED_APPS = (
     'routez.routes',
     'routez.stops',
     'routez.trips',
-    'routez.webapp'
+    'routez.webapp',
+    'compressor',
 )
 
 # Use local settings (defined elsewhere in this project) for environment
