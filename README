@@ -21,6 +21,11 @@ Install an Apple Developer SDK (the iOS dev SDK should work fine), pcre
 (http://www.pcre.org/) and ImageMagick (easiest to install this via 
 MacPorts or similar). 
 
+2. Initialize git submodules from the root directory:
+
+git submodule init
+git submodule update
+
 2. In root, copy local.cfg.tmpl to local.cfg and modify it according to your 
 needs. It should be fairly self-explanatory how to do so-- here's the one I
 use for hbus.ca:

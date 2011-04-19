@@ -1,9 +1,0 @@
-Todo list (accurate as of 7 February 2010) in rough order of priority:
-
-- Unit tests for geocoder (requires some kind of sample data set...)
-- More precise intersection parser (use more than just roads)
-- Return of multiple results where there is ambiguity
-- Incorporate Canadian provinces into regular expressions
-- OpenStreetMap data parser
-- French/Quebec address parsing
-- U.S. address parsing

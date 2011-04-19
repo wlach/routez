@@ -1,0 +1,6 @@
+[submodule "src/libroutez"]
+	path = src/libroutez
+	url = git://github.com/wlach/libroutez.git
+[submodule "src/neocoder"]
+	path = src/neocoder
+	url = git://github.com/wlach/neocoder.git
