@@ -6,14 +6,11 @@ planning functionality.
 
 ## Setup
 
-Steps to installing routez:
-
-1. Install various required packages:
+Install various required packages:
 
 Ubuntu or Debian Linux:
 
-    sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev \
-         libpcre++-dev
+    sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev libpcre++-dev
 
 MacOS X:
 
@@ -21,14 +18,14 @@ Install an Apple Developer SDK (the iOS dev SDK should work fine), pcre
 (http://www.pcre.org/) and ImageMagick (easiest to install this via 
 MacPorts or similar). 
 
-2. Initialize git submodules from the root directory:
+Initialize git submodules from the root directory:
 
     git submodule init
     git submodule update
 
-3. In root, copy local.cfg.tmpl to local.cfg and modify it according to your 
-needs. It should be fairly self-explanatory how to do so-- here's the one I
-use for hbus.ca:
+Then, in root, copy local.cfg.tmpl to local.cfg and modify it according to
+your needs. It should be fairly self-explanatory how to do so-- here's the one
+I use for hbus.ca:
 
     [buildout]
     extends = buildout.cfg
@@ -51,19 +48,19 @@ use for hbus.ca:
 The only section that really demands explanation is geodata.
 
 * gtfs_file: A general transit feed file of the region you're covering
-* osm_file:  An OpenStreetMap file of the road network for the region you're 
-	     covering (can be omitted if you don't care about trip planning)
+* osm_file:  An OpenStreetMap file of the road network for the region you're
+covering (can be omitted if you don't care about trip planning)
 * gml_file:  A geometry markup file (as published by geobase.ca) of the region
-	     you're covering. Canadian-specific, can be omitted for other 
-	     locales (though typing in an address will no longer work in the 
-	     travel UI: you'll have to use lat/lng coordinates directly)
+you're covering. Canadian-specific, can be omitted for other locales (though
+typing in an address will no longer work in the travel UI: you'll have to use
+lat/lng coordinates directly)
 
-4. Run buildout from the project's root directory:
+Run buildout from the project's root directory:
 
     python bootstrap.py
     ./bin/buildout -c local.cfg
 
-5. Run a script to generate the required databases:
+Run a script to generate the required databases:
 
     ./bin/createall
 
