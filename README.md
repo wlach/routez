@@ -10,7 +10,7 @@ Install various required packages:
 
 Ubuntu or Debian Linux:
 
-    sudo apt-get install -y python-dev ruby1.8-dev ruby-dev swig sqlite3-dev libpcre++-dev
+    sudo apt-get install -y g++ python-dev ruby1.8-dev ruby-dev swig sqlite3-dev libpcre++-dev
 
 MacOS X:
 
