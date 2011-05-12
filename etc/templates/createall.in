@@ -12,6 +12,7 @@ ${buildout:directory}/bin/creategraph || exit 1
 echo "Creating geocoder db..."
 ${buildout:directory}/bin/creategeodb || exit 1
 echo "Creating db..."
+${buildout:directory}/bin/routez syncdb || exit 1
 ${buildout:directory}/bin/createdb || exit 1
 echo "Creating markers..."
 ${buildout:directory}/bin/routez generateroutemarkers || exit 1
