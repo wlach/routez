@@ -10,5 +10,5 @@ PYTHON="${buildout:directory}/bin/python"
 if [ $GML_FILE ]; then
     BOUNDS=`${libroutez:path}/utils/get-gtfs-bounds.py -m $GTFS_FILE`
 
-    ${neocoder:path}/utils/gml2py.py $GML_FILE $BOUNDS | ${neocoder:path}/utils/creategeodb.py - ${development:var-directory}/mygeocoder.db
+    ${neocoder:path}/utils/gml2py-geobase.py $GML_FILE $BOUNDS | ${neocoder:path}/utils/creategeodb.py - ${development:var-directory}/mygeocoder.db
 fi
