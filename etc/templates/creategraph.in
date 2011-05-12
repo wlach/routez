@@ -1,8 +1,5 @@
 #!/bin/sh
 
-export LD_LIBRARY_PATH="${buildout:directory}/develop-eggs/rtree:${libroutez:location}/lib:${neocoder:location}/lib"
-export DYLD_LIBRARY_PATH="${buildout:directory}/develop-eggs/rtree:${libroutez:location}/lib:${neocoder:location}/lib"
-
 OSM_FILE=${geodata:osm_file}
 
 if [ $OSM_FILE ]; then
