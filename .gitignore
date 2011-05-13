@@ -9,4 +9,8 @@ local.cfg
 parts
 src/routez.egg-info
 src/routez/local_settings.py
-var
+var/mygeocoder.db
+var/mygraph.routez
+var/routez.db
+var/generated
+var/static       
