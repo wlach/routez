@@ -8,9 +8,15 @@ planning functionality.
 
 Install various required packages:
 
-Ubuntu or Debian Linux:
+Ubuntu or Debian Linux (older versions e.g. 10.04 Lucid Lynx):
 
-    sudo apt-get install -y g++ python-dev ruby1.8-dev ruby-dev swig sqlite3-dev libpcre++-dev
+    sudo apt-get install -y g++ imagemagick make python-dev ruby ruby1.8-dev \
+        ruby-dev swig sqlite3-dev libpcre++-dev
+
+Ubuntu or Debian Linux (newer versions e.g. 11.04 Natty Narwhal):
+
+    sudo apt-get install -y g++ imagemagick make python-dev ruby ruby1.8-dev \
+        ruby-dev swig libsqlite3-dev libpcre++-dev
 
 MacOS X:
 
