@@ -1,6 +1,6 @@
 ## About
 
-Routez is a transit planning web service written in Python and Javascript. 
+Routez is a transit planning web service written in Python and Javascript.
 It uses the libroutez (http://github.com/wlach/libroutez) library for trip
 planning functionality.
 
@@ -20,9 +20,9 @@ Ubuntu or Debian Linux (newer versions e.g. 11.04 Natty Narwhal):
 
 MacOS X:
 
-Install an Apple Developer SDK (the iOS dev SDK should work fine), pcre 
-(http://www.pcre.org/) and ImageMagick (easiest to install this via 
-MacPorts or similar). 
+Install an Apple Developer SDK (the iOS dev SDK should work fine), pcre
+(http://www.pcre.org/) and ImageMagick (easiest to install this via
+MacPorts or similar).
 
 Initialize git submodules from the root directory:
 
@@ -35,18 +35,18 @@ I use for hbus.ca:
 
     [buildout]
     extends = buildout.cfg
-    
+
     [routez_settings]
     server_name = hbus.ca
     cmaps_api_key = 6cf313fb0cac592a98c0f60ab0693118
     analytics_key = UA-1648932-4
     use_local_geocoder = 1
-    
+
     [geodata]
     gtfs_file = /Users/wlach/src/halifax-metro-transit_20101104_0800.zip
     osm_file = /Users/wlach/src/hrm-area-serviced-by-mt-3.osm
     gml_file = /Users/wlach/src/ns-geobase/NRN_NS_7_1_GEOM.gml
-    
+
     [routez_server]
     ssh_alias = hbus
     buildout_directory = /home/routez/Sites/hbus
@@ -76,7 +76,7 @@ To run a test server on your workstation, simply run:
 
     ./bin/routez runserver
 
-The only currently supported server configuration for routez is currently the 
+The only currently supported server configuration for routez is currently the
 Ubuntu Lucid LTS release (http://releases.ubuntu.com/lucid/) using the nginx
 web server (http://nginx.org/). So install that if needed:
 
@@ -102,5 +102,5 @@ Start routez:
 
     ./bin/restart-routez
 
-And you're off! You should be able to get access to routez through your site's 
+And you're off! You should be able to get access to routez through your site's
 IP address.
